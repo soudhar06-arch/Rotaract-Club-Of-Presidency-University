@@ -1,0 +1,65 @@
+# TASKS.md
+
+- [x] Create PROJECT_SPEC.md
+- [x] Create SOFTWARE_ARCHITECTURE.md
+- [x] Create DATABASE_SCHEMA.md
+- [x] Create UI_DESIGN_SYSTEM.md
+- [x] Create ADMIN_DASHBOARD.md
+- [x] Create AI_CHATBOT.md
+- [x] Create ROADMAP.md
+- [ ] Create TASKS.md
+- [ ] Create PROMPT_LIBRARY.md
+- [ ] Create HANDOVER_GUIDE.md
+- [ ] Initialize Next.js project with TypeScript
+- [ ] Configure Tailwind CSS
+- [ ] Configure Supabase client
+- [ ] Initialize Prisma with database schema
+- [ ] Run initial database migration
+- [ ] Set up project folder structure
+- [ ] Configure environment variables
+- [ ] Build root layout and global styles
+- [ ] Build public navbar component
+- [ ] Build public footer component
+- [ ] Build homepage hero section
+- [ ] Build homepage stats section
+- [ ] Build homepage CTA section
+- [ ] Build About page with mission/vision
+- [ ] Build BOD grid component
+- [ ] Build Events listing page
+- [ ] Build Event card component
+- [ ] Build Event detail page
+- [ ] Build Admin events CRUD
+- [ ] Build Gallery listing page
+- [ ] Build Album card component
+- [ ] Build Lightbox modal component
+- [ ] Build Admin gallery CRUD
+- [ ] Build Awards page
+- [ ] Build Award card component
+- [ ] Build Admin awards CRUD
+- [ ] Build Collaborations page
+- [ ] Build Collaboration card component
+- [ ] Build Admin collaborations CRUD
+- [ ] Build Contact page with form
+- [ ] Build Join page with application form
+- [ ] Build Admin applications review
+- [ ] Build Admin dashboard overview
+- [ ] Build Admin sidebar navigation
+- [ ] Implement Supabase authentication
+- [ ] Implement auth middleware
+- [ ] Implement role-based permissions
+- [ ] Build Admin BOD management
+- [ ] Build Admin settings page
+- [ ] Build AI chatbot widget
+- [ ] Build chatbot API route with RAG
+- [ ] Build Admin knowledge base page
+- [ ] Implement document upload and processing
+- [ ] Implement vector embeddings with pgvector
+- [ ] Test chatbot with sample documents
+- [ ] Configure Vercel deployment
+- [ ] Set up production environment variables
+- [ ] Run production database migrations
+- [ ] Deploy to production
+- [ ] Test all features in production
+- [ ] Configure custom domain and SSL
+- [ ] Set up error monitoring (Sentry)
+- [ ] Document deployment process
