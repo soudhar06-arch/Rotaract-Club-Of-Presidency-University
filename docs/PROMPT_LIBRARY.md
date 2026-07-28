@@ -10,6 +10,7 @@
 Build a responsive navbar component for the Rotaract Club website.
 
 Requirements:
+
 - Fixed top position with backdrop blur
 - Logo on the left (use a placeholder SVG or text logo)
 - Desktop: horizontal links (Home, About, Events, Gallery, Awards, Collaborations, Contact, Join)
@@ -31,12 +32,13 @@ Place the component in src/components/public/navbar.tsx
 Build a responsive footer component for the Rotaract Club website.
 
 Requirements:
+
 - 4-column grid on desktop, single column on mobile
 - Column 1: Club name, brief description, logo
 - Column 2: Quick Links (Home, About, Events, Gallery, etc.)
 - Column 3: Contact Info (email, phone, address)
 - Column 4: Social Media Links (use Lucide icons: Instagram, Facebook, Twitter, LinkedIn)
-- Bottom bar: Copyright notice and  Built with love for Rotaract
+- Bottom bar: Copyright notice and Built with love for Rotaract
 - Background: Rotaract Blue (#003F87) with white text
 - Follow UI_DESIGN_SYSTEM.md for spacing and typography
 - Use Tailwind CSS classes
@@ -52,6 +54,7 @@ Place the component in src/components/public/footer.tsx
 Build a hero section component for the Rotaract Club homepage.
 
 Requirements:
+
 - Full viewport height (min-h-screen)
 - Background image with dark overlay (use a placeholder from Unsplash or gradient)
 - Centered content with club name, tagline, and two CTAs
@@ -74,6 +77,7 @@ Place the component in src/components/public/hero.tsx
 Build the Events section with public listing, detail page, and admin CRUD.
 
 Requirements:
+
 1. Public Events Page (/events):
    - Grid of EventCard components
    - Filter tabs: Upcoming, Past, All
@@ -111,6 +115,7 @@ Create components in src/components/public/ and src/components/admin/.
 Build the Gallery section with public albums, lightbox, and admin management.
 
 Requirements:
+
 1. Public Gallery Page (/gallery):
    - Grid of album cards showing cover image and title
    - Filter by published/unpublished (admin only sees all)
@@ -149,6 +154,7 @@ Create components in src/components/public/ and src/components/admin/.
 Build the Awards section with public display and admin management.
 
 Requirements:
+
 1. Public Awards Page (/awards):
    - Filter tabs by category
    - Grid of award cards
@@ -172,6 +178,7 @@ Create components in src/components/public/award-card.tsx and admin forms.
 Implement Supabase authentication for the admin dashboard.
 
 Requirements:
+
 1. Login Page (/dashboard/login):
    - Email and password fields
    - Sign In button
@@ -206,6 +213,7 @@ Use Supabase Auth with email/password provider.
 Configure Supabase as the backend service.
 
 Requirements:
+
 1. Project Setup:
    - Create Supabase project
    - Enable email authentication
@@ -239,6 +247,7 @@ Follow SOFTWARE_ARCHITECTURE.md for project structure and tech stack.
 Build the admin dashboard overview page.
 
 Requirements:
+
 1. Stats Cards (4 cards in a row):
    - Total Events (count)
    - Total Albums (count)
@@ -272,6 +281,7 @@ Place the page at src/app/(admin)/dashboard/page.tsx
 Build a calendar view for events.
 
 Requirements:
+
 1. Monthly Calendar Component:
    - Grid of 7 columns (Sun-Sat)
    - Days of current month displayed
@@ -304,6 +314,7 @@ Integrate with the Events CRUD from the Events prompt.
 Build the AI chatbot widget with RAG capabilities.
 
 Requirements:
+
 1. Chatbot Widget (floating on all public pages):
    - Toggle button (bottom-right corner)
    - Expandable chat window (300px wide, 400px tall)
@@ -345,6 +356,7 @@ Use UI_DESIGN_SYSTEM.md for widget styling.
 Build reusable form components following the UI design system.
 
 Requirements:
+
 1. Input Component:
    - Label above input
    - Placeholder text
@@ -389,6 +401,7 @@ Create components in src/components/ui/.
 Deploy the Rotaract website to production.
 
 Requirements:
+
 1. Vercel Setup:
    - Connect GitHub repository to Vercel
    - Configure environment variables in Vercel dashboard
