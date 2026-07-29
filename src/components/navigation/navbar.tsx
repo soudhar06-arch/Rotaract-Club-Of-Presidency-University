@@ -2,27 +2,25 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ArrowRight, Sparkles } from "lucide-react";
+import { Menu, X, ArrowRight, Shield } from "lucide-react";
 import { ROUTES } from "@/constants";
-import { ThemeToggle } from "@/components/shared/theme-toggle";
+import { ThemeToggle } from "@/components/shared";
 
 const NAV_ITEMS = [
-  { id: "hero", label: "Home", href: ROUTES.HOME },
-  { id: "mission", label: "About", href: ROUTES.HOME + "#mission" },
-  { id: "projects", label: "Projects", href: ROUTES.HOME + "#projects" },
-  { id: "events", label: "Events", href: ROUTES.HOME + "#events" },
-  { id: "gallery", label: "Gallery", href: ROUTES.HOME + "#gallery" },
-  { id: "board", label: "Board", href: ROUTES.HOME + "#board" },
-  { id: "contact", label: "Contact", href: ROUTES.CONTACT },
+  { label: "Home", href: "#hero", id: "hero" },
+  { label: "About", href: "#mission", id: "mission" },
+  { label: "Projects", href: "#projects", id: "projects" },
+  { label: "Events", href: "#events", id: "events" },
+  { label: "Gallery", href: "#gallery", id: "gallery" },
+  { label: "Leadership", href: "#board", id: "board" },
+  { label: "Contact", href: "#contact", id: "contact" },
 ];
 
 export function Navbar() {
-  const pathname = usePathname();
-  const [scrolled, setScrolled] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
   const [activeSection, setActiveSection] = useState("hero");
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -31,31 +29,21 @@ export function Navbar() {
       const totalHeight =
         document.documentElement.scrollHeight - window.innerHeight;
       if (totalHeight > 0) {
-        const progress = (window.scrollY / totalHeight) * 100;
-        setScrollProgress(Math.min(100, Math.max(0, progress)));
+        setScrollProgress((window.scrollY / totalHeight) * 100);
       }
+      setIsScrolled(window.scrollY > 20);
 
-      setScrolled(window.scrollY > 20);
+      // 2. Scroll-Spy Active Section Detection
+      const sections = NAV_ITEMS.map((item) =>
+        document.getElementById(item.id),
+      ).filter(Boolean);
+      const scrollPosition = window.scrollY + 200;
 
-      // 2. Scroll-Spy Section Detector
-      if (pathname === "/") {
-        const sectionIds = [
-          "hero",
-          "mission",
-          "projects",
-          "events",
-          "gallery",
-          "board",
-          "contact",
-        ];
-        const scrollPosition = window.scrollY + 200;
-
-        for (let i = sectionIds.length - 1; i >= 0; i--) {
-          const section = document.getElementById(sectionIds[i]);
-          if (section && section.offsetTop <= scrollPosition) {
-            setActiveSection(sectionIds[i]);
-            break;
-          }
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const section = sections[i];
+        if (section && section.offsetTop <= scrollPosition) {
+          setActiveSection(NAV_ITEMS[i].id);
+          break;
         }
       }
     };
@@ -63,135 +51,132 @@ export function Navbar() {
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [pathname]);
+  }, []);
 
   return (
-    <header
-      className={`fixed top-0 right-0 left-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "shadow-navigation border-b border-[color:var(--color-border)] bg-[color:var(--color-surface-glass)] py-3 backdrop-blur-xl"
-          : "bg-transparent py-5"
-      }`}
-    >
-      <div className="container-shell flex items-center justify-between px-4 sm:px-6 lg:px-8">
-        {/* Brand Logo */}
-        <Link
-          href={ROUTES.HOME}
-          className="group flex items-center gap-3 focus-visible:outline-none"
-        >
-          <div className="shadow-small flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[color:var(--color-brand-accent-blue)] to-[#002857] text-lg font-extrabold text-white transition-transform group-hover:scale-105">
-            R
-          </div>
-          <div className="flex flex-col">
-            <span className="font-geist text-base font-bold tracking-tight text-[color:var(--color-text-primary)]">
-              Rotaract Club
-            </span>
-            <span className="flex items-center gap-1 font-mono text-[10px] font-semibold tracking-wider text-[color:var(--color-brand-rotary-gold)] uppercase">
-              <span>Presidency University</span>
-              <Sparkles className="h-2.5 w-2.5" />
-            </span>
-          </div>
-        </Link>
-
-        {/* Desktop Navigation Links with Animated Pill Indicator */}
-        <nav className="shadow-small relative hidden items-center gap-1 rounded-full border border-[color:var(--color-border)] bg-[color:var(--color-surface)]/80 px-2 py-1.5 backdrop-blur-md lg:flex">
-          {NAV_ITEMS.map((item) => {
-            const isSelected =
-              pathname === "/"
-                ? activeSection === item.id
-                : pathname === item.href;
-            return (
-              <Link
-                key={item.id}
-                href={item.href}
-                className={`relative z-10 rounded-full px-4 py-1.5 text-xs font-semibold transition-colors ${
-                  isSelected
-                    ? "text-white"
-                    : "text-[color:var(--color-text-secondary)] hover:text-[color:var(--color-text-primary)]"
-                }`}
-              >
-                {isSelected && (
-                  <motion.div
-                    layoutId="activeNavIndicator"
-                    className="shadow-small absolute inset-0 -z-10 rounded-full bg-[color:var(--color-brand-accent-blue)]"
-                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                  />
-                )}
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Desktop Actions */}
-        <div className="hidden items-center gap-3 lg:flex">
-          <ThemeToggle />
-          <Link
-            href={ROUTES.JOIN}
-            className="shadow-small inline-flex items-center gap-2 rounded-xl bg-[color:var(--color-brand-accent-blue)] px-4 py-2 text-xs font-semibold text-white transition-all hover:scale-[1.02] hover:bg-[color:var(--color-brand-accent-blue)]/90 active:scale-[0.98]"
-          >
-            <span>Join Rotaract</span>
-            <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
-        </div>
-
-        {/* Mobile Toggle Button */}
-        <div className="flex items-center gap-2 lg:hidden">
-          <ThemeToggle />
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="rounded-xl border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-2 text-[color:var(--color-text-primary)]"
-            aria-label="Toggle navigation drawer"
-          >
-            {mobileMenuOpen ? (
-              <X className="h-5 w-5" />
-            ) : (
-              <Menu className="h-5 w-5" />
-            )}
-          </button>
-        </div>
-      </div>
-
-      {/* Progress Bar Scroll Indicator */}
-      <div className="absolute right-0 bottom-0 left-0 h-[2px] bg-transparent">
-        <motion.div
-          className="h-full bg-gradient-to-r from-[color:var(--color-brand-accent-blue)] via-[color:var(--color-brand-rotary-gold)] to-[color:var(--color-brand-accent-blue)]"
+    <header className="fixed top-0 right-0 left-0 z-40">
+      {/* Top Scroll Progress Line */}
+      <div className="h-[2px] w-full overflow-hidden bg-transparent">
+        <div
+          className="h-full bg-gradient-to-r from-[color:var(--color-brand-accent-blue)] via-blue-400 to-[color:var(--color-brand-rotary-gold)] transition-all duration-150 ease-out"
           style={{ width: `${scrollProgress}%` }}
         />
       </div>
 
-      {/* Mobile Menu Drawer */}
+      {/* Main Glass Header */}
+      <nav
+        className={`w-full transition-all duration-300 ${
+          isScrolled
+            ? "shadow-large border-b border-white/10 bg-[#050505]/80 py-3 backdrop-blur-2xl"
+            : "bg-transparent py-5"
+        }`}
+      >
+        <div className="container-shell flex items-center justify-between px-4 sm:px-6 lg:px-8">
+          {/* Brand Logo */}
+          <Link href={ROUTES.HOME} className="group flex items-center gap-3">
+            <div className="shadow-glow h-9 w-9 rounded-xl bg-gradient-to-tr from-[color:var(--color-brand-accent-blue)] to-blue-700 p-0.5 transition-transform group-hover:scale-105">
+              <div className="flex h-full w-full items-center justify-center rounded-[10px] bg-[#0A0A0A] text-white">
+                <Shield className="h-4 w-4 text-[color:var(--color-brand-accent-blue)]" />
+              </div>
+            </div>
+            <div className="flex flex-col">
+              <span className="font-geist text-sm leading-none font-bold tracking-tight text-white transition-colors group-hover:text-[color:var(--color-brand-accent-blue)]">
+                ROTARACT
+              </span>
+              <span className="font-mono text-[10px] tracking-wider text-[color:var(--color-text-muted)]">
+                PRESIDENCY UNIV
+              </span>
+            </div>
+          </Link>
+
+          {/* Desktop Nav Items with Scroll-Spy Indicator */}
+          <div className="shadow-small hidden items-center gap-1 rounded-full border border-white/10 bg-white/[0.03] p-1.5 backdrop-blur-xl md:flex">
+            {NAV_ITEMS.map((item) => {
+              const isActive = activeSection === item.id;
+              return (
+                <a
+                  key={item.id}
+                  href={item.href}
+                  className={`relative px-4 py-1.5 text-xs font-semibold transition-colors duration-200 ${
+                    isActive
+                      ? "text-white"
+                      : "text-[color:var(--color-text-muted)] hover:text-white"
+                  }`}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="activePill"
+                      className="shadow-small absolute inset-0 -z-10 rounded-full bg-gradient-to-r from-[color:var(--color-brand-accent-blue)] to-blue-600"
+                      transition={{
+                        type: "spring",
+                        stiffness: 380,
+                        damping: 30,
+                      }}
+                    />
+                  )}
+                  <span>{item.label}</span>
+                </a>
+              );
+            })}
+          </div>
+
+          {/* Right Action CTA & Theme Toggle */}
+          <div className="hidden items-center gap-3 md:flex">
+            <ThemeToggle />
+            <Link
+              href={ROUTES.JOIN}
+              className="shadow-small inline-flex items-center gap-2 rounded-xl border border-white/10 bg-[color:var(--color-brand-accent-blue)] px-4 py-2 text-xs font-semibold text-white transition-all hover:scale-105 hover:bg-[color:var(--color-brand-accent-blue)]/90 active:scale-95"
+            >
+              <span>Join Club</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+
+          {/* Mobile Hamburger Menu */}
+          <div className="flex items-center gap-2 md:hidden">
+            <ThemeToggle />
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="rounded-xl border border-white/10 bg-white/[0.04] p-2 text-white transition-colors hover:bg-white/10"
+              aria-label="Toggle Navigation Menu"
+            >
+              {mobileMenuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* Mobile Glass Menu Drawer */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-            className="shadow-large overflow-hidden border-b border-[color:var(--color-border)] bg-[color:var(--color-surface)] lg:hidden"
+            className="overflow-hidden border-b border-white/10 bg-[#050505]/95 backdrop-blur-2xl md:hidden"
           >
-            <div className="flex flex-col gap-3 px-6 py-6">
+            <div className="space-y-3 px-6 py-6">
               {NAV_ITEMS.map((item) => (
-                <Link
+                <a
                   key={item.id}
                   href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`border-b border-[color:var(--color-border)]/50 py-2 text-sm font-semibold transition-colors last:border-0 ${
-                    activeSection === item.id
-                      ? "font-bold text-[color:var(--color-brand-accent-blue)] dark:text-[color:var(--color-brand-rotary-gold)]"
-                      : "text-[color:var(--color-text-primary)] hover:text-[color:var(--color-brand-accent-blue)]"
-                  }`}
+                  className="block border-b border-white/5 py-2 text-sm font-medium text-[color:var(--color-text-secondary)] hover:text-white"
                 >
                   {item.label}
-                </Link>
+                </a>
               ))}
-              <div className="flex flex-col gap-2 pt-2">
+              <div className="pt-2">
                 <Link
                   href={ROUTES.JOIN}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="shadow-small flex w-full items-center justify-center gap-2 rounded-xl bg-[color:var(--color-brand-accent-blue)] py-3 text-sm font-semibold text-white"
+                  className="shadow-small inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[color:var(--color-brand-accent-blue)] py-3 text-xs font-semibold text-white"
                 >
-                  <span>Join Rotaract</span>
+                  <span>Join Rotaract Club</span>
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>

@@ -9,3 +9,4 @@ export * from "./board-preview";
 export * from "./testimonials";
 export * from "./join-cta";
 export * from "./sponsors";
+export * from "./credibility-strip";

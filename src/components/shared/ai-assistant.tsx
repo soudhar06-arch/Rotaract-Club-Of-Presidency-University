@@ -27,7 +27,7 @@ export function AIAssistant() {
     {
       id: "1",
       sender: "bot",
-      text: "Hello! 👋 I'm the Rotaract AI Assistant. How can I assist you today with our community initiatives, membership, or events?",
+      text: "Greetings! 👋 I'm the Rotaract AI Assistant. How can I assist you with our community projects, membership, or events?",
       time: "09:00 AM",
     },
   ]);
@@ -106,7 +106,7 @@ export function AIAssistant() {
 
   return (
     <div className="fixed right-6 bottom-6 z-50">
-      {/* Floating Chat Button */}
+      {/* Floating Glass Orb Button */}
       <AnimatePresence>
         {!isOpen && (
           <motion.button
@@ -114,7 +114,7 @@ export function AIAssistant() {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             onClick={() => setIsOpen(true)}
-            className="group shadow-hero relative flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-r from-[color:var(--color-brand-accent-blue)] to-[#002b5c] text-white transition-transform hover:scale-105 focus-visible:outline-none active:scale-95"
+            className="group shadow-glow relative flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-gradient-to-r from-[#3B82F6] to-blue-700 text-white transition-transform hover:scale-105 focus-visible:outline-none active:scale-95"
             aria-label="Open AI Assistant"
           >
             <Bot className="h-6 w-6" />
@@ -126,7 +126,7 @@ export function AIAssistant() {
         )}
       </AnimatePresence>
 
-      {/* Expandable Chat Drawer Window */}
+      {/* Glass Drawer Window */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -134,10 +134,10 @@ export function AIAssistant() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-            className="shadow-hero flex h-[520px] w-[360px] flex-col overflow-hidden rounded-3xl border border-[color:var(--color-border)] bg-[color:var(--color-surface)] sm:w-[400px]"
+            className="shadow-large flex h-[520px] w-[360px] flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#0A0A0A]/95 backdrop-blur-2xl sm:w-[400px]"
           >
             {/* Header */}
-            <div className="flex items-center justify-between bg-gradient-to-r from-[color:var(--color-brand-accent-blue)] to-[#002857] p-4 text-white">
+            <div className="flex items-center justify-between bg-gradient-to-r from-[#3B82F6] to-blue-900 p-4 text-white">
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/10 text-[color:var(--color-brand-rotary-gold)] backdrop-blur-md">
                   <Bot className="h-5 w-5" />
@@ -165,7 +165,7 @@ export function AIAssistant() {
             </div>
 
             {/* Messages Scroll Area */}
-            <div className="flex-1 space-y-4 overflow-y-auto bg-[color:var(--color-bg-primary)] p-4">
+            <div className="flex-1 space-y-4 overflow-y-auto bg-[#050505] p-4">
               {messages.map((msg) => (
                 <div
                   key={msg.id}
@@ -176,7 +176,7 @@ export function AIAssistant() {
                   <div
                     className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold ${
                       msg.sender === "user"
-                        ? "bg-[color:var(--color-brand-accent-blue)] text-white"
+                        ? "bg-[#3B82F6] text-white"
                         : "bg-[color:var(--color-brand-rotary-gold)]/20 text-[color:var(--color-brand-rotary-gold)]"
                     }`}
                   >
@@ -189,8 +189,8 @@ export function AIAssistant() {
                   <div
                     className={`shadow-small max-w-[80%] rounded-2xl px-4 py-2.5 text-xs ${
                       msg.sender === "user"
-                        ? "rounded-tr-none bg-[color:var(--color-brand-accent-blue)] text-white"
-                        : "rounded-tl-none border border-[color:var(--color-border)] bg-[color:var(--color-surface)] text-[color:var(--color-text-primary)]"
+                        ? "rounded-tr-none bg-[#3B82F6] text-white"
+                        : "rounded-tl-none border border-white/10 bg-white/[0.04] text-white"
                     }`}
                   >
                     <p className="leading-relaxed">{msg.text}</p>
@@ -213,7 +213,7 @@ export function AIAssistant() {
                   <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[color:var(--color-brand-rotary-gold)]/20 text-[color:var(--color-brand-rotary-gold)]">
                     <RefreshCw className="h-3.5 w-3.5 animate-spin" />
                   </div>
-                  <div className="flex items-center gap-1 rounded-2xl rounded-tl-none border border-[color:var(--color-border)] bg-[color:var(--color-surface)] px-3 py-2">
+                  <div className="flex items-center gap-1 rounded-2xl rounded-tl-none border border-white/10 bg-white/[0.04] px-3 py-2">
                     <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[color:var(--color-text-muted)]" />
                     <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[color:var(--color-text-muted)] [animation-delay:0.2s]" />
                     <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[color:var(--color-text-muted)] [animation-delay:0.4s]" />
@@ -224,14 +224,14 @@ export function AIAssistant() {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Suggested Questions */}
+            {/* Suggested Question Chips */}
             {messages.length < 3 && (
-              <div className="flex items-center gap-1.5 overflow-x-auto border-t border-[color:var(--color-border)]/60 bg-[color:var(--color-surface)] px-4 py-2">
+              <div className="flex items-center gap-1.5 overflow-x-auto border-t border-white/10 bg-[#0A0A0A] px-4 py-2">
                 {SUGGESTED_QUESTIONS.map((q, idx) => (
                   <button
                     key={idx}
                     onClick={() => handleSend(q)}
-                    className="shrink-0 rounded-full border border-[color:var(--color-border)] bg-[color:var(--color-bg-secondary)] px-2.5 py-1 text-[11px] font-medium text-[color:var(--color-brand-accent-blue)] transition-colors hover:bg-[color:var(--color-border)] dark:text-[color:var(--color-brand-rotary-gold)]"
+                    className="shrink-0 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] font-medium text-[#3B82F6] transition-colors hover:bg-white/[0.08]"
                   >
                     {q}
                   </button>
@@ -245,19 +245,19 @@ export function AIAssistant() {
                 e.preventDefault();
                 handleSend();
               }}
-              className="flex items-center gap-2 border-t border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-3"
+              className="flex items-center gap-2 border-t border-white/10 bg-[#0A0A0A] p-3"
             >
               <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask about events, membership, projects..."
-                className="flex-1 rounded-xl border border-[color:var(--color-border)] bg-[color:var(--color-bg-primary)] px-3.5 py-2 text-xs text-[color:var(--color-text-primary)] placeholder:text-[color:var(--color-text-muted)] focus-visible:ring-2 focus-visible:ring-[color:var(--color-brand-rotary-gold)] focus-visible:outline-none"
+                className="flex-1 rounded-xl border border-white/10 bg-[#050505] px-3.5 py-2 text-xs text-white placeholder:text-[color:var(--color-text-muted)] focus-visible:ring-2 focus-visible:ring-[#3B82F6] focus-visible:outline-none"
               />
               <button
                 type="submit"
                 disabled={!input.trim() || loading}
-                className="flex h-9 w-9 items-center justify-center rounded-xl bg-[color:var(--color-brand-accent-blue)] text-white transition-opacity hover:opacity-90 active:scale-95 disabled:opacity-50"
+                className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#3B82F6] text-white transition-opacity hover:opacity-90 active:scale-95 disabled:opacity-50"
                 aria-label="Send message"
               >
                 <Send className="h-4 w-4" />
