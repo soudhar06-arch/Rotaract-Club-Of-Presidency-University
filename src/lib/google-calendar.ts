@@ -42,6 +42,8 @@ export interface GoogleCalendarDiagnostics {
   itemCount: number;
 }
 
+export const DEFAULT_EVENT_IMAGE = "/gallery/gallery-1.jpeg";
+
 const EVENT_IMAGES = [
   "/gallery/gallery-1.jpeg",
   "/gallery/gallery-2.jpg",
@@ -54,6 +56,16 @@ const EVENT_IMAGES = [
   "/gallery/gallery-9.jpeg",
   "/gallery/gallery-10.jpeg",
 ];
+
+function extractEventImage(description: string, idx: number): string {
+  if (description) {
+    const matchImg = description.match(/\[image:\s*([^\s\]]+)\]/i);
+    if (matchImg && matchImg[1]) {
+      return matchImg[1];
+    }
+  }
+  return EVENT_IMAGES[idx % EVENT_IMAGES.length] || DEFAULT_EVENT_IMAGE;
+}
 
 function formatIsoDate(dateObj: Date): string {
   const year = dateObj.getFullYear();
@@ -152,6 +164,7 @@ function cleanDescription(rawDesc: string): string {
     .replace(/<[^>]*>/g, "")
     .replace(/\[category:[^\]]+\]/gi, "")
     .replace(/\[registration:[^\]]+\]/gi, "")
+    .replace(/\[image:[^\]]+\]/gi, "")
     .trim();
 }
 
@@ -325,7 +338,7 @@ export async function fetchGoogleCalendarEventsWithDiagnostics(): Promise<{
 
         const status: "upcoming" | "past" =
           endDate >= now ? "upcoming" : "past";
-        const image = EVENT_IMAGES[idx % EVENT_IMAGES.length];
+        const image = extractEventImage(rawDescription, idx);
 
         return {
           id: item.id || `gcal-${idx}`,
