@@ -2,51 +2,46 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Send, Bot, User, Sparkles, RefreshCw } from "lucide-react";
-
+import { Bot, Sparkles, X, Send, User, ChevronRight } from "lucide-react";
 interface Message {
   id: string;
-  sender: "bot" | "user";
+  sender: "user" | "assistant";
   text: string;
-  time: string;
+  timestamp: string;
 }
 
-const SUGGESTED_QUESTIONS = [
-  "How do I join Rotaract?",
-  "What are upcoming events?",
-  "Who is on the board?",
-  "Tell me about flagship projects",
+const PROMPT_SUGGESTIONS = [
+  "When is the next event?",
+  "What events are happening this month?",
+  "How can I apply for membership?",
+  "Who leads the Board of Directors?",
 ];
 
 export function AIAssistant() {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const messageIdCounter = useRef(100);
+  const [isTyping, setIsTyping] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
-      id: "1",
-      sender: "bot",
-      text: "Greetings! 👋 I'm the Rotaract AI Assistant. How can I assist you with our community projects, membership, or events?",
-      time: "09:00 AM",
+      id: "m-1",
+      sender: "assistant",
+      text: "Greetings! I am the Rotaract Intelligence Assistant for the Rotaract Club of Presidency University. How may I assist you today?",
+      timestamp: "10:00 AM",
     },
   ]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (isOpen) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages, isOpen]);
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isTyping]);
 
-  const handleSend = async (queryText?: string) => {
-    const textToSend = queryText || input.trim();
-    if (!textToSend || loading) return;
+  const handleSend = async (textToSend?: string) => {
+    const query = textToSend || input;
+    if (!query.trim()) return;
 
-    messageIdCounter.current += 1;
-    const userMsgId = `user-${messageIdCounter.current}`;
-    const formattedTime = new Date().toLocaleTimeString([], {
+    const userMsgId = `u-${crypto.randomUUID()}`;
+    const userMsgTime = new Date().toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
     });
@@ -54,218 +49,205 @@ export function AIAssistant() {
     const userMsg: Message = {
       id: userMsgId,
       sender: "user",
-      text: textToSend,
-      time: formattedTime,
+      text: query,
+      timestamp: userMsgTime,
     };
 
     setMessages((prev) => [...prev, userMsg]);
-    if (!queryText) setInput("");
-    setLoading(true);
+    if (!textToSend) setInput("");
+    setIsTyping(true);
 
     try {
       const res = await fetch("/api/chatbot", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: textToSend }),
+        body: JSON.stringify({ message: query }),
       });
-      const data = await res.json();
 
-      messageIdCounter.current += 1;
-      const botMsgId = `bot-${messageIdCounter.current}`;
+      let responseText =
+        "The Rotaract Club of Presidency University is dedicated to youth leadership, professional networking, and community service.";
 
-      const botMsg: Message = {
-        id: botMsgId,
-        sender: "bot",
-        text:
-          data.reply ||
-          "Thank you for reaching out! Please explore our site for more details.",
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
+      if (res.ok) {
+        const data = (await res.json()) as { reply?: string };
+        if (data.reply) responseText = data.reply;
+      }
+
+      const assistantMsgId = `a-${crypto.randomUUID()}`;
+      const assistantMsgTime = new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+
+      const assistantMsg: Message = {
+        id: assistantMsgId,
+        sender: "assistant",
+        text: responseText,
+        timestamp: assistantMsgTime,
       };
 
-      setMessages((prev) => [...prev, botMsg]);
-    } catch {
-      messageIdCounter.current += 1;
-      const errId = `bot-err-${messageIdCounter.current}`;
-      const errorMsg: Message = {
-        id: errId,
-        sender: "bot",
-        text: "Sorry, I ran into a connection issue. Please try again shortly.",
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
+      setMessages((prev) => [...prev, assistantMsg]);
+    } catch (err: unknown) {
+      console.error("AI assistant send error:", err);
+      const errorMsgId = `a-${crypto.randomUUID()}`;
+      const errorMsgTime = new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+
+      const assistantMsg: Message = {
+        id: errorMsgId,
+        sender: "assistant",
+        text: "I'm having trouble connecting right now. Please explore our Calendar and Events pages for up-to-date schedule information!",
+        timestamp: errorMsgTime,
       };
-      setMessages((prev) => [...prev, errorMsg]);
+      setMessages((prev) => [...prev, assistantMsg]);
     } finally {
-      setLoading(false);
+      setIsTyping(false);
     }
   };
 
   return (
-    <div className="fixed right-6 bottom-6 z-50">
-      {/* Floating Glass Orb Button */}
-      <AnimatePresence>
-        {!isOpen && (
-          <motion.button
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            onClick={() => setIsOpen(true)}
-            className="group shadow-glow relative flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-gradient-to-r from-[#3B82F6] to-blue-700 text-white transition-transform hover:scale-105 focus-visible:outline-none active:scale-95"
-            aria-label="Open AI Assistant"
-          >
-            <Bot className="h-6 w-6" />
-            <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[color:var(--color-brand-rotary-gold)] opacity-75" />
-              <span className="relative inline-flex h-3.5 w-3.5 rounded-full bg-[color:var(--color-brand-rotary-gold)]" />
-            </span>
-          </motion.button>
-        )}
-      </AnimatePresence>
+    <>
+      {/* Floating Glass Trigger Orb */}
+      <div className="fixed right-6 bottom-6 z-40">
+        <motion.button
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setIsOpen(!isOpen)}
+          className="group shadow-glow relative flex h-14 w-14 items-center justify-center rounded-full border border-white/20 bg-[#101010]/80 backdrop-blur-xl"
+          aria-label="Open AI Assistant"
+        >
+          <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#3B82F6] to-indigo-600 opacity-20 transition-opacity group-hover:opacity-40" />
+          <Bot className="h-6 w-6 text-[#3B82F6] transition-transform group-hover:rotate-12" />
+          <span className="absolute -top-1 -right-1 flex h-3 w-3">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#3B82F6] opacity-75" />
+            <span className="relative inline-flex h-3 w-3 rounded-full bg-[#3B82F6]" />
+          </span>
+        </motion.button>
+      </div>
 
-      {/* Glass Drawer Window */}
+      {/* Floating Modal Panel */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-            className="shadow-large flex h-[520px] w-[360px] flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#0A0A0A]/95 backdrop-blur-2xl sm:w-[400px]"
+            className="shadow-large fixed right-6 bottom-24 z-50 flex h-[520px] w-[360px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0A0A0A]/95 backdrop-blur-2xl sm:w-[400px]"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between bg-gradient-to-r from-[#3B82F6] to-blue-900 p-4 text-white">
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/10 text-[color:var(--color-brand-rotary-gold)] backdrop-blur-md">
-                  <Bot className="h-5 w-5" />
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-white/10 bg-[#101010]/80 px-4 py-3.5">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#3B82F6]/40 bg-[#3B82F6]/20">
+                  <Sparkles className="h-4 w-4 text-[#3B82F6]" />
                 </div>
                 <div>
-                  <div className="flex items-center gap-1.5">
-                    <h3 className="font-geist text-sm font-bold">
-                      Rotaract AI Assistant
-                    </h3>
-                    <Sparkles className="h-3 w-3 text-[color:var(--color-brand-rotary-gold)]" />
-                  </div>
-                  <div className="flex items-center gap-1 text-[11px] text-slate-300">
-                    <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
-                    <span>Online & Ready</span>
-                  </div>
+                  <h4 className="text-xs font-bold tracking-wide text-white">
+                    Rotaract Intelligence AI
+                  </h4>
+                  <p className="text-[10px] text-[#9A9A9A]">
+                    Official Club Assistant
+                  </p>
                 </div>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="rounded-xl p-1.5 text-slate-300 transition-colors hover:bg-white/10 hover:text-white"
-                aria-label="Close Assistant"
+                className="rounded-lg p-1 text-[#9A9A9A] transition-colors hover:bg-white/10 hover:text-white"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4" />
               </button>
             </div>
 
-            {/* Messages Scroll Area */}
-            <div className="flex-1 space-y-4 overflow-y-auto bg-[#050505] p-4">
+            {/* Chat Body */}
+            <div className="flex-1 space-y-3.5 overflow-y-auto p-4">
               {messages.map((msg) => (
                 <div
                   key={msg.id}
-                  className={`flex items-start gap-2.5 ${
-                    msg.sender === "user" ? "flex-row-reverse" : ""
-                  }`}
+                  className={`flex gap-2.5 ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
                 >
+                  {msg.sender === "assistant" && (
+                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-[#3B82F6]/20 text-[#3B82F6]">
+                      <Bot className="h-3.5 w-3.5" />
+                    </div>
+                  )}
                   <div
-                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold ${
+                    className={`max-w-[80%] rounded-xl p-3 text-xs leading-relaxed ${
                       msg.sender === "user"
-                        ? "bg-[#3B82F6] text-white"
-                        : "bg-[color:var(--color-brand-rotary-gold)]/20 text-[color:var(--color-brand-rotary-gold)]"
+                        ? "bg-[#3B82F6] font-medium text-white"
+                        : "border border-white/10 bg-white/[0.04] text-[#D4D4D4]"
                     }`}
                   >
-                    {msg.sender === "user" ? (
-                      <User className="h-4 w-4" />
-                    ) : (
-                      <Bot className="h-4 w-4" />
-                    )}
-                  </div>
-                  <div
-                    className={`shadow-small max-w-[80%] rounded-2xl px-4 py-2.5 text-xs ${
-                      msg.sender === "user"
-                        ? "rounded-tr-none bg-[#3B82F6] text-white"
-                        : "rounded-tl-none border border-white/10 bg-white/[0.04] text-white"
-                    }`}
-                  >
-                    <p className="leading-relaxed">{msg.text}</p>
-                    <span
-                      className={`mt-1 block text-right text-[9px] ${
-                        msg.sender === "user"
-                          ? "text-slate-200"
-                          : "text-[color:var(--color-text-muted)]"
-                      }`}
-                    >
-                      {msg.time}
+                    <p>{msg.text}</p>
+                    <span className="mt-1 block text-right text-[9px] text-[#9A9A9A]">
+                      {msg.timestamp}
                     </span>
                   </div>
+                  {msg.sender === "user" && (
+                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-white/10 text-white">
+                      <User className="h-3.5 w-3.5" />
+                    </div>
+                  )}
                 </div>
               ))}
 
-              {/* Typing Indicator */}
-              {loading && (
-                <div className="flex items-center gap-2 text-xs text-[color:var(--color-text-muted)]">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[color:var(--color-brand-rotary-gold)]/20 text-[color:var(--color-brand-rotary-gold)]">
-                    <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-                  </div>
-                  <div className="flex items-center gap-1 rounded-2xl rounded-tl-none border border-white/10 bg-white/[0.04] px-3 py-2">
-                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[color:var(--color-text-muted)]" />
-                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[color:var(--color-text-muted)] [animation-delay:0.2s]" />
-                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[color:var(--color-text-muted)] [animation-delay:0.4s]" />
-                  </div>
+              {isTyping && (
+                <div className="flex items-center gap-2 text-xs text-[#9A9A9A]">
+                  <Bot className="h-4 w-4 animate-pulse text-[#3B82F6]" />
+                  <span className="animate-pulse">Thinking...</span>
                 </div>
               )}
-
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Suggested Question Chips */}
+            {/* Prompt Chips */}
             {messages.length < 3 && (
-              <div className="flex items-center gap-1.5 overflow-x-auto border-t border-white/10 bg-[#0A0A0A] px-4 py-2">
-                {SUGGESTED_QUESTIONS.map((q, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => handleSend(q)}
-                    className="shrink-0 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] font-medium text-[#3B82F6] transition-colors hover:bg-white/[0.08]"
-                  >
-                    {q}
-                  </button>
-                ))}
+              <div className="border-t border-white/5 bg-[#050505]/60 p-2.5">
+                <p className="mb-1.5 px-1 text-[10px] font-medium text-[#71717A]">
+                  Suggested Queries:
+                </p>
+                <div className="flex flex-col gap-1">
+                  {PROMPT_SUGGESTIONS.map((chip, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => handleSend(chip)}
+                      className="flex items-center justify-between rounded-lg border border-white/5 bg-white/[0.02] px-2.5 py-1.5 text-left text-[11px] text-[#9A9A9A] transition-colors hover:border-[#3B82F6]/50 hover:bg-[#3B82F6]/10 hover:text-white"
+                    >
+                      <span>{chip}</span>
+                      <ChevronRight className="h-3 w-3 text-[#3B82F6]" />
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 
-            {/* Input Form */}
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSend();
-              }}
-              className="flex items-center gap-2 border-t border-white/10 bg-[#0A0A0A] p-3"
-            >
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask about events, membership, projects..."
-                className="flex-1 rounded-xl border border-white/10 bg-[#050505] px-3.5 py-2 text-xs text-white placeholder:text-[color:var(--color-text-muted)] focus-visible:ring-2 focus-visible:ring-[#3B82F6] focus-visible:outline-none"
-              />
-              <button
-                type="submit"
-                disabled={!input.trim() || loading}
-                className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#3B82F6] text-white transition-opacity hover:opacity-90 active:scale-95 disabled:opacity-50"
-                aria-label="Send message"
+            {/* Input Box */}
+            <div className="border-t border-white/10 bg-[#0A0A0A] p-3">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSend();
+                }}
+                className="flex items-center gap-2"
               >
-                <Send className="h-4 w-4" />
-              </button>
-            </form>
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Ask anything about Rotaract..."
+                  className="flex-1 rounded-xl border border-white/10 bg-white/[0.04] px-3.5 py-2 text-xs text-white placeholder-[#71717A] focus:border-[#3B82F6] focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  disabled={!input.trim()}
+                  className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#3B82F6] text-white transition-opacity disabled:opacity-40"
+                >
+                  <Send className="h-4 w-4" />
+                </button>
+              </form>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </>
   );
 }

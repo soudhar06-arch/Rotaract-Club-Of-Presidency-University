@@ -1,0 +1,28 @@
+<svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="blueGlow" x1="0" y1="0" x2="200" y2="200" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#3B82F6" />
+      <stop offset="100%" stop-color="#1D4ED8" />
+    </linearGradient>
+    <linearGradient id="darkBg" x1="0" y1="0" x2="0" y2="200" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#151515" />
+      <stop offset="100%" stop-color="#050505" />
+    </linearGradient>
+  </defs>
+
+  <!-- Outer Frame -->
+  <rect x="10" y="10" width="180" height="180" rx="36" fill="url(#darkBg)" stroke="rgba(255,255,255,0.12)" stroke-width="2"/>
+  <rect x="14" y="14" width="172" height="172" rx="32" stroke="url(#blueGlow)" stroke-width="1.5" stroke-opacity="0.6"/>
+
+  <!-- Rotary Ring -->
+  <circle cx="100" cy="100" r="62" stroke="url(#blueGlow)" stroke-width="3" stroke-dasharray="4 4"/>
+  <circle cx="100" cy="100" r="48" stroke="white" stroke-width="2" stroke-opacity="0.8"/>
+
+  <!-- Inner Rotaract Emblem -->
+  <path d="M100 60L135 80V120L100 140L65 120V80L100 60Z" fill="url(#blueGlow)" fill-opacity="0.15" stroke="url(#blueGlow)" stroke-width="3" stroke-linejoin="round"/>
+  
+  <!-- Central Gear Hub -->
+  <circle cx="100" cy="100" r="22" fill="#0A0A0A" stroke="white" stroke-width="2"/>
+  <path d="M100 84V116M84 100H116M88 88L112 112M88 112L112 88" stroke="#3B82F6" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="100" cy="100" r="7" fill="white"/>
+</svg>

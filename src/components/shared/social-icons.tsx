@@ -35,3 +35,28 @@ export function LinkedinIcon(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+export function SocialIcons() {
+  return (
+    <div className="flex items-center gap-3">
+      <a
+        href="https://instagram.com/rotaract_pu"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="rounded-lg border border-white/10 bg-white/[0.04] p-2 text-[#9A9A9A] transition-colors hover:border-[#3B82F6] hover:bg-[#3B82F6] hover:text-white"
+        aria-label="Instagram"
+      >
+        <InstagramIcon className="h-4 w-4" />
+      </a>
+      <a
+        href="https://linkedin.com/company/rotaract-pu"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="rounded-lg border border-white/10 bg-white/[0.04] p-2 text-[#9A9A9A] transition-colors hover:border-[#3B82F6] hover:bg-[#3B82F6] hover:text-white"
+        aria-label="LinkedIn"
+      >
+        <LinkedinIcon className="h-4 w-4" />
+      </a>
+    </div>
+  );
+}

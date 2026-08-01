@@ -1,125 +1,251 @@
-import type { Metadata } from "next";
+"use client";
+
+import { useState } from "react";
+import { motion } from "framer-motion";
 import Image from "next/image";
-import Link from "next/link";
-import { Calendar, MapPin, Clock, ArrowRight } from "lucide-react";
-import { ROUTES } from "@/constants";
-
-export const metadata: Metadata = {
-  title: "Events & Calendar",
-  description:
-    "View upcoming events, action drives, workshops, and community meetings hosted by Rotaract.",
-};
-
-const EVENTS = [
-  {
-    title: "Annual Mega Blood Donation Drive 2026",
-    category: "Public Health",
-    date: "AUG 15, 2026",
-    time: "09:00 AM - 04:00 PM",
-    location: "Auditorium Block A, Presidency University",
-    image: "/images/event-blood-drive.png",
-    slug: "mega-blood-donation-2026",
-    desc: "Join us in saving lives. Free health checkup and blood donation certificate provided by Red Cross.",
-  },
-  {
-    title: "Youth Leadership & Innovation Summit",
-    category: "Professional Development",
-    date: "SEP 02, 2026",
-    time: "10:00 AM - 05:00 PM",
-    location: "Main Convention Center, Bengaluru",
-    image: "/images/gallery-youth-summit.png",
-    slug: "youth-leadership-summit-2026",
-    desc: "A flagship university summit featuring keynote speeches, panel debates, and networking sessions.",
-  },
-  {
-    title: "Community Literacy & Book Distribution",
-    category: "Community Service",
-    date: "SEP 20, 2026",
-    time: "11:00 AM - 02:00 PM",
-    location: "Primary Govt School, Yelahanka",
-    image: "/images/hero-community.png",
-    slug: "community-literacy-drive",
-    desc: "Distributing books, stationery, and holding digital learning workshops for young learners.",
-  },
-];
+import {
+  Calendar,
+  Clock,
+  MapPin,
+  ExternalLink,
+  History,
+  CalendarDays,
+} from "lucide-react";
+import { CalendarEvent } from "@/lib/google-calendar";
+import { useCalendarEvents } from "@/hooks/use-calendar-events";
 
 export default function EventsPage() {
+  const { upcomingEvents, pastEvents, loading, addToUserCalendar } =
+    useCalendarEvents();
+  const [activeTab, setActiveTab] = useState<"all" | "upcoming" | "past">(
+    "all",
+  );
+
+  const totalCount = upcomingEvents.length + pastEvents.length;
+
   return (
     <div className="space-y-16 pt-28 pb-20">
-      <section className="container-shell max-w-3xl space-y-3 px-4 text-center sm:px-6 lg:px-8">
-        <span className="font-mono text-xs font-semibold tracking-wider text-[color:var(--color-brand-rotary-gold)] uppercase">
-          Chapter Calendar
-        </span>
-        <h1 className="text-display-l font-bold text-[color:var(--color-text-primary)]">
-          Upcoming Events & Meetings
-        </h1>
-        <p className="text-body-large text-[color:var(--color-text-secondary)]">
-          Participate in our upcoming community drives, professional workshops,
-          and fellowship gatherings.
-        </p>
-      </section>
+      <div className="container-shell px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="mx-auto max-w-3xl space-y-4 text-center">
+          <span className="text-xs font-semibold tracking-widest text-[#3B82F6] uppercase">
+            LIVE GOOGLE CALENDAR CMS
+          </span>
+          <h1 className="text-display-l font-bold tracking-tight text-white">
+            Events & Conclaves
+          </h1>
+          <p className="text-base leading-relaxed text-[#9A9A9A]">
+            Browse all upcoming flagship conclaves, community drives, and past
+            event archives synced live from Google Calendar.
+          </p>
 
-      <section className="container-shell px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-          {EVENTS.map((event, idx) => (
-            <div
-              key={idx}
-              className="shadow-medium hover-lift group flex flex-col overflow-hidden rounded-3xl border border-[color:var(--color-border)] bg-[color:var(--color-surface)]"
+          {/* Filter Tabs */}
+          <div className="flex items-center justify-center gap-3 pt-6">
+            <button
+              onClick={() => setActiveTab("all")}
+              className={`rounded-full px-5 py-2 text-xs font-semibold transition-all ${
+                activeTab === "all"
+                  ? "shadow-glow bg-[#3B82F6] text-white"
+                  : "border border-white/10 bg-white/[0.04] text-[#9A9A9A] hover:text-white"
+              }`}
             >
-              <div className="relative aspect-[16/9] w-full overflow-hidden">
-                <Image
-                  src={event.image}
-                  alt={event.title}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 400px"
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <div className="absolute top-3 right-3 rounded-full border border-white/20 bg-[color:var(--color-surface-glass)] px-3 py-1 text-[11px] font-semibold text-[color:var(--color-text-primary)] backdrop-blur-md">
-                  {event.category}
-                </div>
-              </div>
-
-              <div className="flex flex-1 flex-col justify-between space-y-4 p-6">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3 text-xs font-semibold text-[color:var(--color-brand-accent-blue)] dark:text-[color:var(--color-brand-rotary-gold)]">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-3.5 w-3.5" />
-                      <span>{event.date}</span>
-                    </div>
-                    <div className="flex items-center gap-1 font-normal text-[color:var(--color-text-muted)]">
-                      <Clock className="h-3.5 w-3.5" />
-                      <span>{event.time}</span>
-                    </div>
-                  </div>
-
-                  <h2 className="text-heading-s line-clamp-2 font-bold text-[color:var(--color-text-primary)]">
-                    {event.title}
-                  </h2>
-
-                  <p className="text-body-small line-clamp-2 text-[color:var(--color-text-secondary)]">
-                    {event.desc}
-                  </p>
-
-                  <div className="flex items-start gap-1.5 text-xs text-[color:var(--color-text-muted)]">
-                    <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                    <span>{event.location}</span>
-                  </div>
-                </div>
-
-                <div className="border-t border-[color:var(--color-border)] pt-3">
-                  <Link
-                    href={`${ROUTES.EVENTS}/${event.slug}`}
-                    className="inline-flex items-center gap-2 text-xs font-semibold text-[color:var(--color-brand-accent-blue)] hover:underline dark:text-[color:var(--color-brand-rotary-gold)]"
-                  >
-                    <span>View Event & Register</span>
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </Link>
-                </div>
-              </div>
-            </div>
-          ))}
+              All Events ({totalCount})
+            </button>
+            <button
+              onClick={() => setActiveTab("upcoming")}
+              className={`rounded-full px-5 py-2 text-xs font-semibold transition-all ${
+                activeTab === "upcoming"
+                  ? "shadow-glow bg-[#3B82F6] text-white"
+                  : "border border-white/10 bg-white/[0.04] text-[#9A9A9A] hover:text-white"
+              }`}
+            >
+              Upcoming ({upcomingEvents.length})
+            </button>
+            <button
+              onClick={() => setActiveTab("past")}
+              className={`rounded-full px-5 py-2 text-xs font-semibold transition-all ${
+                activeTab === "past"
+                  ? "shadow-glow bg-[#3B82F6] text-white"
+                  : "border border-white/10 bg-white/[0.04] text-[#9A9A9A] hover:text-white"
+              }`}
+            >
+              Past Events ({pastEvents.length})
+            </button>
+          </div>
         </div>
-      </section>
+
+        {/* Content Sections */}
+        {loading ? (
+          <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div
+                key={i}
+                className="glass-card h-80 animate-pulse rounded-2xl bg-white/5 p-4"
+              />
+            ))}
+          </div>
+        ) : totalCount === 0 ? (
+          <div className="glass-card mt-16 flex flex-col items-center justify-center space-y-3 p-12 text-center">
+            <CalendarDays className="h-12 w-12 text-[#3B82F6]" />
+            <h3 className="text-lg font-bold text-white">
+              No Events Available
+            </h3>
+            <p className="max-w-md text-xs text-[#9A9A9A]">
+              Create an event in Google Calendar to automatically display it
+              here on the website.
+            </p>
+          </div>
+        ) : (
+          <div className="mt-14 space-y-16">
+            {/* Upcoming Events Section */}
+            {(activeTab === "all" || activeTab === "upcoming") && (
+              <section className="space-y-6">
+                <div className="flex items-center gap-3 border-b border-white/10 pb-3">
+                  <Calendar className="h-5 w-5 text-[#3B82F6]" />
+                  <h2 className="text-xl font-bold tracking-wide text-white">
+                    Upcoming Events ({upcomingEvents.length})
+                  </h2>
+                </div>
+
+                {upcomingEvents.length === 0 ? (
+                  <p className="py-8 text-center text-xs text-[#9A9A9A]">
+                    No upcoming events scheduled right now.
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                    {upcomingEvents.map((evt, idx) => (
+                      <EventCard
+                        key={evt.id}
+                        evt={evt}
+                        idx={idx}
+                        onAddCalendar={addToUserCalendar}
+                      />
+                    ))}
+                  </div>
+                )}
+              </section>
+            )}
+
+            {/* Past Events Section */}
+            {(activeTab === "all" || activeTab === "past") && (
+              <section className="space-y-6">
+                <div className="flex items-center gap-3 border-b border-white/10 pb-3">
+                  <History className="h-5 w-5 text-[#71717A]" />
+                  <h2 className="text-xl font-bold tracking-wide text-white">
+                    Past Events & Archives ({pastEvents.length})
+                  </h2>
+                </div>
+
+                {pastEvents.length === 0 ? (
+                  <p className="py-8 text-center text-xs text-[#9A9A9A]">
+                    No past event archives found on Google Calendar.
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                    {pastEvents.map((evt, idx) => (
+                      <EventCard
+                        key={evt.id}
+                        evt={evt}
+                        idx={idx}
+                        isPast
+                        onAddCalendar={addToUserCalendar}
+                      />
+                    ))}
+                  </div>
+                )}
+              </section>
+            )}
+          </div>
+        )}
+      </div>
     </div>
+  );
+}
+
+function EventCard({
+  evt,
+  idx,
+  isPast,
+  onAddCalendar,
+}: {
+  evt: CalendarEvent;
+  idx: number;
+  isPast?: boolean;
+  onAddCalendar: (evt: CalendarEvent) => void;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: idx * 0.05 }}
+      className="glass-card group flex flex-col justify-between overflow-hidden"
+    >
+      <div>
+        <div className="relative h-48 w-full overflow-hidden bg-[#101010]">
+          <Image
+            src={evt.image}
+            alt={evt.title}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent" />
+          <span
+            className={`shadow-glow absolute top-3 left-3 rounded-md px-2.5 py-1 text-[10px] font-bold text-white uppercase ${
+              isPast ? "bg-[#71717A]" : "bg-[#3B82F6]"
+            }`}
+          >
+            {evt.category}
+          </span>
+        </div>
+
+        <div className="p-5">
+          <h3 className="line-clamp-2 text-base font-bold text-white transition-colors group-hover:text-[#3B82F6]">
+            {evt.title}
+          </h3>
+
+          <div className="mt-4 space-y-2 text-xs text-[#9A9A9A]">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-3.5 w-3.5 text-[#3B82F6]" />
+              <span>{evt.date}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Clock className="h-3.5 w-3.5 text-[#3B82F6]" />
+              <span>{evt.time}</span>
+            </div>
+            <div className="flex items-center gap-2 truncate">
+              <MapPin className="h-3.5 w-3.5 shrink-0 text-[#3B82F6]" />
+              <span className="truncate">{evt.venue || evt.location}</span>
+            </div>
+          </div>
+
+          <p className="mt-3 line-clamp-2 text-xs leading-relaxed text-[#9A9A9A]">
+            {evt.description}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex gap-2 p-5 pt-0">
+        {evt.registrationLink && !isPast && (
+          <a
+            href={evt.registrationLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shadow-glow flex-1 rounded-xl bg-[#3B82F6] py-2.5 text-center text-xs font-semibold text-white transition-all hover:bg-blue-600 active:scale-95"
+          >
+            Register
+          </a>
+        )}
+
+        <button
+          onClick={() => onAddCalendar(evt)}
+          className="flex items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2.5 text-xs font-semibold text-white transition-all hover:bg-white/10"
+          title="Add to My Google Calendar"
+        >
+          <span className="text-xs">Add to My Google Calendar</span>
+          <ExternalLink className="h-3.5 w-3.5 text-[#3B82F6]" />
+        </button>
+      </div>
+    </motion.div>
   );
 }

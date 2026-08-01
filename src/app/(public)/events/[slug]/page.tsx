@@ -53,7 +53,7 @@ export default function EventDetailPage() {
             src="/images/event-blood-drive.png"
             alt="Blood Donation Event"
             fill
-            sizes="800px"
+            sizes="(max-width: 1024px) 100vw, 800px"
             className="object-cover"
             priority
           />

@@ -1,17 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  /* Version 2.0 Palette */
+  /* Version 2.0 Luxury Monochrome Palette */
   --color-brand-accent-blue: #3b82f6;
   --color-brand-accent-blue-hover: #2563eb;
-  --color-brand-rotary-gold: #f5a623;
+  --color-brand-accent-glow: rgba(59, 130, 246, 0.35);
 
   --color-bg-primary: #050505;
   --color-bg-secondary: #0a0a0a;
   --color-surface: #101010;
   --color-surface-elevated: #151515;
   --color-surface-glass: rgba(255, 255, 255, 0.04);
-  --color-surface-glass-elevated: rgba(255, 255, 255, 0.07);
+  --color-surface-glass-hover: rgba(255, 255, 255, 0.07);
 
   --color-text-primary: #ffffff;
   --color-text-secondary: #d4d4d4;
@@ -59,7 +59,6 @@
 
 @theme inline {
   --color-brand-blue: var(--color-brand-accent-blue);
-  --color-rotary-gold: var(--color-brand-rotary-gold);
   --color-bg-primary: var(--color-bg-primary);
   --color-bg-secondary: var(--color-bg-secondary);
   --color-surface: var(--color-surface);

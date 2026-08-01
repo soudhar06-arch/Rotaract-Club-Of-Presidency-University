@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { useInView, animate } from "framer-motion";
 
 interface CountUpProps {
-  to: number;
+  to?: number;
+  end?: number;
   suffix?: string;
   prefix?: string;
   duration?: number;
@@ -13,11 +14,13 @@ interface CountUpProps {
 
 export function CountUp({
   to,
+  end,
   suffix = "",
   prefix = "",
   duration = 1.8,
   className = "",
 }: CountUpProps) {
+  const targetVal = to ?? end ?? 0;
   const ref = useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once: true });
   const [count, setCount] = useState(0);
@@ -25,7 +28,7 @@ export function CountUp({
   useEffect(() => {
     if (!isInView) return;
 
-    const controls = animate(0, to, {
+    const controls = animate(0, targetVal, {
       duration,
       ease: [0.16, 1, 0.3, 1],
       onUpdate(value) {
@@ -34,7 +37,7 @@ export function CountUp({
     });
 
     return () => controls.stop();
-  }, [isInView, to, duration]);
+  }, [isInView, targetVal, duration]);
 
   return (
     <span ref={ref} className={className}>

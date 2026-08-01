@@ -1,123 +1,157 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Shield, Heart } from "lucide-react";
+import Image from "next/image";
+import { ArrowUpRight, Mail, MapPin, Phone } from "lucide-react";
 import { ROUTES } from "@/constants";
 
 export function Footer() {
+  const currentYear = new Date().getFullYear();
+
   return (
-    <footer className="relative overflow-hidden border-t border-white/10 bg-[#050505] text-white">
+    <footer className="relative border-t border-white/[0.08] bg-[#050505] text-white">
       <div className="container-shell px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
-        <div className="mb-16 grid grid-cols-1 gap-12 md:grid-cols-12 lg:gap-8">
-          {/* Col 1: Brand & Charter */}
-          <div className="space-y-4 md:col-span-5">
-            <Link href={ROUTES.HOME} className="group flex items-center gap-3">
-              <div className="shadow-glow h-10 w-10 rounded-xl bg-gradient-to-tr from-[color:var(--color-brand-accent-blue)] to-blue-700 p-0.5">
-                <div className="flex h-full w-full items-center justify-center rounded-[10px] bg-[#0A0A0A] text-white">
-                  <Shield className="h-5 w-5 text-[color:var(--color-brand-accent-blue)]" />
-                </div>
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-8">
+          {/* Main Brand Info (5 Cols) */}
+          <div className="space-y-6 lg:col-span-5">
+            <div className="flex items-center gap-3">
+              <div className="relative h-10 w-10 overflow-hidden rounded-xl border border-white/10 bg-[#101010] p-1">
+                <Image
+                  src="/logos/club_logo.svg"
+                  alt="Rotaract Logo"
+                  fill
+                  sizes="40px"
+                  className="object-contain p-1"
+                />
               </div>
               <div className="flex flex-col">
-                <span className="font-geist text-base leading-none font-bold tracking-tight text-white">
+                <span className="text-sm font-extrabold tracking-wider text-white uppercase">
                   ROTARACT CLUB
                 </span>
-                <span className="font-mono text-xs tracking-wider text-[color:var(--color-text-muted)]">
+                <span className="text-xs font-medium tracking-widest text-[#9A9A9A] uppercase">
                   PRESIDENCY UNIVERSITY
                 </span>
               </div>
-            </Link>
+            </div>
 
-            <p className="max-w-sm text-xs leading-relaxed text-[color:var(--color-text-muted)]">
-              Chartered under Rotary District 3191. Empowering students through
-              service, international understanding, and executive leadership.
+            <p className="max-w-md text-sm leading-relaxed text-[#9A9A9A]">
+              The official Rotaract Club of Presidency University is a premier
+              student-led organization sponsored by Rotary International
+              District 3191. Dedicated to leadership development, community
+              impact, and global fellowship.
             </p>
+
+            <div className="flex items-center gap-3 text-xs text-[#71717A]">
+              <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
+              <span>Chartered under Rotary International District 3191</span>
+            </div>
           </div>
 
-          {/* Col 2: Navigation Links */}
-          <div className="space-y-3 md:col-span-3">
-            <h3 className="font-mono text-xs font-semibold tracking-wider text-[color:var(--color-brand-rotary-gold)] uppercase">
+          {/* Quick Links (3 Cols) */}
+          <div className="space-y-4 lg:col-span-3">
+            <h3 className="text-xs font-semibold tracking-widest text-white uppercase">
               Navigation
             </h3>
-            <ul className="space-y-2 text-xs font-medium text-[color:var(--color-text-muted)]">
+            <ul className="space-y-2.5 text-sm text-[#9A9A9A]">
               <li>
                 <Link
-                  href={ROUTES.ABOUT}
+                  href="/#hero"
                   className="transition-colors hover:text-white"
                 >
-                  About Us & Philosophy
+                  Home & Overview
                 </Link>
               </li>
               <li>
                 <Link
-                  href={ROUTES.PROJECTS}
+                  href="/#about"
                   className="transition-colors hover:text-white"
                 >
-                  Flagship Initiatives
+                  About & Mission
                 </Link>
               </li>
               <li>
                 <Link
-                  href={ROUTES.EVENTS}
+                  href="/#projects"
                   className="transition-colors hover:text-white"
                 >
-                  Upcoming Events & Drives
+                  Featured Projects
                 </Link>
               </li>
               <li>
                 <Link
-                  href={ROUTES.GALLERY}
+                  href="/#events"
                   className="transition-colors hover:text-white"
                 >
-                  Photo Gallery Albums
+                  Events & Calendar
                 </Link>
               </li>
               <li>
                 <Link
-                  href={ROUTES.AWARDS}
+                  href="/#gallery"
                   className="transition-colors hover:text-white"
                 >
-                  District Awards
+                  Photo Gallery
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/#leadership"
+                  className="transition-colors hover:text-white"
+                >
+                  Board of Directors
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Col 3: Newsletter Inquiries */}
-          <div className="space-y-3 md:col-span-4">
-            <h3 className="font-mono text-xs font-semibold tracking-wider text-[color:var(--color-brand-rotary-gold)] uppercase">
-              Stay Connected
+          {/* Contact & Governance (4 Cols) */}
+          <div className="space-y-4 lg:col-span-4">
+            <h3 className="text-xs font-semibold tracking-widest text-white uppercase">
+              Official Headquarters
             </h3>
-            <p className="text-xs text-[color:var(--color-text-muted)]">
-              Subscribe for updates on community drives and campus events.
-            </p>
+            <ul className="space-y-3 text-sm text-[#9A9A9A]">
+              <li className="flex items-start gap-3">
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#3B82F6]" />
+                <span>
+                  Presidency University Campus, Dibbur, Itgalpur, Rajanukunte,
+                  Yelahanka, Bengaluru, Karnataka 560064
+                </span>
+              </li>
+              <li className="flex items-center gap-3">
+                <Mail className="h-4 w-4 shrink-0 text-[#3B82F6]" />
+                <a
+                  href="mailto:rotaract@presidencyuniversity.in"
+                  className="transition-colors hover:text-white"
+                >
+                  rotaract@presidencyuniversity.in
+                </a>
+              </li>
+              <li className="flex items-center gap-3">
+                <Phone className="h-4 w-4 shrink-0 text-[#3B82F6]" />
+                <span>+91 (080) 2309-3500</span>
+              </li>
+            </ul>
 
-            <form
-              onSubmit={(e) => e.preventDefault()}
-              className="flex items-center gap-2 pt-1"
-            >
-              <input
-                type="email"
-                placeholder="Enter student email..."
-                required
-                className="flex-1 rounded-xl border border-white/10 bg-white/[0.04] px-3.5 py-2 text-xs text-white placeholder:text-[color:var(--color-text-muted)] focus-visible:ring-1 focus-visible:ring-[#3B82F6] focus-visible:outline-none"
-              />
-              <button
-                type="submit"
-                className="flex shrink-0 items-center justify-center rounded-xl bg-[#3B82F6] px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-blue-600"
+            <div className="pt-2">
+              <Link
+                href={ROUTES.JOIN}
+                className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-4 py-2 text-xs font-semibold text-white transition-all hover:border-[#3B82F6] hover:bg-[#3B82F6]"
               >
-                <ArrowRight className="h-4 w-4" />
-              </button>
-            </form>
+                <span>Join Rotaract Club</span>
+                <ArrowUpRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
           </div>
         </div>
 
-        {/* Bottom Legal Bar */}
-        <div className="flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 text-xs text-[color:var(--color-text-muted)] sm:flex-row">
+        {/* Divider & Copyright */}
+        <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-white/[0.08] pt-8 text-xs text-[#71717A] md:flex-row">
           <p>
-            © {new Date().getFullYear()} Rotaract Club of Presidency University.
-            All rights reserved.
+            © {currentYear} Rotaract Club of Presidency University. All Rights
+            Reserved.
           </p>
-          <div className="flex items-center gap-4">
+
+          <div className="flex items-center gap-6">
             <Link
               href={ROUTES.PRIVACY}
               className="transition-colors hover:text-white"
@@ -130,10 +164,12 @@ export function Footer() {
             >
               Terms of Service
             </Link>
-            <div className="flex items-center gap-1">
-              <span>Built with Service</span>
-              <Heart className="h-3.5 w-3.5 fill-red-500 text-red-500" />
-            </div>
+            <Link
+              href={ROUTES.COLLABORATE}
+              className="transition-colors hover:text-white"
+            >
+              Partner With Us
+            </Link>
           </div>
         </div>
       </div>

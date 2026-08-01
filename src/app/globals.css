@@ -15,7 +15,7 @@ body {
   min-height: 100vh;
   background-color: #050505;
   color: #ffffff;
-  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
   line-height: 1.7;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -34,7 +34,7 @@ body {
 }
 
 ::placeholder {
-  color: #9a9a9a;
+  color: #71717a;
 }
 
 /* Custom Scrollbars */
@@ -72,47 +72,42 @@ body {
 @media (min-width: 768px) {
   .section-shell {
     padding-inline: var(--space-8);
-    padding-block: var(--space-24);
+    padding-block: var(--space-20);
   }
 }
 
-/* Cinematic Display Typography Scale */
+/* Luxury Editorial Typography Scale */
 .text-display-xl {
-  font-family: var(--font-geist-sans), sans-serif;
-  font-size: clamp(3rem, 6.5vw, 5.25rem);
+  font-size: clamp(2.75rem, 6vw, 5.5rem);
   font-weight: 800;
   line-height: 1.02;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.04em;
 }
 
 .text-display-l {
-  font-family: var(--font-geist-sans), sans-serif;
-  font-size: clamp(2.25rem, 4.8vw, 3.75rem);
+  font-size: clamp(2rem, 4.5vw, 3.75rem);
   font-weight: 700;
-  line-height: 1.06;
-  letter-spacing: -0.025em;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
 }
 
 .text-heading-xl {
-  font-family: var(--font-geist-sans), sans-serif;
-  font-size: clamp(1.85rem, 3.2vw, 2.75rem);
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
   font-weight: 700;
-  line-height: 1.12;
-  letter-spacing: -0.015em;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
 }
 
 .text-heading-l {
-  font-family: var(--font-geist-sans), sans-serif;
-  font-size: 1.85rem;
+  font-size: 1.75rem;
   font-weight: 700;
   line-height: 1.2;
 }
 
 .text-heading-m {
-  font-family: var(--font-geist-sans), sans-serif;
-  font-size: 1.4rem;
+  font-size: 1.35rem;
   font-weight: 600;
-  line-height: 1.25;
+  line-height: 1.3;
 }
 
 /* Glass Card & Microinteraction Classes */
@@ -138,4 +133,14 @@ body {
   background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
                     linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
   background-size: 60px 60px;
+}
+
+/* Animated Shimmer / Glow Utility */
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.05); }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 6s ease-in-out infinite;
 }

@@ -22,17 +22,23 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: {
     default: siteConfig.name,
-    template: `%s | ${siteConfig.shortName}`,
+    template: `%s | Rotaract Presidency`,
   },
   description: siteConfig.description,
   metadataBase: new URL(siteConfig.url),
+  icons: {
+    icon: "/logos/club_logo.svg",
+    shortcut: "/logos/club_logo.svg",
+    apple: "/logos/club_logo.svg",
+  },
   keywords: [
     "Rotaract",
+    "Rotaract Club of Presidency University",
     "Presidency University",
+    "Rotary District 3191",
     "Community Service",
-    "Leadership",
-    "Youth Club",
-    "Rotary",
+    "Youth Leadership",
+    "Rotary International",
   ],
   authors: [{ name: siteConfig.author }],
   openGraph: {
@@ -60,10 +66,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f8fafc" },
-    { media: "(prefers-color-scheme: dark)", color: "#0f172a" },
-  ],
+  themeColor: "#050505",
 };
 
 export default function RootLayout({
@@ -75,9 +78,9 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${inter.variable} ${jetbrainsMono.variable}`}
+      className={`${geistSans.variable} ${inter.variable} ${jetbrainsMono.variable} dark`}
     >
-      <body className="min-h-screen bg-[color:var(--color-bg-primary)] text-[color:var(--color-text-primary)] antialiased transition-colors duration-300">
+      <body className="min-h-screen bg-[#050505] text-white antialiased">
         <AppProviders>{children}</AppProviders>
       </body>
     </html>

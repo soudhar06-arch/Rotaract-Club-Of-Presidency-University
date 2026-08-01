@@ -3,45 +3,45 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 
-const PARTNERS = [
+const ENTITIES = [
   { name: "Rotary International", logo: "/logos/rotary-international.svg" },
-  { name: "Rotaract Emblem", logo: "/logos/rotaract-emblem.svg" },
+  { name: "Rotaract District 3191", logo: "/logos/district-3191.svg" },
   { name: "Presidency University", logo: "/logos/presidency-university.svg" },
-  { name: "Rotary District 3191", logo: "/logos/district-3191.svg" },
+  { name: "Rotary Club of Bangalore", logo: "/logos/rotaract-emblem.svg" },
+  { name: "Corporate Partners", logo: "/logos/club_logo.svg" },
 ];
 
 export function CredibilityStrip() {
   return (
-    <section className="relative z-20 w-full border-y border-white/10 bg-[#050505]/90 py-8">
+    <section className="relative z-10 border-y border-white/[0.06] bg-[#0A0A0A]/60 py-6 backdrop-blur-xl">
       <div className="container-shell px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-          {/* Label */}
-          <div className="flex shrink-0 items-center gap-2 font-mono text-[11px] tracking-widest text-[color:var(--color-text-muted)] uppercase">
-            <span className="h-1.5 w-1.5 rounded-full bg-[color:var(--color-brand-accent-blue)]" />
-            <span>Chartered Affiliations & Partners</span>
-          </div>
+        <div className="flex flex-col items-center justify-between gap-4 md:flex-row md:gap-8">
+          <p className="shrink-0 text-[11px] font-semibold tracking-widest text-[#71717A] uppercase">
+            OFFICIAL AFFILIATIONS & PARTNERSHIPS
+          </p>
 
-          {/* Logo Strip */}
-          <div className="flex flex-wrap items-center justify-center gap-8 md:justify-end md:gap-12">
-            {PARTNERS.map((partner, idx) => (
+          <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-12 lg:gap-16">
+            {ENTITIES.map((entity, idx) => (
               <motion.div
                 key={idx}
                 initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                whileInView={{ opacity: 0.6, y: 0 }}
+                whileHover={{ opacity: 1, scale: 1.05 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.3, delay: idx * 0.08 }}
-                className="group flex cursor-pointer items-center gap-2.5 opacity-40 transition-opacity hover:opacity-100"
+                className="group flex cursor-pointer items-center gap-2.5 transition-all"
               >
-                <div className="relative h-7 w-7 text-white">
+                <div className="relative h-6 w-6 opacity-75 grayscale transition-all group-hover:opacity-100 group-hover:grayscale-0">
                   <Image
-                    src={partner.logo}
-                    alt={partner.name}
+                    src={entity.logo}
+                    alt={entity.name}
                     fill
-                    className="object-contain brightness-200 invert filter"
+                    sizes="24px"
+                    className="object-contain"
                   />
                 </div>
-                <span className="hidden font-mono text-xs font-medium tracking-tight text-white sm:inline">
-                  {partner.name}
+                <span className="text-xs font-medium text-[#9A9A9A] transition-colors group-hover:text-white">
+                  {entity.name}
                 </span>
               </motion.div>
             ))}
