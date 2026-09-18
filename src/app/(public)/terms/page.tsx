@@ -2,35 +2,19 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
-  description:
-    "Terms of service and code of conduct for student members and visitors.",
+  description: "Terms of service and code of conduct for student members and visitors.",
 };
 
 export default function TermsPage() {
   return (
-    <div className="container-shell max-w-3xl space-y-6 px-4 pt-28 pb-20 sm:px-6 lg:px-8">
-      <h1 className="text-display-l font-bold text-[color:var(--color-text-primary)]">
-        Terms of Service & Code of Conduct
-      </h1>
-      <p className="font-mono text-xs text-[color:var(--color-text-muted)]">
-        Last updated: July 2026
-      </p>
-
-      <div className="text-body-small space-y-4 leading-relaxed text-[color:var(--color-text-secondary)]">
-        <p>
-          By accessing this website and participating in Rotaract Club of
-          Presidency University events, members and visitors agree to abide by
-          Rotary International ethics, university student conduct guidelines,
-          and respectful community engagement.
-        </p>
-        <h2 className="text-heading-s pt-2 font-bold text-[color:var(--color-text-primary)]">
-          Member Responsibilities
-        </h2>
-        <p>
-          Members must maintain integrity, represent the university and Rotary
-          brand professionally, and contribute positively to community service
-          initiatives.
-        </p>
+    <div className="section-shell pt-32 pb-20">
+      <div className="mx-auto max-w-3xl">
+        <div className="eyebrow">Terms</div>
+        <h1 className="mt-4 text-5xl md:text-7xl tracking-[-0.07em] uppercase">Code of conduct.</h1>
+        <div className="mt-10 space-y-6 border border-[color:var(--line)] bg-[rgba(255,255,255,0.02)] p-6 text-[color:var(--text-soft)]">
+          <p>By using this website or participating in Rotaract Club of Presidency University activities, members and visitors agree to uphold respectful engagement, professionalism and student conduct expectations.</p>
+          <p>All club operations should reflect Rotary values, university policies and a commitment to inclusive, ethical community service. We reserve the right to review or decline participation where conduct conflicts with these principles.</p>
+        </div>
       </div>
     </div>
   );

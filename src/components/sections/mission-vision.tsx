@@ -9,6 +9,7 @@ import {
   Users,
   Zap,
 } from "lucide-react";
+import clubData from "@/data/club.json";
 
 const PILLARS = [
   {
@@ -27,7 +28,7 @@ const PILLARS = [
     icon: Globe,
     title: "Global Fellowship",
     description:
-      "Fostering international understanding through youth exchanges and collaborative projects across Rotary International District 3191.",
+      `Fostering international understanding through youth exchanges and collaborative projects across ${clubData.rotaryDistrict}.`,
   },
   {
     icon: Zap,
@@ -75,11 +76,9 @@ export function MissionVisionSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.2 }}
-          className="mt-4 text-base text-[#9A9A9A] sm:text-lg"
+          className="mt-4 text-base text-[#9A9A9A] sm:text-lg leading-relaxed"
         >
-          The Rotaract Club of Presidency University brings together young
-          visionaries to take action, develop leadership skills, and deliver
-          sustainable solutions to society&apos;s most pressing challenges.
+          {clubData.mediumDescription}
         </motion.p>
       </div>
 

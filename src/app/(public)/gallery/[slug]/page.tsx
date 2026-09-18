@@ -1,7 +1,7 @@
 import Image from "next/image";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { ROUTES } from "@/constants";
+
+import { BackButton } from "@/components/shared/back-button";
 
 export default function GalleryAlbumPage() {
   const IMAGES = [
@@ -14,13 +14,7 @@ export default function GalleryAlbumPage() {
   return (
     <div className="space-y-12 pt-28 pb-20">
       <div className="container-shell space-y-6 px-4 sm:px-6 lg:px-8">
-        <Link
-          href={ROUTES.GALLERY}
-          className="inline-flex items-center gap-2 text-xs font-semibold text-[color:var(--color-text-muted)] hover:text-[color:var(--color-text-primary)]"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span>Back to All Albums</span>
-        </Link>
+        <BackButton fallbackRoute={ROUTES.GALLERY} label="Back to All Albums" className="mb-4" />
 
         <div>
           <span className="font-mono text-xs font-bold tracking-wider text-[color:var(--color-brand-rotary-gold)] uppercase">
@@ -35,14 +29,17 @@ export default function GalleryAlbumPage() {
           {IMAGES.map((src, idx) => (
             <div
               key={idx}
-              className="shadow-medium group relative aspect-[4/3] overflow-hidden rounded-3xl border border-[color:var(--color-border)]"
+              tabIndex={0}
+              role="button"
+              aria-label={`Album photo ${idx + 1}`}
+              className="gallery-card-interactive shadow-medium group relative aspect-[4/3] overflow-hidden rounded-3xl border border-[color:var(--color-border)]"
             >
               <Image
                 src={src}
                 alt={`Album item ${idx + 1}`}
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                className="object-cover"
               />
             </div>
           ))}

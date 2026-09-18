@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { EventCalendar } from "@/components/calendar/calendar";
 import { Sparkles } from "lucide-react";
+import { BackButton } from "@/components/shared/back-button";
 
 export const metadata: Metadata = {
   title:
@@ -13,6 +14,7 @@ export default function CalendarPage() {
   return (
     <div className="space-y-12 pt-28 pb-20">
       <div className="container-shell px-4 sm:px-6 lg:px-8">
+        <BackButton fallbackRoute="/#events" className="mb-6" />
         {/* Page Header */}
         <div className="mx-auto max-w-3xl space-y-4 text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-[#3B82F6]/30 bg-[#3B82F6]/10 px-4 py-1.5 text-xs font-semibold text-[#3B82F6]">

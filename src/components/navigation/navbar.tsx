@@ -1,92 +1,71 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ArrowRight } from "lucide-react";
 import { ROUTES } from "@/constants";
-
-const NAV_ITEMS = [
-  { label: "Home", id: "hero", route: "/" },
-  { label: "About", id: "about", route: "/#about" },
-  { label: "Projects", id: "projects", route: "/#projects" },
-  { label: "Events", id: "events", route: "/events" },
-  { label: "Calendar", id: "calendar", route: "/calendar" },
-  { label: "Gallery", id: "gallery", route: "/gallery" },
-  { label: "Leadership", id: "leadership", route: "/#leadership" },
-  { label: "Contact", id: "contact", route: "/#contact" },
-];
+import { NAV_ITEMS, type NavItemConfig } from "@/config/navigation";
 
 export function Navbar() {
   const pathname = usePathname();
-  const router = useRouter();
 
-  const [activeItem, setActiveItem] = useState<string>(() => {
-    if (pathname === "/calendar") return "calendar";
-    if (pathname === "/events" || pathname.startsWith("/events/"))
-      return "events";
-    if (pathname === "/gallery" || pathname.startsWith("/gallery/"))
-      return "gallery";
-    if (pathname === "/join") return "join";
-    return "hero";
-  });
-  const [scrollProgress, setScrollProgress] = useState<number>(0);
+  const [activeSection, setActiveSection] = useState<string>("hero");
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
   const isHomePage = pathname === "/";
+  const isProgrammaticScroll = useRef(false);
+  const progressBarRef = useRef<HTMLDivElement>(null);
 
-  // 1. Determine active navbar item based on pathname and scroll position
-  const syncActiveState = useCallback(() => {
-    if (pathname === "/calendar") {
-      setActiveItem("calendar");
-    } else if (pathname === "/events" || pathname.startsWith("/events/")) {
-      setActiveItem("events");
-    } else if (pathname === "/gallery" || pathname.startsWith("/gallery/")) {
-      setActiveItem("gallery");
-    } else if (pathname === "/join") {
-      setActiveItem("join");
-    } else if (isHomePage) {
-      if (typeof window !== "undefined" && window.location.hash) {
-        const hashId = window.location.hash.replace("#", "");
-        if (NAV_ITEMS.some((item) => item.id === hashId)) {
-          setActiveItem(hashId);
+  /**
+   * Derive the currently active nav item ID from pathname + scroll section.
+   *
+   * Priority:
+   * 1. For page-type items — match by pageRoute prefix.
+   * 2. For section-type items on the homepage — use IntersectionObserver-driven
+   *    activeSection state.
+   * 3. Fallback: "hero"
+   */
+  const currentActiveId = (() => {
+    // Check page-type items first (prefix match so /events/[slug] still highlights Events)
+    for (const item of NAV_ITEMS) {
+      if (item.type === "page" && item.pageRoute) {
+        if (
+          pathname === item.pageRoute ||
+          pathname.startsWith(item.pageRoute + "/")
+        ) {
+          return item.id;
         }
       }
     }
-  }, [pathname, isHomePage]);
+    // On homepage, use scroll-spy
+    if (isHomePage) return activeSection;
+    return "hero";
+  })();
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      syncActiveState();
-    }, 0);
-    return () => clearTimeout(timer);
-  }, [syncActiveState]);
-
-  // 2. Scroll Spy for Homepage using IntersectionObserver
+  // 1. IntersectionObserver — homepage section scroll-spy
   useEffect(() => {
     if (!isHomePage) return;
 
-    const sectionIds = NAV_ITEMS.map((item) => item.id);
-    const observerCallback: IntersectionObserverCallback = (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          setActiveItem(entry.target.id);
-        }
-      });
-    };
-
-    const observerOptions: IntersectionObserverInit = {
-      root: null,
-      rootMargin: "-20% 0px -50% 0px",
-      threshold: 0.1,
-    };
+    const sectionIds = NAV_ITEMS.filter((i) => i.sectionId).map(
+      (i) => i.sectionId!
+    );
 
     const observer = new IntersectionObserver(
-      observerCallback,
-      observerOptions,
+      (entries) => {
+        if (isProgrammaticScroll.current) return;
+        // Pick the entry with the largest intersection ratio when multiple fire
+        const intersecting = entries.filter((e) => e.isIntersecting);
+        if (intersecting.length === 0) return;
+        const best = intersecting.reduce((a, b) =>
+          a.intersectionRatio >= b.intersectionRatio ? a : b
+        );
+        setActiveSection(best.target.id);
+      },
+      { root: null, rootMargin: "-15% 0px -50% 0px", threshold: 0 }
     );
 
     sectionIds.forEach((id) => {
@@ -97,15 +76,27 @@ export function Navbar() {
     return () => observer.disconnect();
   }, [isHomePage]);
 
-  // 3. Scroll Progress & Sticky Bar effect
+  // 2. GPU-accelerated scroll progress bar + isScrolled flag (no re-render on scroll)
   useEffect(() => {
+    let ticking = false;
+
     const handleScroll = () => {
-      const totalHeight =
-        document.documentElement.scrollHeight - window.innerHeight;
-      if (totalHeight > 0) {
-        setScrollProgress((window.scrollY / totalHeight) * 100);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const scrollY = window.scrollY;
+          const totalHeight =
+            document.documentElement.scrollHeight - window.innerHeight;
+
+          if (progressBarRef.current && totalHeight > 0) {
+            const scale = Math.min(1, Math.max(0, scrollY / totalHeight));
+            progressBarRef.current.style.transform = `scaleX(${scale})`;
+          }
+
+          setIsScrolled(scrollY > 20);
+          ticking = false;
+        });
+        ticking = true;
       }
-      setIsScrolled(window.scrollY > 20);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -113,101 +104,118 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // 4. Handle hash scrolling after cross-page navigation
+  // 3. Handle initial hash scroll on homepage mount (with header offset)
   useEffect(() => {
-    if (isHomePage && typeof window !== "undefined") {
-      const hash = window.location.hash.replace("#", "");
-      if (hash && NAV_ITEMS.some((item) => item.id === hash)) {
-        const timer = setTimeout(() => {
-          setActiveItem(hash);
-          const el = document.getElementById(hash);
-          if (el) el.scrollIntoView({ behavior: "smooth" });
-        }, 120);
-        return () => clearTimeout(timer);
-      }
-    }
-  }, [isHomePage, pathname]);
+    if (!isHomePage) return;
+    const hash = window.location.hash.replace("#", "");
+    if (!hash) return;
 
-  // 5. Popstate & Hash Change Listener for Browser Back/Forward buttons
+    // Defer until layout is ready
+    const timer = setTimeout(() => {
+      const targetEl = document.getElementById(hash);
+      if (!targetEl) return;
+
+      isProgrammaticScroll.current = true;
+      setActiveSection(hash);
+
+      const headerHeight =
+        (document.querySelector("header") as HTMLElement | null)
+          ?.getBoundingClientRect().height ?? 80;
+      const targetPos =
+        targetEl.getBoundingClientRect().top + window.scrollY - headerHeight;
+
+      window.scrollTo({ top: targetPos, behavior: "smooth" });
+
+      const resetTimer = setTimeout(() => {
+        isProgrammaticScroll.current = false;
+      }, 900);
+      return () => clearTimeout(resetTimer);
+    }, 120);
+
+    return () => clearTimeout(timer);
+  }, [isHomePage]);
+
+  // 4. Mobile menu scroll lock + Escape key
   useEffect(() => {
-    const handleLocationChange = () => {
-      if (isHomePage) {
-        const hashId = window.location.hash.replace("#", "");
-        if (hashId && NAV_ITEMS.some((item) => item.id === hashId)) {
-          setActiveItem(hashId);
-          const targetEl = document.getElementById(hashId);
-          if (targetEl) targetEl.scrollIntoView({ behavior: "smooth" });
-        } else {
-          setActiveItem("hero");
-        }
-      } else {
-        syncActiveState();
-      }
+    if (!mobileMenuOpen) return;
+    document.body.style.overflow = "hidden";
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileMenuOpen(false);
     };
-
-    window.addEventListener("popstate", handleLocationChange);
-    window.addEventListener("hashchange", handleLocationChange);
+    window.addEventListener("keydown", handleKeyDown);
     return () => {
-      window.removeEventListener("popstate", handleLocationChange);
-      window.removeEventListener("hashchange", handleLocationChange);
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isHomePage, syncActiveState]);
+  }, [mobileMenuOpen]);
 
-  // 5. Unified Navigation Click Handler
+  /**
+   * Unified navigation handler.
+   *
+   * Section items:
+   *   - If already on homepage → preventDefault + smooth scroll.
+   *   - If on another page → navigate to "/" then let the hash effect scroll.
+   *
+   * Page items:
+   *   - If on the target page → no-op (already there) or scroll to top.
+   *   - Otherwise → router.push(route).
+   */
   const handleNavClick = (
     e: React.MouseEvent<HTMLAnchorElement>,
-    item: (typeof NAV_ITEMS)[0],
+    item: NavItemConfig
   ) => {
-    e.preventDefault();
     setMobileMenuOpen(false);
 
-    if (item.id === "calendar") {
-      setActiveItem("calendar");
-      router.push("/calendar");
-      return;
-    }
+    if (item.type === "section" && item.sectionId) {
+      if (isHomePage) {
+        e.preventDefault();
+        const targetId = item.sectionId;
+        const targetEl = document.getElementById(targetId);
 
-    if (item.id === "events" && pathname !== "/events") {
-      setActiveItem("events");
-      router.push("/events");
-      return;
-    }
-
-    if (item.id === "gallery" && pathname !== "/gallery") {
-      setActiveItem("gallery");
-      router.push("/gallery");
-      return;
-    }
-
-    // Homepage section scrolling logic
-    if (isHomePage) {
-      const targetElement = document.getElementById(item.id);
-      if (targetElement) {
-        targetElement.scrollIntoView({ behavior: "smooth" });
-        setActiveItem(item.id);
-        window.history.pushState(
-          null,
-          "",
-          item.id === "hero" ? "/" : `#${item.id}`,
-        );
-      } else {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-        setActiveItem("hero");
+        if (targetEl) {
+          isProgrammaticScroll.current = true;
+          setActiveSection(targetId);
+          window.history.pushState(
+            null,
+            "",
+            targetId === "hero" ? "/" : `#${targetId}`
+          );
+          const headerHeight =
+            (document.querySelector("header") as HTMLElement | null)
+              ?.getBoundingClientRect().height ?? 80;
+          const targetPos =
+            targetEl.getBoundingClientRect().top +
+            window.scrollY -
+            headerHeight;
+          window.scrollTo({ top: targetPos, behavior: "smooth" });
+          setTimeout(() => {
+            isProgrammaticScroll.current = false;
+          }, 900);
+        } else {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          setActiveSection("hero");
+        }
       }
-    } else {
-      // Navigate from non-homepage to target section on homepage
-      setActiveItem(item.id);
-      router.push(item.id === "hero" ? "/" : `/#${item.id}`);
+      // When not on homepage, the <a href="/#section"> will navigate normally;
+      // the hash effect on homepage mount will handle the scroll.
+    } else if (item.type === "page" && item.pageRoute) {
+      // If already on the page, just scroll to top
+      if (pathname === item.pageRoute) {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+      // Otherwise let Next.js Link / router handle it (href is already correct)
     }
   };
 
   return (
     <header className="fixed top-0 right-0 left-0 z-50">
-      {/* Top Accent Progress Bar */}
+      {/* Top Accent Progress Bar (GPU Hardware Accelerated) */}
       <div className="h-[2px] w-full overflow-hidden bg-transparent">
         <div
-          className="h-full bg-gradient-to-r from-blue-600 via-blue-500 to-blue-400 transition-all duration-150 ease-out"
-          style={{ width: `${scrollProgress}%` }}
+          ref={progressBarRef}
+          className="h-full bg-gradient-to-r from-blue-600 via-blue-500 to-blue-400 origin-left transition-transform duration-75 ease-out"
+          style={{ transform: "scaleX(0)" }}
         />
       </div>
 
@@ -215,7 +223,7 @@ export function Navbar() {
       <nav
         className={`w-full transition-all duration-300 ${
           isScrolled
-            ? "shadow-large border-b border-white/[0.08] bg-[#050505]/85 py-3 backdrop-blur-2xl"
+            ? "shadow-large border-b border-white/[0.08] bg-[#050505]/90 py-3 backdrop-blur-2xl"
             : "bg-transparent py-5"
         }`}
       >
@@ -227,10 +235,10 @@ export function Navbar() {
               if (isHomePage) {
                 e.preventDefault();
                 window.scrollTo({ top: 0, behavior: "smooth" });
-                setActiveItem("hero");
+                setActiveSection("hero");
                 window.history.pushState(null, "", "/");
               } else {
-                setActiveItem("hero");
+                setActiveSection("hero");
               }
             }}
             className="group flex items-center gap-3 transition-opacity hover:opacity-90"
@@ -255,47 +263,35 @@ export function Navbar() {
             </div>
           </Link>
 
-          {/* Desktop Nav Links with Gliding Active Pill */}
+          {/* Desktop Nav Links */}
           <div className="hidden items-center gap-1 rounded-full border border-white/[0.08] bg-white/[0.03] p-1.5 backdrop-blur-xl md:flex">
             {NAV_ITEMS.map((item) => {
-              const isSelected = activeItem === item.id;
+              const isSelected = currentActiveId === item.id;
               return (
                 <a
                   key={item.id}
                   href={item.route}
                   onClick={(e) => handleNavClick(e, item)}
-                  className={`relative px-3.5 py-1.5 text-xs font-medium transition-colors duration-200 ${
+                  className={`relative rounded-full px-3.5 py-1.5 text-xs font-medium transition-all duration-200 ${
                     isSelected
-                      ? "font-semibold text-white"
-                      : "text-[#9A9A9A] hover:text-white"
+                      ? "bg-[#3B82F6] font-semibold text-white shadow-[0_0_20px_rgba(59,130,246,0.5)]"
+                      : "text-[#9A9A9A] hover:bg-white/[0.06] hover:text-white"
                   }`}
                 >
-                  {isSelected && (
-                    <motion.div
-                      layoutId="activePill"
-                      className="absolute inset-0 -z-10 rounded-full bg-[#3B82F6] shadow-[0_0_20px_rgba(59,130,246,0.5)]"
-                      transition={{
-                        type: "spring",
-                        stiffness: 380,
-                        damping: 30,
-                      }}
-                    />
-                  )}
                   <span>{item.label}</span>
                 </a>
               );
             })}
           </div>
 
-          {/* Right Action CTA (Apply for Membership) */}
+          {/* Right Action CTA */}
           <div className="hidden items-center gap-3 md:flex">
             <Link
               href={ROUTES.JOIN}
-              onClick={() => setActiveItem("join")}
               className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition-all duration-200 active:scale-95 ${
                 pathname === ROUTES.JOIN
                   ? "bg-[#3B82F6] text-white shadow-[0_0_25px_rgba(59,130,246,0.6)]"
-                  : "border border-white/10 bg-white/[0.05] text-white hover:border-[#3B82F6] hover:bg-[#3B82F6] hover:text-white"
+                  : "border border-[#3B82F6]/40 bg-[#3B82F6]/10 text-white hover:border-[#3B82F6] hover:bg-[#3B82F6] hover:text-white shadow-[0_0_15px_rgba(59,130,246,0.25)]"
               }`}
             >
               <span>Apply for Membership</span>
@@ -336,7 +332,7 @@ export function Navbar() {
                   href={item.route}
                   onClick={(e) => handleNavClick(e, item)}
                   className={`block border-b border-white/5 py-2.5 text-sm font-medium transition-colors ${
-                    activeItem === item.id
+                    currentActiveId === item.id
                       ? "font-bold text-[#3B82F6]"
                       : "text-[#9A9A9A] hover:text-white"
                   }`}
@@ -347,10 +343,7 @@ export function Navbar() {
               <div className="pt-3">
                 <Link
                   href={ROUTES.JOIN}
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    setActiveItem("join");
-                  }}
+                  onClick={() => setMobileMenuOpen(false)}
                   className="shadow-glow inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#3B82F6] py-3 text-xs font-semibold text-white"
                 >
                   <span>Apply for Membership</span>

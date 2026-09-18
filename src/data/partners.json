@@ -1,0 +1,50 @@
+[
+  {
+    "name": "Rotary Club of Vidyaranyapura",
+    "relationship": "Sponsoring / Partner Rotary Club",
+    "period": "CURRENT",
+    "logo": "/logos/rotary-international.svg"
+  },
+  {
+    "name": "Rotary Club of Bangalore Oasis",
+    "relationship": "Previous Partner Rotary Club",
+    "period": "Previous Affiliation",
+    "logo": "/logos/rotary-international.svg"
+  },
+  {
+    "name": "Rotaract Club of Bangalore Golden Rock",
+    "relationship": "Project Collaboration (CyberShield)",
+    "period": "2026",
+    "logo": "/logos/rotaract-emblem.svg"
+  },
+  {
+    "name": "Rotaract Bangalore West",
+    "relationship": "Project Collaboration (CPR Training)",
+    "period": "2026",
+    "logo": "/logos/rotaract-emblem.svg"
+  },
+  {
+    "name": "Bangalore Medical Services Trust (BMST)",
+    "relationship": "Official Blood Bank Partner",
+    "period": "2025",
+    "logo": "/logos/rotaract-emblem.svg"
+  },
+  {
+    "name": "NCC Wing & ISR Cell",
+    "relationship": "University Institutional Partners",
+    "period": "2026",
+    "logo": "/logos/presidency-university.svg"
+  },
+  {
+    "name": "Mathrubelaku Foundation",
+    "relationship": "Community Service Partner",
+    "period": "2026",
+    "logo": "/logos/rotaract-emblem.svg"
+  },
+  {
+    "name": "Presidency University",
+    "relationship": "Host Institution",
+    "period": "CURRENT",
+    "logo": "/logos/presidency-university.svg"
+  }
+]

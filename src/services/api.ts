@@ -47,15 +47,19 @@ export async function fetchAwards(): Promise<Award[]> {
 }
 
 export async function submitJoinApplication(
-  formData: Record<string, unknown>,
-): Promise<{ success: boolean; message: string }> {
-  // Future Supabase: await supabase.from('join_requests').insert(formData);
-  console.log("Submitted Join Application:", formData);
-  return {
-    success: true,
-    message:
-      "Thank you for applying! Our membership committee will review your application and contact you shortly.",
-  };
+  formData: Record<string, unknown>
+): Promise<{ success: boolean; message?: string; error?: string }> {
+  const res = await fetch("/api/apply", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(formData),
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.error || "Failed to submit application.");
+  }
+  return data;
 }
 
 export async function submitCollaborationRequest(

@@ -75,7 +75,7 @@ export function ImpactStatsSection() {
                 <Icon className="h-6 w-6" />
               </div>
               <div className="text-3xl font-extrabold text-white sm:text-4xl">
-                <CountUp end={stat.value} suffix={stat.suffix} />
+                <CountUp end={stat.value} suffix={stat.suffix} once={false} />
               </div>
               <h3 className="mt-2 text-sm font-semibold text-white">
                 {stat.label}

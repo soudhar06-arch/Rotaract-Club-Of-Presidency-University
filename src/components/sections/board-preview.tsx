@@ -1,10 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
+import ExpandableProfileCard from "@/components/ui/expandable-profile-card";
+import { MOCK_BOARD, BoardMember } from "@/services/mock-data";
 import { Mail } from "lucide-react";
 import { LinkedinIcon } from "@/components/shared/social-icons";
-import { MOCK_BOARD } from "@/services/mock-data";
 
 export function BoardPreviewSection() {
   return (
@@ -16,7 +16,7 @@ export function BoardPreviewSection() {
           viewport={{ once: true }}
           className="text-xs font-semibold tracking-widest text-[#3B82F6] uppercase"
         >
-          EXECUTIVE GOVERNANCE
+          EXECUTIVE LEADERSHIP
         </motion.span>
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
@@ -25,7 +25,7 @@ export function BoardPreviewSection() {
           transition={{ delay: 0.1 }}
           className="text-heading-xl mt-3 font-bold tracking-tight text-white"
         >
-          Board of Directors 2026–2027
+          Board of Directors
         </motion.h2>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
@@ -35,72 +35,76 @@ export function BoardPreviewSection() {
           className="mt-4 text-base text-[#9A9A9A]"
         >
           Steered by visionary student leaders committed to service, strategic
-          growth, and institutional excellence.
+          growth, and institutional excellence. Click any card to expand full profile.
         </motion.p>
       </div>
 
       <div className="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {MOCK_BOARD.map((member, idx) => (
+        {MOCK_BOARD.map((member: BoardMember, idx: number) => (
           <motion.div
             key={member.id}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: idx * 0.1 }}
-            className="glass-card group flex flex-col justify-between overflow-hidden p-6 text-center"
+            className="flex justify-center"
           >
-            <div>
-              <div className="shadow-medium relative mx-auto h-32 w-32 overflow-hidden rounded-2xl border-2 border-white/10 bg-[#101010] transition-transform duration-500 group-hover:scale-105 group-hover:border-[#3B82F6]">
-                <Image
-                  src={member.image}
-                  alt={member.name}
-                  fill
-                  sizes="128px"
-                  className="object-cover"
-                />
-              </div>
+            <ExpandableProfileCard
+              imageSrc={member.image}
+              title={member.name}
+              subtitle={member.role}
+              content={
+                <div className="flex flex-col gap-5 text-left text-white">
+                  <div>
+                    <span className="inline-block rounded-md border border-[#3B82F6]/40 bg-[#3B82F6]/10 px-3 py-1 text-xs font-bold text-[#3B82F6] uppercase mb-2">
+                      {member.role}
+                    </span>
+                    <p className="text-xs text-[#9A9A9A]">{member.department}</p>
+                  </div>
 
-              <div className="mt-6">
-                <span className="inline-block rounded-md border border-[#3B82F6]/40 bg-[#3B82F6]/10 px-3 py-1 text-[11px] font-bold text-[#3B82F6] uppercase">
-                  {member.role}
-                </span>
-                <h3 className="mt-3 text-lg font-bold text-white group-hover:text-[#3B82F6]">
-                  {member.name}
-                </h3>
-                <p className="mt-1 text-xs text-[#9A9A9A]">
-                  {member.department}
-                </p>
-              </div>
+                  {member.bio && (
+                    <div>
+                      <h4 className="text-[#D4D4D4] font-semibold text-xs tracking-wider uppercase mb-1">
+                        Biography
+                      </h4>
+                      <p className="text-xs leading-relaxed text-[#9A9A9A]">{member.bio}</p>
+                    </div>
+                  )}
 
-              {member.quote && (
-                <p className="mt-4 text-xs leading-relaxed text-[#71717A] italic">
-                  &ldquo;{member.quote}&rdquo;
-                </p>
-              )}
-            </div>
+                  {member.quote && (
+                    <div className="rounded-xl border border-white/10 bg-white/[0.04] p-4">
+                      <h4 className="text-xs font-semibold text-[#3B82F6] uppercase mb-1">
+                        Leadership Motto
+                      </h4>
+                      <p className="text-xs italic text-white">&ldquo;{member.quote}&rdquo;</p>
+                    </div>
+                  )}
 
-            <div className="mt-6 flex items-center justify-center gap-3 border-t border-white/10 pt-4">
-              {member.linkedin && (
-                <a
-                  href={member.linkedin}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="rounded-lg border border-white/10 bg-white/[0.04] p-2 text-[#9A9A9A] transition-colors hover:border-[#3B82F6] hover:bg-[#3B82F6] hover:text-white"
-                  aria-label={`${member.name} LinkedIn`}
-                >
-                  <LinkedinIcon className="h-4 w-4" />
-                </a>
-              )}
-              {member.email && (
-                <a
-                  href={`mailto:${member.email}`}
-                  className="rounded-lg border border-white/10 bg-white/[0.04] p-2 text-[#9A9A9A] transition-colors hover:border-[#3B82F6] hover:bg-[#3B82F6] hover:text-white"
-                  aria-label={`Email ${member.name}`}
-                >
-                  <Mail className="h-4 w-4" />
-                </a>
-              )}
-            </div>
+                  <div className="flex items-center gap-3 pt-3 border-t border-white/10">
+                    {member.linkedin && (
+                      <a
+                        href={member.linkedin}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#3B82F6]"
+                      >
+                        <LinkedinIcon className="h-4 w-4" />
+                        <span>LinkedIn Profile</span>
+                      </a>
+                    )}
+                    {member.email && (
+                      <a
+                        href={`mailto:${member.email}`}
+                        className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#3B82F6]"
+                      >
+                        <Mail className="h-4 w-4" />
+                        <span>Contact Email</span>
+                      </a>
+                    )}
+                  </div>
+                </div>
+              }
+            />
           </motion.div>
         ))}
       </div>

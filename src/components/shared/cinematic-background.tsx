@@ -3,6 +3,8 @@
 import { useEffect, useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 
+import { CursorWaves } from "./cursor-waves";
+
 export function CinematicBackground() {
   const containerRef = useRef<HTMLDivElement>(null);
   const spotlightRef = useRef<HTMLDivElement>(null);
@@ -38,6 +40,7 @@ export function CinematicBackground() {
       className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-[#050505]"
       aria-hidden="true"
     >
+      <CursorWaves />
       {/* Matte Black Base */}
       <div className="absolute inset-0 bg-[#050505]" />
 

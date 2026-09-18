@@ -2,3 +2,5 @@ export * from "./use-media-query";
 export * from "./use-debounce";
 export * from "./use-mounted";
 export * from "./use-calendar-events";
+export * from "./use-persisted-state";
+

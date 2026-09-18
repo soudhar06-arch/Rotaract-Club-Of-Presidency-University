@@ -4,35 +4,77 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ShieldCheck, Sparkles, ChevronDown } from "lucide-react";
+import { ArrowRight, ShieldCheck, Sparkles, ChevronDown, CalendarPlus, Info } from "lucide-react";
+import { CountUp } from "@/components/shared/count-up";
 import { HERO_GALLERY_IMAGES } from "@/services/mock-data";
 import { ROUTES } from "@/constants";
 
+const GOOGLE_CALENDAR_SUBSCRIBE_URL =
+  "https://calendar.google.com/calendar/render?cid=eeb75d6bf01f26062e450bd636e8754def7c93a45bba4f7be07a862e49db8745%40group.calendar.google.com";
+
 export function HeroSection() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isMounted, setIsMounted] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  useEffect(() => {
+    const handle = requestAnimationFrame(() => {
+      setIsMounted(true);
+      if (typeof window !== "undefined") {
+        const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+        setPrefersReducedMotion(mediaQuery.matches);
+      }
+    });
+
+    if (typeof window !== "undefined") {
+      const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+      const listener = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+      mediaQuery.addEventListener("change", listener);
+      return () => {
+        cancelAnimationFrame(handle);
+        mediaQuery.removeEventListener("change", listener);
+      };
+    }
+    return () => cancelAnimationFrame(handle);
+  }, []);
 
   // Background gallery slow crossfade timer
   useEffect(() => {
+    if (!isMounted || prefersReducedMotion) return;
     const timer = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev + 1) % HERO_GALLERY_IMAGES.length);
-    }, 6000);
+      if (!document.hidden) {
+        setCurrentImageIndex((prev) => (prev + 1) % HERO_GALLERY_IMAGES.length);
+      }
+    }, 6500);
     return () => clearInterval(timer);
-  }, []);
+  }, [isMounted, prefersReducedMotion]);
+
+  const handleSubscribeCalendar = () => {
+    if (typeof window !== "undefined") {
+      window.open(GOOGLE_CALENDAR_SUBSCRIBE_URL, "_blank", "noopener,noreferrer");
+    }
+  };
+
+  const stats = [
+    { value: "500+", label: "Active Rotaractors" },
+    { value: "50+", label: "Projects Executed" },
+    { value: "10K+", label: "Lives Impacted" },
+  ];
 
   return (
     <section
       id="hero"
       className="relative flex min-h-screen w-full flex-col justify-between overflow-hidden pt-28 pb-12"
     >
-      {/* Animated Hero Background Gallery Layer with Ken Burns Scale Effect */}
+      {/* Background Gallery Layer with Eager Load for First Image, Lazy for Subsequent */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="popLayout">
           <motion.div
             key={currentImageIndex}
-            initial={{ opacity: 0, scale: 1.08 }}
-            animate={{ opacity: 0.3, scale: [1.08, 1.02, 1] }}
-            exit={{ opacity: 0, scale: 1.05 }}
-            transition={{ duration: 2.2, ease: "easeInOut" }}
+            initial={prefersReducedMotion ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 1.04 }}
+            animate={prefersReducedMotion ? { opacity: 1, scale: 1 } : { opacity: 0.65, scale: 1 }}
+            exit={prefersReducedMotion ? { opacity: 1, scale: 1 } : { opacity: 0 }}
+            transition={{ duration: prefersReducedMotion ? 0 : 1.6, ease: "easeInOut" }}
             className="absolute inset-0"
           >
             <Image
@@ -40,40 +82,39 @@ export function HeroSection() {
               alt="Rotaract Activity Background"
               fill
               sizes="100vw"
-              priority
-              className="object-cover object-center brightness-90 contrast-105 filter"
+              priority={currentImageIndex === 0}
+              className="object-cover object-center brightness-105 contrast-100 filter"
             />
           </motion.div>
         </AnimatePresence>
 
-        {/* Multi-layer Overlays: Noise Texture, Glass Overlay, Dark Gradient & Cinematic Vignette */}
-        <div className="absolute inset-0 bg-[#050505]/65 backdrop-blur-[2px]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#050505] via-[#050505]/75 to-[#050505]" />
-        <div className="absolute inset-0 bg-radial from-transparent via-[#050505]/70 to-[#050505]" />
-        <div className="absolute inset-0 bg-[radial-gradient(#3B82F6_1px,transparent_1px)] [background-size:24px_24px] opacity-10" />
+        {/* Overlays */}
+        <div className="absolute inset-0 bg-[#050505]/40 backdrop-blur-[1px]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#050505]/60 via-transparent to-[#050505]" />
+        <div className="absolute inset-0 bg-radial from-transparent via-[#050505]/40 to-[#050505]/80" />
       </div>
 
       {/* Main Hero Content Container */}
       <div className="container-shell relative z-10 flex flex-1 flex-col justify-center px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-4xl text-center">
-          {/* Official Rotary District Badge */}
+          {/* Rotary District Badge */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.5 }}
             className="shadow-glow inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-1.5 backdrop-blur-xl"
           >
             <ShieldCheck className="h-4 w-4 text-[#3B82F6]" />
             <span className="text-xs font-semibold tracking-wider text-[#D4D4D4] uppercase">
-              Chartered under Rotary District 3191
+              Chartered under Rotary District 3192
             </span>
           </motion.div>
 
-          {/* Editorial Headline */}
+          {/* Headline */}
           <motion.h1
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
             className="text-display-xl mt-8 font-extrabold tracking-tight text-white drop-shadow-md"
           >
             ROTARACT CLUB OF <br />
@@ -84,9 +125,9 @@ export function HeroSection() {
 
           {/* Subtitle */}
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
             className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-[#9A9A9A] drop-shadow sm:text-lg lg:text-xl"
           >
             Architecting impact through leadership development, community
@@ -96,10 +137,10 @@ export function HeroSection() {
 
           {/* Action CTAs */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.3 }}
-            className="mt-10 flex flex-wrap items-center justify-center gap-4"
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="mt-8 flex flex-wrap items-center justify-center gap-4"
           >
             <Link
               href={ROUTES.JOIN}
@@ -116,6 +157,44 @@ export function HeroSection() {
               <span>Explore Our Impact</span>
               <Sparkles className="h-4 w-4 text-[#3B82F6]" />
             </a>
+
+            {/* Compact Secondary CTA for Official Google Calendar Subscription */}
+            <button
+              onClick={handleSubscribeCalendar}
+              className="inline-flex items-center gap-2 rounded-xl border border-[#3B82F6]/30 bg-[#3B82F6]/10 px-5 py-3.5 text-xs font-semibold text-[#3B82F6] backdrop-blur-xl transition-all hover:bg-[#3B82F6] hover:text-white"
+              title="Add Rotaract Calendar to Google Calendar"
+            >
+              <CalendarPlus className="h-4 w-4" />
+              <span>Add Club Calendar</span>
+            </button>
+          </motion.div>
+
+          {/* Notification Guidance Note */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="mt-4 flex items-center justify-center gap-2 text-[11px] text-[#71717A]"
+          >
+            <Info className="h-3.5 w-3.5 text-[#3B82F6]" />
+            <span>Subscribing adds club events to your Google Calendar where you can configure mobile alerts.</span>
+          </motion.div>
+
+          {/* Stats Bar */}
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+            className="mt-12 grid grid-cols-3 divide-x divide-white/10 border-t border-white/10 pt-8"
+          >
+            {stats.map((stat, idx) => (
+              <div key={idx} className="flex flex-col items-center px-4">
+                <span className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+                  <CountUp value={stat.value} once={false} />
+                </span>
+                <span className="mt-1 text-xs text-[#9A9A9A]">{stat.label}</span>
+              </div>
+            ))}
           </motion.div>
         </div>
       </div>
@@ -124,7 +203,7 @@ export function HeroSection() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.8 }}
+        transition={{ delay: 0.6 }}
         className="relative z-10 flex flex-col items-center pt-8"
       >
         <a

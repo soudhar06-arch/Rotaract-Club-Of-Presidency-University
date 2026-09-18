@@ -1,0 +1,259 @@
+[
+  {
+    "id": "petals-of-power",
+    "title": "Petals of Power",
+    "category": "Community Service",
+    "date": "2026-03-14",
+    "time": "10:00 AM – 12:00 PM",
+    "venue": "Presidency University",
+    "description": "Women's empowerment and awareness engagement initiative focused on active student participation.",
+    "objective": "Promote gender equality and celebrate Women's Day.",
+    "featured": true,
+    "image": "/gallery/gallery-1.jpeg",
+    "coverImage": "/gallery/gallery-1.jpeg",
+    "images": [
+      "/gallery/gallery-1.jpeg",
+      "/gallery/gallery-6.jpeg",
+      "/gallery/gallery-12.jpeg"
+    ]
+  },
+  {
+    "id": "blood-donation-camp",
+    "title": "Blood Donation Camp",
+    "category": "Community Service",
+    "date": "2025-11-14",
+    "time": "10:00 AM – 04:00 PM",
+    "venue": "Presidency University",
+    "collaborators": ["NCC Wing", "Bangalore Medical Services Trust (BMST)"],
+    "description": "Facilitated voluntary blood donation and supported community healthcare requirements across Bengaluru.",
+    "objective": "Collect blood units for emergency medical facilities.",
+    "featured": true,
+    "image": "/gallery/gallery-2.jpg",
+    "coverImage": "/gallery/gallery-2.jpg",
+    "images": [
+      "/gallery/gallery-2.jpg",
+      "/gallery/gallery-4.jpeg",
+      "/gallery/gallery-10.jpeg"
+    ]
+  },
+  {
+    "id": "the-silent-strength",
+    "title": "The Silent Strength",
+    "category": "Health Awareness",
+    "date": "2025-11-04",
+    "time": "02:30 PM",
+    "venue": "Seminar Hall 1",
+    "description": "Breast cancer awareness session highlighting early detection and preventative healthcare.",
+    "objective": "Spread breast cancer awareness.",
+    "featured": false,
+    "image": "/gallery/gallery-3.jpeg",
+    "coverImage": "/gallery/gallery-3.jpeg",
+    "images": [
+      "/gallery/gallery-3.jpeg",
+      "/gallery/gallery-8.jpeg"
+    ]
+  },
+  {
+    "id": "cpr-training-session",
+    "title": "CPR Training Session",
+    "category": "Community Service",
+    "date": "2026-01-30",
+    "venue": "DSA Lawn",
+    "collaborators": ["Rotaract Bangalore West"],
+    "description": "Hands-on emergency medical response and CPR certification training led by Rtr. Neeraj R.",
+    "objective": "Train students in life-saving CPR techniques.",
+    "featured": true,
+    "image": "/gallery/gallery-4.jpeg",
+    "coverImage": "/gallery/gallery-4.jpeg",
+    "images": [
+      "/gallery/gallery-4.jpeg",
+      "/gallery/gallery-3.jpeg",
+      "/gallery/gallery-11.jpeg"
+    ]
+  },
+  {
+    "id": "fluent-futures",
+    "title": "Fluent Futures",
+    "category": "Education",
+    "date": "2026-02-11",
+    "venue": "Government Higher Primary School, Chokkanahalli",
+    "description": "Educational outreach, English literacy, and mentorship session for primary school students.",
+    "objective": "Enhance primary education standards in rural schools.",
+    "featured": false,
+    "image": "/gallery/gallery-5.jpeg",
+    "coverImage": "/gallery/gallery-5.jpeg",
+    "images": [
+      "/gallery/gallery-5.jpeg",
+      "/gallery/gallery-1.jpeg"
+    ]
+  },
+  {
+    "id": "echoes-of-the-wild",
+    "title": "Echoes of the Wild",
+    "category": "Environmental",
+    "date": "2026-02-16",
+    "venue": "Wildlife Rescue and Conservation Centre",
+    "description": "Wildlife conservation exposure visit and environmental awareness drive.",
+    "objective": "Educate members on local wildlife protection efforts.",
+    "featured": false,
+    "image": "/gallery/gallery-6.jpeg",
+    "coverImage": "/gallery/gallery-6.jpeg",
+    "images": [
+      "/gallery/gallery-6.jpeg",
+      "/gallery/gallery-5.jpeg"
+    ]
+  },
+  {
+    "id": "art-of-earth",
+    "title": "Art of Earth",
+    "category": "Cultural",
+    "date": "2026-02-01",
+    "venue": "Pottery Town",
+    "participants": 17,
+    "description": "Experiential cultural pottery workshop introducing 17 members to traditional Indian craft heritage.",
+    "objective": "Promote traditional arts and fellowship.",
+    "featured": false,
+    "image": "/gallery/gallery-1.jpeg",
+    "coverImage": "/gallery/gallery-1.jpeg",
+    "images": [
+      "/gallery/gallery-1.jpeg",
+      "/gallery/gallery-7.jpeg"
+    ]
+  },
+  {
+    "id": "the-human-firewall-project",
+    "title": "The Human Firewall Project",
+    "category": "Professional Development",
+    "date": "2026-02-04",
+    "venue": "Seminar Hall 02",
+    "description": "Interactive cybersecurity seminar teaching digital safety and threat defense.",
+    "objective": "Educate students on modern cybersecurity threats.",
+    "featured": false,
+    "image": "/gallery/gallery-2.jpg",
+    "coverImage": "/gallery/gallery-2.jpg",
+    "images": [
+      "/gallery/gallery-2.jpg",
+      "/gallery/gallery-9.jpeg"
+    ]
+  },
+  {
+    "id": "unsaid",
+    "title": "UNSAID",
+    "category": "Well-being",
+    "date": "2026-03-23",
+    "time": "12:00 PM – 03:00 PM",
+    "venue": "Seminar Hall 02",
+    "description": "Emotional well-being and mental health awareness forum focusing on open dialogue.",
+    "objective": "Create a safe space for mental health discussions.",
+    "featured": false,
+    "image": "/gallery/gallery-3.jpeg",
+    "coverImage": "/gallery/gallery-3.jpeg",
+    "images": [
+      "/gallery/gallery-3.jpeg",
+      "/gallery/gallery-10.jpeg"
+    ]
+  },
+  {
+    "id": "cybershield",
+    "title": "CyberShield",
+    "category": "Professional Development",
+    "date": "2026-03-28",
+    "platform": "Google Meet",
+    "collaborators": ["Rotaract Club of Bangalore Golden Rock"],
+    "description": "Inter-club digital security workshop analyzing modern cyber attack vectors.",
+    "objective": "Provide practical cybersecurity guidance.",
+    "featured": true,
+    "image": "/gallery/gallery-4.jpeg",
+    "coverImage": "/gallery/gallery-4.jpeg",
+    "images": [
+      "/gallery/gallery-4.jpeg",
+      "/gallery/gallery-8.jpeg"
+    ]
+  },
+  {
+    "id": "career-catalyst",
+    "title": "Career Catalyst",
+    "category": "Professional Development",
+    "date": "2026-04-02",
+    "time": "12:00 PM – 02:00 PM",
+    "venue": "Seminar Hall 2",
+    "participants": 42,
+    "description": "Career guidance masterclass delivered by PP Rtr. Rtn. Sanjay for 42 student attendees.",
+    "objective": "Enhance career readiness and resume skills.",
+    "featured": true,
+    "image": "/gallery/gallery-5.jpeg",
+    "coverImage": "/gallery/gallery-5.jpeg",
+    "images": [
+      "/gallery/gallery-5.jpeg",
+      "/gallery/gallery-12.jpeg"
+    ]
+  },
+  {
+    "id": "feed-the-need",
+    "title": "Feed the Need",
+    "category": "Community Service",
+    "volunteers": 8,
+    "beneficiaries": 15,
+    "description": "Food distribution initiative providing 15 nutritious meals to underserved individuals.",
+    "objective": "Alleviate local hunger.",
+    "featured": false,
+    "image": "/gallery/gallery-6.jpeg",
+    "coverImage": "/gallery/gallery-6.jpeg",
+    "images": [
+      "/gallery/gallery-6.jpeg",
+      "/gallery/gallery-7.jpeg"
+    ]
+  },
+  {
+    "id": "sihi-sankranti",
+    "title": "Sihi Sankranti",
+    "category": "Cultural",
+    "date": "2026-01-25",
+    "venue": "Mathrubelaku Foundation",
+    "description": "Traditional Sankranti celebration and community engagement with elder residents.",
+    "objective": "Celebrate cultural heritage through community service.",
+    "featured": false,
+    "image": "/gallery/gallery-1.jpeg",
+    "coverImage": "/gallery/gallery-1.jpeg",
+    "images": [
+      "/gallery/gallery-1.jpeg",
+      "/gallery/gallery-13.jpeg"
+    ]
+  },
+  {
+    "id": "republic-day-celebration-2026",
+    "title": "Republic Day Celebration 2026",
+    "category": "Community Service",
+    "date": "2026-01-26",
+    "venue": "Chokkanahalli",
+    "collaborators": ["ISR Cell"],
+    "beneficiaries": 55,
+    "description": "Patriotic celebration and educational kit distribution for 55 primary school children.",
+    "objective": "Foster civic pride and support education.",
+    "featured": false,
+    "image": "/gallery/gallery-2.jpg",
+    "coverImage": "/gallery/gallery-2.jpg",
+    "images": [
+      "/gallery/gallery-2.jpg",
+      "/gallery/gallery-10.jpeg"
+    ]
+  },
+  {
+    "id": "outbound-ride-dil-se-dilli",
+    "title": "Outbound R.I.D.E – Dil Se Dilli",
+    "category": "International Service",
+    "date": "2026-02-20",
+    "venue": "New Delhi",
+    "collaborators": ["District 3192", "District 3012"],
+    "description": "Inter-district cultural exchange program hosted in Delhi for leadership networking.",
+    "objective": "Expand Rotaract networking and inter-district fellowship.",
+    "featured": true,
+    "image": "/gallery/gallery-3.jpeg",
+    "coverImage": "/gallery/gallery-3.jpeg",
+    "images": [
+      "/gallery/gallery-3.jpeg",
+      "/gallery/gallery-5.jpeg",
+      "/gallery/gallery-7.jpeg"
+    ]
+  }
+]

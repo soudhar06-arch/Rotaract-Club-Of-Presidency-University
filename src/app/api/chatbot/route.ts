@@ -6,13 +6,18 @@ import {
 } from "@/lib/google-calendar";
 
 const BOT_KNOWLEDGE: Record<string, string> = {
-  join: "You can apply for membership by visiting our Join Us page or filling out the application form on our website. We welcome all students passionate about leadership and service!",
-  board:
-    "The Board of Directors (2025-26) is led by President Rtn. Sourav Sharma, Vice President Rtr. Ananya Rao, Secretary Rtr. Rohan Kulkarni, and Treasurer Rtr. Priya Nair.",
-  mission:
-    "Our mission is to empower young adults through service, leadership development, professional networking, and impactful community initiatives.",
-  projects:
-    "Our flagship project is the Green Campus Revolution, which has planted over 1,000 native saplings across urban campus spaces.",
+  join: "Any student enrolled at Presidency University across all schools can join! Fill out the membership application on our Join page.",
+  membership: "The membership induction process includes an online application, review by the membership committee, and adding inducted members to official communication channels.",
+  experience: "No prior volunteering or leadership experience is required! We welcome all enthusiastic students willing to serve and learn.",
+  president: "The President of Rotaract Club of Presidency University is Deekshitha B.",
+  secretary: "The Secretary of Rotaract Club of Presidency University is Soudhar Mendra V.",
+  district: "Rotaract Club of Presidency University operates under Rotary International District 3192 (Charter ID: 217365).",
+  rotary: "Our Sponsoring / Partner Rotary Club is Rotary Club of Vidyaranyapura.",
+  board: "The Executive Board of RCPU includes President Deekshitha B, Secretary Soudhar Mendra V, and Directors Affan, Shakshi Chhatri, Tanisha Atanur, Rohith Kishan, Abimanyu K, and Anuska Kirtania.",
+  mission: "Our mission is to empower Presidency University students through leadership development, professional networking, and sustainable community impact.",
+  projects: "Our flagship projects include Petals of Power, Blood Donation Camp (with BMST & NCC), CyberShield, Career Catalyst, CPR Training, and International Cultural Exchanges.",
+  calendar: "All upcoming club events are synced in real-time from our official Google Calendar. Click 'Add Club Calendar' to add events directly to your personal calendar.",
+  faq: "Check out our dedicated FAQ page (/faq) for complete details regarding membership, events, and collaborations!",
 };
 
 export async function POST(req: Request) {
@@ -23,7 +28,7 @@ export async function POST(req: Request) {
       .trim();
 
     let reply =
-      "Thank you for asking! The Rotaract Club of Presidency University is dedicated to youth leadership and service. For specific inquiries, feel free to contact us directly or visit our About page.";
+      "Thank you for asking! The Rotaract Club of Presidency University is dedicated to youth leadership and community service. Feel free to explore our FAQ section or contact us directly.";
 
     // 1. Fetch live events from Google Calendar API
     const allEvents = await fetchGoogleCalendarEvents();
@@ -57,7 +62,7 @@ export async function POST(req: Request) {
         reply = `No events scheduled for this month on Google Calendar yet. Visit our Calendar page to explore future conclaves!`;
       }
     } else {
-      // 3. Search Google Calendar events by title / description match (e.g. "What time is the blood donation camp?")
+      // 3. Search Google Calendar events by title / description match
       const matchedEvent = allEvents.find((evt) => {
         const titleLower = evt.title.toLowerCase();
         const descLower = evt.description.toLowerCase();
@@ -80,7 +85,7 @@ export async function POST(req: Request) {
             .slice(0, 3)
             .map((e) => `'${e.title}' on ${e.date}`)
             .join(", ");
-          reply = `Our upcoming events on Google Calendar include: ${topList}. Head to our Calendar & Events page for full details!`;
+          reply = `Our upcoming events on Google Calendar include: ${topList}. Head to our Calendar page for full details!`;
         } else {
           reply =
             "Explore all scheduled assemblies on our interactive Google Calendar page!";

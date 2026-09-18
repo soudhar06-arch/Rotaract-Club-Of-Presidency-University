@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
 import {
   Calendar,
   Clock,
@@ -10,9 +11,11 @@ import {
   ExternalLink,
   History,
   CalendarDays,
+  ArrowRight,
 } from "lucide-react";
 import { CalendarEvent } from "@/lib/google-calendar";
 import { useCalendarEvents } from "@/hooks/use-calendar-events";
+import { BackButton } from "@/components/shared/back-button";
 
 export default function EventsPage() {
   const { upcomingEvents, pastEvents, loading, addToUserCalendar } =
@@ -26,6 +29,7 @@ export default function EventsPage() {
   return (
     <div className="space-y-16 pt-28 pb-20">
       <div className="container-shell px-4 sm:px-6 lg:px-8">
+        <BackButton fallbackRoute="/#events" className="mb-6" />
         {/* Header */}
         <div className="mx-auto max-w-3xl space-y-4 text-center">
           <span className="text-xs font-semibold tracking-widest text-[#3B82F6] uppercase">
@@ -225,26 +229,38 @@ function EventCard({
         </div>
       </div>
 
-      <div className="flex gap-2 p-5 pt-0">
-        {evt.registrationLink && !isPast && (
-          <a
-            href={evt.registrationLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="shadow-glow flex-1 rounded-xl bg-[#3B82F6] py-2.5 text-center text-xs font-semibold text-white transition-all hover:bg-blue-600 active:scale-95"
-          >
-            Register
-          </a>
-        )}
+      <div className="flex flex-col gap-2 p-5 pt-0">
+        {/* Primary CTA row */}
+        <div className="flex gap-2">
+          {evt.registrationLink && !isPast && (
+            <a
+              href={evt.registrationLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="shadow-glow flex-1 rounded-xl bg-[#3B82F6] py-2.5 text-center text-xs font-semibold text-white transition-all hover:bg-blue-600 active:scale-95"
+            >
+              Register
+            </a>
+          )}
 
-        <button
-          onClick={() => onAddCalendar(evt)}
-          className="flex items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2.5 text-xs font-semibold text-white transition-all hover:bg-white/10"
-          title="Add to My Google Calendar"
+          <button
+            onClick={() => onAddCalendar(evt)}
+            className="flex items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2.5 text-xs font-semibold text-white transition-all hover:bg-white/10"
+            title="Add to My Google Calendar"
+          >
+            <span className="text-xs">Add to Calendar</span>
+            <ExternalLink className="h-3.5 w-3.5 text-[#3B82F6]" />
+          </button>
+        </div>
+
+        {/* View Details link */}
+        <Link
+          href={`/events/${evt.id}`}
+          className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-[#3B82F6]/30 bg-[#3B82F6]/[0.07] py-2.5 text-xs font-semibold text-[#3B82F6] transition-all hover:bg-[#3B82F6]/15 hover:border-[#3B82F6]/60 active:scale-95"
         >
-          <span className="text-xs">Add to My Google Calendar</span>
-          <ExternalLink className="h-3.5 w-3.5 text-[#3B82F6]" />
-        </button>
+          <span>View Event Details</span>
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
       </div>
     </motion.div>
   );

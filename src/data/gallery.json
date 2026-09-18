@@ -1,0 +1,93 @@
+[
+  {
+    "id": "gal-1",
+    "name": "Community Impact Drive",
+    "url": "/gallery/gallery-1.jpeg",
+    "category": "Gallery",
+    "uploadedAt": "2026-03-01"
+  },
+  {
+    "id": "gal-2",
+    "name": "Rotaract Annual Meet",
+    "url": "/gallery/gallery-2.jpg",
+    "category": "Gallery",
+    "uploadedAt": "2026-03-02"
+  },
+  {
+    "id": "gal-3",
+    "name": "Leadership Bootcamp",
+    "url": "/gallery/gallery-3.jpeg",
+    "category": "Event",
+    "uploadedAt": "2026-03-05"
+  },
+  {
+    "id": "gal-4",
+    "name": "Blood Donation Drive",
+    "url": "/gallery/gallery-4.jpeg",
+    "category": "Project",
+    "uploadedAt": "2026-03-10"
+  },
+  {
+    "id": "gal-5",
+    "name": "Tree Plantation Drive",
+    "url": "/gallery/gallery-5.jpeg",
+    "category": "Project",
+    "uploadedAt": "2026-03-12"
+  },
+  {
+    "id": "gal-6",
+    "name": "Youth Fellowship Night",
+    "url": "/gallery/gallery-6.jpeg",
+    "category": "Event",
+    "uploadedAt": "2026-03-15"
+  },
+  {
+    "id": "gal-7",
+    "name": "District Assembly 3192",
+    "url": "/gallery/gallery-7.jpeg",
+    "category": "Gallery",
+    "uploadedAt": "2026-03-18"
+  },
+  {
+    "id": "gal-8",
+    "name": "Campus Cultural Fest",
+    "url": "/gallery/gallery-8.jpeg",
+    "category": "Event",
+    "uploadedAt": "2026-03-20"
+  },
+  {
+    "id": "gal-9",
+    "name": "Executive Council Briefing",
+    "url": "/gallery/gallery-9.jpeg",
+    "category": "BOD",
+    "uploadedAt": "2026-03-22"
+  },
+  {
+    "id": "gal-10",
+    "name": "Cleanliness Awareness Rally",
+    "url": "/gallery/gallery-10.jpeg",
+    "category": "Project",
+    "uploadedAt": "2026-03-25"
+  },
+  {
+    "id": "gal-11",
+    "name": "Rotaract Sports Tournament",
+    "url": "/gallery/gallery-11.jpeg",
+    "category": "Event",
+    "uploadedAt": "2026-03-28"
+  },
+  {
+    "id": "gal-12",
+    "name": "Skill Development Workshop",
+    "url": "/gallery/gallery-12.jpeg",
+    "category": "Project",
+    "uploadedAt": "2026-04-01"
+  },
+  {
+    "id": "gal-13",
+    "name": "Rotaract Nightout Celebration",
+    "url": "/gallery/gallery-13.jpeg",
+    "category": "Event",
+    "uploadedAt": "2026-04-05"
+  }
+]

@@ -59,7 +59,7 @@ export function GalleryPreviewSection() {
       </div>
 
       {/* Editorial Masonry Grid */}
-      <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {filteredPhotos.map((item, idx) => (
           <motion.div
             key={item.id}
@@ -68,14 +68,23 @@ export function GalleryPreviewSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.4, delay: idx * 0.06 }}
             onClick={() => setSelectedPhoto(item)}
-            className="glass-card group relative h-72 cursor-pointer overflow-hidden"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setSelectedPhoto(item);
+              }
+            }}
+            tabIndex={0}
+            role="button"
+            aria-label={`View photo: ${item.title}`}
+            className="gallery-card-interactive group relative h-72 cursor-pointer overflow-hidden rounded-2xl sm:rounded-3xl border border-white/10"
           >
             <Image
               src={item.image}
               alt={item.title}
               fill
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              className="object-cover transition-transform duration-700 group-hover:scale-110"
+              className="object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/20 to-transparent opacity-60 transition-opacity group-hover:opacity-90" />
 

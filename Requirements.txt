@@ -1,0 +1,40 @@
+WEBSITE REQUIREMENTS CHECKLIST
+
+1. Expandable profile card:
+   - Command: npx shadcn@latest add https://registry.watermelon.sh/r/expandable-profile-card.json
+   - Usage: Profile/BOD cards, project cards, and timeline milestones where appropriate.
+
+2. Admin login:
+   - Command: npx shadcn@latest add https://registry.watermelon.sh/r/auth-07.json
+   - Usage: Admin panel login page. Do not expose admin functionality publicly.
+
+3. Morphing button:
+   - Command: npx shadcn@latest add https://registry.watermelon.sh/r/morphing-button.json
+   - Usage: "Get notified" / notification CTA where appropriate.
+
+4. Contact component:
+   - Command: npx shadcn@latest add https://registry.watermelon.sh/r/contact-4.json
+   - Usage: Integrate into existing Contact section/page.
+
+5. Schedule date:
+   - Command: npx shadcn@latest add https://registry.watermelon.sh/r/schedule-date.json
+   - Usage: Calendar UI while keeping Google Calendar as single source of event data.
+
+6. FAQ:
+   - Command: npx shadcn@latest add https://registry.watermelon.sh/r/faq-5.json
+   - Usage: FAQ section, compatible with existing AI assistant knowledge flow.
+
+7. Hero:
+   - Command: npx shadcn@latest add https://registry.watermelon.sh/r/hero-3.json
+   - Usage: Enhance existing hero without destroying current premium design.
+
+8. Error:
+   - Command: npx shadcn@latest add https://registry.watermelon.sh/r/error-3.json
+   - Usage: Proper error and fallback states (404 / global error).
+
+9. Event popup card:
+   - Command: pnpm dlx shadcn@latest add https://registry.watermelon.sh/r/card-5.json
+   - Usage: Existing event detail popup, working with live Google Calendar event data.
+
+10. Preloader:
+    - Implementation: Premium loading animation inspired by SPYLT Milk, lightweight and consistent.

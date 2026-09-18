@@ -1,0 +1,51 @@
+[
+  {
+    "id": "charter",
+    "year": "Charter",
+    "title": "Club Establishment & Chartering",
+    "category": "Milestone",
+    "description": "Establishment and official chartering of Rotaract Club of Presidency University under Rotary International District 3192 (Charter #217365)."
+  },
+  {
+    "id": "partner-transition",
+    "year": "2026",
+    "title": "Rotary Partner Transition",
+    "category": "Governance",
+    "description": "Formally initiated transition of Sponsoring Rotary Club to Rotary Club of Vidyaranyapura."
+  },
+  {
+    "id": "blood-donation",
+    "year": "Nov 2025",
+    "title": "Community Health Initiative",
+    "category": "Community Service",
+    "description": "Conducted flagship Blood Donation Camp with NCC Wing and BMST."
+  },
+  {
+    "id": "petals-power",
+    "year": "Mar 2026",
+    "title": "Women's Empowerment – Petals of Power",
+    "category": "Community Service",
+    "description": "Executed Women's Day awareness and community engagement drive on campus."
+  },
+  {
+    "id": "cybershield-collab",
+    "year": "Mar 2026",
+    "title": "CyberShield Cybersecurity Drive",
+    "category": "Professional Development",
+    "description": "Partnered with Rotaract Club of Bangalore Golden Rock for digital threat defense education."
+  },
+  {
+    "id": "career-catalyst-launch",
+    "year": "Apr 2026",
+    "title": "Career Catalyst Masterclass",
+    "category": "Professional Development",
+    "description": "Organized career development masterclass with PP Rtr. Rtn. Sanjay for 42 student participants."
+  },
+  {
+    "id": "sri-lanka-exchange",
+    "year": "Jun 2026",
+    "title": "India × Sri Lanka Cultural Exchange",
+    "category": "International Service",
+    "description": "Executed Bridges Beyond international cultural understanding session via Google Meet."
+  }
+]

@@ -1,0 +1,62 @@
+[
+  {
+    "id": "faq-1",
+    "question": "What is Rotaract?",
+    "answer": "Rotaract is a Rotary-affiliated youth organization that provides young people with opportunities for leadership, community service, professional development, fellowship and global understanding.",
+    "category": "General"
+  },
+  {
+    "id": "faq-2",
+    "question": "Who can join the Rotaract Club of Presidency University?",
+    "answer": "Students enrolled at Presidency University who meet the membership guidelines are eligible to apply.",
+    "category": "Membership"
+  },
+  {
+    "id": "faq-3",
+    "question": "How can I join?",
+    "answer": "Students can apply through the official online membership application form during the club's active membership intake period.",
+    "category": "Membership"
+  },
+  {
+    "id": "faq-4",
+    "question": "Is there a membership fee?",
+    "answer": "The previously established membership fee is ₹350, subject to official confirmation for the current Rotaract year.",
+    "category": "Membership"
+  },
+  {
+    "id": "faq-5",
+    "question": "Do members need previous volunteering experience?",
+    "answer": "No previous volunteering experience is required. We welcome all enthusiastic students willing to learn and serve.",
+    "category": "Membership"
+  },
+  {
+    "id": "faq-6",
+    "question": "Can members lead projects?",
+    "answer": "Yes! Rotaract provides members with direct opportunities to conceptualize, coordinate, and take leadership responsibility for projects.",
+    "category": "Opportunities"
+  },
+  {
+    "id": "faq-7",
+    "question": "Does the club conduct community service projects?",
+    "answer": "Yes, Community Service is a core avenue. Examples include Blood Donation Camps, Fluent Futures literacy drives, and Feed the Need outreach.",
+    "category": "Activities"
+  },
+  {
+    "id": "faq-8",
+    "question": "Does the club conduct professional development events?",
+    "answer": "Yes, RCPU conducts skill-building sessions such as Career Catalyst, CyberShield, and The Human Firewall Project.",
+    "category": "Activities"
+  },
+  {
+    "id": "faq-9",
+    "question": "Does the club collaborate with other Rotaract clubs and organizations?",
+    "answer": "Yes! RCPU frequently collaborates with Rotary clubs, other Rotaract clubs (like Rotaract Bangalore West and Rotaract Bangalore Golden Rock), and NGOs.",
+    "category": "Collaborations"
+  },
+  {
+    "id": "faq-10",
+    "question": "Does the club conduct international cultural exchange activities?",
+    "answer": "Yes! The club has conducted international exchange initiatives such as Bridges Beyond – India × Sri Lanka and Outbound R.I.D.E – Dil Se Dilli.",
+    "category": "International"
+  }
+]

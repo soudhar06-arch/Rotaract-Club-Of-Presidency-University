@@ -1,4 +1,4 @@
-export interface CalendarEvent {
+﻿export interface CalendarEvent {
   id: string;
   title: string;
   category: string;
@@ -10,10 +10,20 @@ export interface CalendarEvent {
   location: string;
   description: string;
   fullDescription: string;
+  eventDescription?: string;
+  details?: string;
+  content?: string;
+  body?: string;
   image: string;
   images: string[];
+  highlights?: string[];
+  participants?: number;
+  beneficiaries?: number;
+  collaborators?: string[];
+  objective?: string;
+  gallery?: string[];
   registrationLink?: string;
-  googleCalendarLink: string;
+  googleCalendarLink?: string;
   status: "upcoming" | "past";
   rawStart: string; // ISO date string
   rawEnd: string; // ISO date string
@@ -157,7 +167,7 @@ function extractRegistrationLink(description: string): string | undefined {
   return undefined;
 }
 
-function cleanDescription(rawDesc: string): string {
+function cleanDescription(rawDesc: string | undefined): string {
   if (!rawDesc) return "";
   return rawDesc
     .replace(/<br\s*\/?>/gi, "\n")
@@ -199,6 +209,10 @@ interface GoogleCalendarApiItem {
   id?: string;
   summary?: string;
   description?: string;
+  eventDescription?: string;
+  details?: string;
+  content?: string;
+  body?: string;
   location?: string;
   htmlLink?: string;
   start?: {
@@ -215,14 +229,28 @@ interface GoogleCalendarApiItem {
  * Fetch events DIRECTLY from public Google Calendar API v3 with Real-time Diagnostics.
  * Single source of truth. Zero fallback mock arrays.
  */
+let cachedEventsPromise: Promise<{
+  events: CalendarEvent[];
+  diagnostics: GoogleCalendarDiagnostics;
+}> | null = null;
+let lastCacheTime = 0;
+const CACHE_TTL_MS = 60000; // 1 minute in-memory deduplication cache
+
 export async function fetchGoogleCalendarEventsWithDiagnostics(): Promise<{
   events: CalendarEvent[];
   diagnostics: GoogleCalendarDiagnostics;
 }> {
-  const calendarId =
-    process.env.NEXT_PUBLIC_GOOGLE_CALENDAR_ID ||
-    "eeb75d6bf01f26062e450bd636e8754def7c93a45bba4f7be07a862e49db8745@group.calendar.google.com";
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_API_KEY || "";
+  const nowTime = Date.now();
+  if (cachedEventsPromise && nowTime - lastCacheTime < CACHE_TTL_MS) {
+    return cachedEventsPromise;
+  }
+
+  cachedEventsPromise = (async () => {
+    lastCacheTime = Date.now();
+    const calendarId =
+      process.env.NEXT_PUBLIC_GOOGLE_CALENDAR_ID ||
+      "eeb75d6bf01f26062e450bd636e8754def7c93a45bba4f7be07a862e49db8745@group.calendar.google.com";
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_API_KEY || "";
 
   if (!apiKey) {
     return {
@@ -321,10 +349,16 @@ export async function fetchGoogleCalendarEventsWithDiagnostics(): Promise<{
           ? "All Day"
           : `${startTimeStr}${endTimeStr ? " - " + endTimeStr : ""}`;
 
-        const rawDescription = item.description || "";
-        const description =
-          cleanDescription(rawDescription) ||
-          "Official Rotaract scheduled event.";
+        const rawDescription =
+          item.description ||
+          item.eventDescription ||
+          item.details ||
+          item.content ||
+          item.body ||
+          "";
+        const normalizedDescription = rawDescription
+          ? cleanDescription(rawDescription)
+          : "Event details will be updated soon.";
         const title = item.summary || "Rotaract Event";
         const venue =
           item.location || "Presidency University Campus, Bengaluru";
@@ -334,7 +368,7 @@ export async function fetchGoogleCalendarEventsWithDiagnostics(): Promise<{
           item.htmlLink ||
           `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
             title,
-          )}&details=${encodeURIComponent(description)}&location=${encodeURIComponent(venue)}`;
+          )}&details=${encodeURIComponent(normalizedDescription)}&location=${encodeURIComponent(venue)}`;
 
         const status: "upcoming" | "past" =
           endDate >= now ? "upcoming" : "past";
@@ -350,8 +384,12 @@ export async function fetchGoogleCalendarEventsWithDiagnostics(): Promise<{
           time: timeDisplay,
           venue,
           location: venue,
-          description,
-          fullDescription: description,
+          description: normalizedDescription,
+          fullDescription: normalizedDescription,
+          eventDescription: item.eventDescription,
+          details: item.details,
+          content: item.content,
+          body: item.body,
           image,
           images: [image],
           registrationLink,
@@ -389,6 +427,9 @@ export async function fetchGoogleCalendarEventsWithDiagnostics(): Promise<{
       },
     };
   }
+  })();
+
+  return cachedEventsPromise;
 }
 
 export async function fetchGoogleCalendarEvents(): Promise<CalendarEvent[]> {
@@ -450,4 +491,91 @@ export async function getTimelineFromEvents(): Promise<MilestoneEvent[]> {
       venue: evt.venue,
     };
   });
+}
+
+export interface ProjectItem {
+  id: string;
+  title: string;
+  slug?: string;
+  shortDescription?: string;
+  description?: string;
+  objective?: string;
+  fullDescription?: string;
+  category: string;
+  date: string;
+  time?: string;
+  venue?: string;
+  image?: string;
+  coverImage: string;
+  images: string[];
+  featured?: boolean;
+  published?: boolean;
+  collaborators?: string[];
+  participants?: number;
+  beneficiaries?: number;
+  volunteers?: number;
+  platform?: string;
+  highlights?: string[];
+  registrationLink?: string;
+  googleCalendarLink?: string;
+}
+
+function toIsoDate(dateStr: string): Date {
+  const d = new Date(dateStr);
+  return isNaN(d.getTime()) ? new Date() : d;
+}
+
+function formatTime12hLocal(dateObj: Date): string {
+  return dateObj.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
+export function normalizeProjectToCalendarEvent(project: ProjectItem): CalendarEvent {
+  const startDate = toIsoDate(project.date);
+  const endDate = new Date(startDate.getTime() + 3600000); // +1 hour default
+
+  const timeDisplay = project.time || `${formatTime12hLocal(startDate)} - ${formatTime12hLocal(endDate)}`;
+
+  const fullDesc = project.fullDescription || project.description || project.shortDescription || "";
+  const normalizedDescription = fullDesc.trim() || "Event details will be updated soon.";
+
+  const venue = project.venue || project.platform || "Presidency University Campus, Bengaluru";
+  const image = project.coverImage || project.image || project.images[0] || "/gallery/gallery-1.jpeg";
+
+  const now = new Date();
+  const status: "upcoming" | "past" = endDate >= now ? "upcoming" : "past";
+
+  return {
+    id: `proj-${project.id}`,
+    title: project.title,
+    category: project.category,
+    date: project.date,
+    startTime: formatTime12hLocal(startDate),
+    endTime: formatTime12hLocal(endDate),
+    time: timeDisplay,
+    venue,
+    location: venue,
+    description: normalizedDescription,
+    fullDescription: normalizedDescription,
+    eventDescription: project.fullDescription,
+    details: project.description,
+    content: project.shortDescription,
+    body: project.objective,
+    image,
+    images: project.images.length > 0 ? project.images : [image],
+    highlights: project.highlights,
+    participants: project.participants,
+    beneficiaries: project.beneficiaries,
+    collaborators: project.collaborators,
+    objective: project.objective,
+    gallery: project.images.slice(1),
+    registrationLink: project.registrationLink,
+    googleCalendarLink: project.googleCalendarLink,
+    status,
+    rawStart: startDate.toISOString(),
+    rawEnd: endDate.toISOString(),
+  };
 }

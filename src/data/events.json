@@ -1,0 +1,144 @@
+[
+  {
+    "id": "minute-to-win",
+    "title": "Minute to Win",
+    "date": "2025-10-29",
+    "venue": "U Block",
+    "category": "Fellowship"
+  },
+  {
+    "id": "rotaractors-nightout",
+    "title": "Rotaractors Nightout",
+    "date": "2026-03-14",
+    "venue": "Sree Kanteerava Stadium",
+    "category": "Fellowship"
+  },
+  {
+    "id": "the-ultimate-doodle-battle",
+    "title": "The Ultimate Doodle Battle",
+    "date": "2026-03-06",
+    "platform": "Skribbl.io",
+    "category": "Fellowship"
+  },
+  {
+    "id": "popcorn-and-vibes",
+    "title": "Popcorn & Vibes",
+    "date": "2026-03-21",
+    "platform": "Discord",
+    "category": "Fellowship"
+  },
+  {
+    "id": "guess-it-right",
+    "title": "Guess It Right",
+    "date": "2026-03-22",
+    "platform": "WorldGuessr",
+    "category": "Fellowship"
+  },
+  {
+    "id": "royal-night",
+    "title": "Royal Night (SRH vs RCB Screening)",
+    "date": "2026-03-28",
+    "platform": "Discord",
+    "category": "Sports"
+  },
+  {
+    "id": "bods-day-out",
+    "title": "BOD's Day Out",
+    "date": "2026-03-29",
+    "venue": "Mall of Asia / Byg Brewski",
+    "category": "Fellowship"
+  },
+  {
+    "id": "code-quest",
+    "title": "Code Quest",
+    "date": "2026-04-08",
+    "venue": "D-Block Stationery",
+    "participants": 14,
+    "category": "Club Service"
+  },
+  {
+    "id": "invincia-volunteering",
+    "title": "Invincia Volunteering",
+    "date": "2026-04-10",
+    "venue": "Presidency University",
+    "category": "Volunteering"
+  },
+  {
+    "id": "virtual-warzone",
+    "title": "Virtual Warzone",
+    "date": "2026-04-15",
+    "platform": "Discord / Krunker.io",
+    "participants": 8,
+    "category": "Fellowship"
+  },
+  {
+    "id": "hidden-quest",
+    "title": "Hidden Quest",
+    "date": "2026-04-29",
+    "participants": 7,
+    "category": "Fellowship"
+  },
+  {
+    "id": "fury-verse-tournament",
+    "title": "Fury Verse Tournament",
+    "date": "2026-05-29",
+    "venue": "IISc Bangalore",
+    "category": "Sports"
+  },
+  {
+    "id": "camp-crimson-bonfire-night",
+    "title": "Camp Crimson – Bonfire Night",
+    "date": "2026-05-27",
+    "venue": "Hesaraghatta Lake",
+    "category": "Fellowship"
+  },
+  {
+    "id": "rog-showdown-series",
+    "title": "ROG SHOWDOWN SERIES (Valorant Skirmish)",
+    "date": "2026-05-23",
+    "venue": "Amogha Computer Needs",
+    "category": "Sports"
+  },
+  {
+    "id": "trip-to-chennai",
+    "title": "Trip to Chennai",
+    "date": "2026-05-31",
+    "participants": 5,
+    "category": "Fellowship"
+  },
+  {
+    "id": "ipl-screening-rcb-vs-gt",
+    "title": "IPL Screening – RCB vs GT",
+    "date": "2026-05-31",
+    "platform": "Google Meet",
+    "category": "Sports"
+  },
+  {
+    "id": "bridges-beyond-india-sri-lanka",
+    "title": "Bridges Beyond – India × Sri Lanka",
+    "date": "2026-06-02",
+    "platform": "Google Meet",
+    "category": "International Service"
+  },
+  {
+    "id": "study-together-lets-ace-it",
+    "title": "Study Together – Let's Ace It Together",
+    "date": "2026-05-16",
+    "platform": "Google Meet",
+    "participants": 4,
+    "category": "Professional Development"
+  },
+  {
+    "id": "turf-night",
+    "title": "Turf Night",
+    "date": "2026-05-21",
+    "venue": "PitchBrew Arena",
+    "category": "Sports"
+  },
+  {
+    "id": "airport-night",
+    "title": "Airport Night",
+    "date": "2026-05-24",
+    "category": "Fellowship"
+  }
+]

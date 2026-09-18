@@ -1,0 +1,24 @@
+WEBSITE stuff
+
+
+expandable Pop up card for profile and projects and for the timeline - npx shadcn@latest add https://registry.watermelon.sh/r/expandable-profile-card.json
+
+
+Login page for admin Panel - npx shadcn@latest add https://registry.watermelon.sh/r/auth-07.json
+
+Get notified email button - npx shadcn@latest add https://registry.watermelon.sh/r/morphing-button.json
+
+Contact Us page - npx shadcn@latest add https://registry.watermelon.sh/r/contact-4.json
+
+
+Calender - npx shadcn@latest add https://registry.watermelon.sh/r/schedule-date.json
+
+FAQ's - npx shadcn@latest add https://registry.watermelon.sh/r/faq-5.json
+
+Hero- npx shadcn@latest add https://registry.watermelon.sh/r/hero-3.json
+
+Error - npx shadcn@latest add https://registry.watermelon.sh/r/error-3.json
+
+event pop-up - pnpm dlx shadcn@latest add https://registry.watermelon.sh/r/card-5.json
+
+Preloader (Loading animation) - Preloader Animation from SPYLT Milk

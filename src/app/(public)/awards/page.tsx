@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Award, Sparkles } from "lucide-react";
+import { BackButton } from "@/components/shared/back-button";
 
 export const metadata: Metadata = {
   title: "Awards & Recognitions",
@@ -28,7 +29,8 @@ const AWARDS = [
 export default function AwardsPage() {
   return (
     <div className="space-y-16 pt-28 pb-20">
-      <section className="container-shell max-w-3xl space-y-3 px-4 text-center sm:px-6 lg:px-8">
+      <section className="container-shell max-w-3xl space-y-3 px-4 sm:px-6 lg:px-8">
+        <BackButton fallbackRoute="/" className="mb-6" />
         <span className="font-mono text-xs font-semibold tracking-wider text-[color:var(--color-brand-rotary-gold)] uppercase">
           District Honors
         </span>
