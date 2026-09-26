@@ -86,19 +86,24 @@ export default function ContactSolutionForm(props: Partial<ContactFormProps>) {
 
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleChange = (field: keyof ContactFormData, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    setError("");
+    try {
+      const response = await fetch("/api/contact", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: form.fullName, email: form.email, subject: form.service, message: form.message }) });
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.error || "Message could not be delivered.");
       setSubmitted(true);
       onSubmit?.(form);
-    }, 800);
+    } catch (error) { setError(error instanceof Error ? error.message : "Message could not be delivered."); }
+    finally { setLoading(false); }
   };
 
   return (
@@ -175,7 +180,8 @@ export default function ContactSolutionForm(props: Partial<ContactFormProps>) {
                 </Button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+              <><p role="alert" className="text-sm text-red-300">{error}</p>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor="fullName">Full Name</Label>
                   <Input
@@ -238,7 +244,7 @@ export default function ContactSolutionForm(props: Partial<ContactFormProps>) {
                   <span>{loading ? "Sending..." : ctaLabel}</span>
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Button>
-              </form>
+              </form></>
             )}
           </CardContent>
         </Card>

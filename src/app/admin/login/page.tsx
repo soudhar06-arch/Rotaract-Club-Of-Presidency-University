@@ -1,7 +1,8 @@
 "use client";
+import { adminFetch } from "@/lib/admin-fetch";
 
 import { useState } from "react";
-import Image from "next/image";
+import Image from "@/components/shared/content-image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ShieldCheck, Eye, EyeOff, Lock, User, AlertCircle, Loader2 } from "lucide-react";
 
@@ -24,7 +25,7 @@ export default function AdminLoginPage() {
     setError(null);
 
     try {
-      const res = await fetch("/api/admin/auth/login", {
+      const res = await adminFetch("/api/admin/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: username.trim(), password }),

@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     old_value JSONB,
     new_value JSONB,
     ip_address TEXT,
+    details TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -54,6 +55,9 @@ CREATE TABLE IF NOT EXISTS site_settings (
     google_sheets_projects_id TEXT,
     google_sheets_bod_id TEXT,
     google_calendar_id TEXT,
+    instagram TEXT,
+    linkedin TEXT,
+    youtube TEXT,
     maintenance_mode BOOLEAN DEFAULT FALSE,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -76,7 +80,7 @@ CREATE TABLE IF NOT EXISTS bod_members (
     category TEXT NOT NULL DEFAULT 'Director',
     bio TEXT,
     quote TEXT,
-    image_url TEXT NOT NULL,
+    image_url TEXT,
     instagram_url TEXT,
     linkedin_url TEXT,
     email TEXT,
@@ -91,7 +95,7 @@ CREATE TABLE IF NOT EXISTS projects (
     id TEXT PRIMARY KEY,
     title TEXT NOT NULL,
     slug TEXT UNIQUE NOT NULL,
-    short_description TEXT NOT NULL,
+    short_description TEXT,
     full_description TEXT,
     category TEXT NOT NULL,
     date DATE,
@@ -110,11 +114,21 @@ CREATE TABLE IF NOT EXISTS historical_events (
     title TEXT NOT NULL,
     slug TEXT UNIQUE NOT NULL,
     category TEXT NOT NULL,
-    date DATE NOT NULL,
+    date DATE,
     time_str TEXT,
     location TEXT,
     description TEXT,
     images JSONB DEFAULT '[]'::jsonb,
+    folder_id TEXT UNIQUE,
+    platform TEXT,
+    participants INT,
+    beneficiaries INT,
+    collaborators JSONB DEFAULT '[]'::jsonb,
+    registration_link TEXT,
+    cover_image TEXT,
+    short_description TEXT,
+    detailed_description TEXT,
+    source TEXT NOT NULL DEFAULT 'cms' CHECK (source IN ('cms', 'drive', 'calendar', 'local')),
     status content_status DEFAULT 'PUBLISHED',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -196,6 +210,43 @@ CREATE TABLE IF NOT EXISTS partners (
     is_active BOOLEAN DEFAULT TRUE
 );
 
+-- Safe upgrades for databases created before the real-data integration.
+ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS details TEXT;
+ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS instagram TEXT;
+ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS linkedin TEXT;
+ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS youtube TEXT;
+ALTER TABLE historical_events ALTER COLUMN date DROP NOT NULL;
+ALTER TABLE historical_events ADD COLUMN IF NOT EXISTS folder_id TEXT UNIQUE;
+ALTER TABLE historical_events ADD COLUMN IF NOT EXISTS platform TEXT;
+ALTER TABLE historical_events ADD COLUMN IF NOT EXISTS participants INT;
+ALTER TABLE historical_events ADD COLUMN IF NOT EXISTS beneficiaries INT;
+ALTER TABLE historical_events ADD COLUMN IF NOT EXISTS collaborators JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE historical_events ADD COLUMN IF NOT EXISTS registration_link TEXT;
+ALTER TABLE historical_events ADD COLUMN IF NOT EXISTS cover_image TEXT;
+ALTER TABLE historical_events ADD COLUMN IF NOT EXISTS short_description TEXT;
+ALTER TABLE historical_events ADD COLUMN IF NOT EXISTS detailed_description TEXT;
+ALTER TABLE historical_events ADD COLUMN IF NOT EXISTS source TEXT NOT NULL DEFAULT 'cms';
+ALTER TABLE historical_events DROP CONSTRAINT IF EXISTS historical_events_source_check;
+ALTER TABLE historical_events ADD CONSTRAINT historical_events_source_check CHECK (source IN ('cms', 'drive', 'calendar', 'local'));
+
+-- Cached, source-grounded summaries. These are intentionally independent of
+-- the source tables so a Drive/Calendar refresh cannot overwrite an approved
+-- description.
+CREATE TABLE IF NOT EXISTS event_descriptions (
+    event_id TEXT NOT NULL,
+    short_description TEXT,
+    detailed_description TEXT,
+    source_hash TEXT PRIMARY KEY,
+    provider TEXT NOT NULL DEFAULT 'openai',
+    model TEXT,
+    state TEXT NOT NULL DEFAULT 'ready',
+    generation_id UUID,
+    generated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+ALTER TABLE event_descriptions ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Public read event descriptions" ON event_descriptions;
+
 -- ROW LEVEL SECURITY (RLS) POLICIES
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE audit_logs ENABLE ROW LEVEL SECURITY;
@@ -206,20 +257,48 @@ ALTER TABLE historical_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE media_assets ENABLE ROW LEVEL SECURITY;
 
 -- PUBLIC READ POLICIES
+DROP POLICY IF EXISTS "Public read site_settings" ON site_settings;
 CREATE POLICY "Public read site_settings" ON site_settings FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public read bod_members" ON bod_members;
 CREATE POLICY "Public read bod_members" ON bod_members FOR SELECT USING (is_active = true);
+DROP POLICY IF EXISTS "Public read published projects" ON projects;
 CREATE POLICY "Public read published projects" ON projects FOR SELECT USING (status = 'PUBLISHED');
+DROP POLICY IF EXISTS "Public read published events" ON historical_events;
 CREATE POLICY "Public read published events" ON historical_events FOR SELECT USING (status = 'PUBLISHED');
 
--- ADMIN ALL ACCESS POLICIES
-CREATE POLICY "Admin full access profiles" ON profiles FOR ALL USING (
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('OWNER', 'ADMIN'))
-);
+-- Writes are exclusively through authenticated, role-checked server APIs using
+-- the service role. No client-side profile policy can escalate its own role.
+DROP POLICY IF EXISTS "Admin full access profiles" ON profiles;
+DROP POLICY IF EXISTS "Admin write bod_members" ON bod_members;
+DROP POLICY IF EXISTS "Admin write projects" ON projects;
 
-CREATE POLICY "Admin write bod_members" ON bod_members FOR ALL USING (
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('OWNER', 'ADMIN', 'EDITOR'))
+-- Idempotent upgrades for existing installations.
+ALTER TABLE bod_members ALTER COLUMN image_url DROP NOT NULL;
+ALTER TABLE projects ALTER COLUMN short_description DROP NOT NULL;
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS objective TEXT;
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS time_str TEXT;
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS platform TEXT;
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS participants INT;
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS beneficiaries INT;
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS volunteers INT;
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS collaborators JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE historical_events ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+ALTER TABLE event_descriptions ALTER COLUMN short_description DROP NOT NULL;
+ALTER TABLE event_descriptions ALTER COLUMN detailed_description DROP NOT NULL;
+ALTER TABLE event_descriptions ALTER COLUMN provider SET DEFAULT 'openai';
+ALTER TABLE event_descriptions ADD COLUMN IF NOT EXISTS state TEXT NOT NULL DEFAULT 'ready';
+ALTER TABLE event_descriptions ADD COLUMN IF NOT EXISTS generation_id UUID;
+ALTER TABLE event_descriptions DROP CONSTRAINT IF EXISTS event_descriptions_pkey;
+CREATE UNIQUE INDEX IF NOT EXISTS event_descriptions_source_hash_idx ON event_descriptions(source_hash);
+CREATE TABLE IF NOT EXISTS content_documents (
+  id TEXT PRIMARY KEY, content JSONB NOT NULL, updated_at TIMESTAMPTZ DEFAULT NOW()
 );
-
-CREATE POLICY "Admin write projects" ON projects FOR ALL USING (
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role IN ('OWNER', 'ADMIN', 'EDITOR'))
-);
+ALTER TABLE content_documents ENABLE ROW LEVEL SECURITY;
+ALTER TABLE faqs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE avenues ENABLE ROW LEVEL SECURITY;
+ALTER TABLE partners ENABLE ROW LEVEL SECURITY;
+ALTER TABLE testimonials ENABLE ROW LEVEL SECURITY;
+ALTER TABLE awards ENABLE ROW LEVEL SECURITY;
+ALTER TABLE timeline_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE social_links ENABLE ROW LEVEL SECURITY;
+ALTER TABLE site_settings ALTER COLUMN membership_form_url SET DEFAULT '';

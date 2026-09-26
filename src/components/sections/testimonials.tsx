@@ -1,10 +1,12 @@
 "use client";
+import { useCMS } from "@/hooks/use-cms";
 
 import { motion } from "framer-motion";
 import { Quote } from "lucide-react";
-import { MOCK_TESTIMONIALS } from "@/services/mock-data";
 
 export function TestimonialsSection() {
+  const { data: records } = useCMS<{ id: string; quote: string; author: string; role: string; organization: string }[]>("testimonials", []);
+  const testimonials = records.map(p => ({ ...p, content: p.quote, batch: p.organization }));
   return (
     <section className="section-shell relative z-10 border-t border-white/[0.06] bg-[#0A0A0A]/40 backdrop-blur-xl">
       <div className="mx-auto max-w-3xl text-center">
@@ -28,7 +30,7 @@ export function TestimonialsSection() {
       </div>
 
       <div className="mt-14 grid grid-cols-1 gap-6 md:grid-cols-3">
-        {MOCK_TESTIMONIALS.map((item, idx) => (
+        {testimonials.map((item, idx) => (
           <motion.div
             key={item.id}
             initial={{ opacity: 0, y: 20 }}

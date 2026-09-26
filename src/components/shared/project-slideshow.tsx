@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import Image from "next/image";
+import Image from "@/components/shared/content-image";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 
@@ -23,7 +23,7 @@ export function ProjectSlideshow({
   sizes = "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px",
 }: ProjectSlideshowProps) {
   // Normalize gallery list: Ensure coverImage is first
-  const primaryCover = coverImage || (images.length > 0 ? images[0] : "/gallery/gallery-1.jpeg");
+  const primaryCover = coverImage || (images.length > 0 ? images[0] : "/images/no-photo.svg");
 
   // Client-side deterministic ordering of non-cover images using useMemo
   const slides = useMemo(() => {
@@ -129,7 +129,7 @@ export function ProjectSlideshow({
           className="absolute inset-0"
         >
           <Image
-            src={slides[currentIndex]}
+            src={slides[currentIndex % slides.length]}
             alt={`${title} - Image ${currentIndex + 1}`}
             fill
             sizes={sizes}

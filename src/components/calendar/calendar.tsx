@@ -23,7 +23,7 @@ export function EventCalendar() {
     loading,
     diagnostics,
     refresh,
-  } = useCalendarEvents();
+  } = useCalendarEvents(true);
 
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [selectedEventState, setSelectedEvent] = useState<CalendarEvent | null>(

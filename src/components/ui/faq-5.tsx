@@ -8,7 +8,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
-import faqData from "@/data/faq.json";
+import { useCMS } from "@/hooks/use-cms";
+import type { FAQItem } from "@/lib/cms-store";
 
 export interface FaqItem {
   question: string;
@@ -27,7 +28,7 @@ export interface Faq5Props {
 }
 
 // Group FAQ data by category from faq.json
-const groupFaqsByCategory = (): FaqCategory[] => {
+const groupFaqsByCategory = (faqData: FAQItem[]): FaqCategory[] => {
   const categoryMap: Record<string, FaqItem[]> = {};
 
   faqData.forEach((item) => {
@@ -45,12 +46,14 @@ const groupFaqsByCategory = (): FaqCategory[] => {
   }));
 };
 
-export const DEFAULT_FAQ_CATEGORIES: FaqCategory[] = groupFaqsByCategory();
+
 
 export function Faq5({
-  categories = DEFAULT_FAQ_CATEGORIES,
+  categories: suppliedCategories,
   className,
 }: Faq5Props) {
+  const { data: faqs } = useCMS<FAQItem[]>("faq", []);
+  const categories = suppliedCategories || groupFaqsByCategory(faqs);
   return (
     <div className={cn("space-y-12", className)}>
       {categories.map((category, catIndex) => (

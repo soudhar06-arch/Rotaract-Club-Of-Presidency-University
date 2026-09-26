@@ -1,4 +1,5 @@
 "use client";
+import { adminFetch } from "@/lib/admin-fetch";
 
 import { useEffect, useState, useCallback } from "react";
 import { Plus, Edit2, Trash2, Search, Save, X, RefreshCw, HelpCircle } from "lucide-react";
@@ -19,7 +20,7 @@ export default function FAQAdminPage() {
 
   const loadFAQs = useCallback(() => {
     setLoading(true);
-    fetch("/api/admin?module=faq")
+    adminFetch("/api/admin?module=faq")
       .then((res) => res.json())
       .then((res) => {
         if (res.success) setFaqs(res.data);
@@ -29,9 +30,10 @@ export default function FAQAdminPage() {
 
   useEffect(() => {
     let ignore = false;
-    fetch("/api/admin?module=faq")
+    adminFetch("/api/admin?module=faq")
       .then((res) => res.json())
       .then((res) => {
+        if (!ignore) setLoading(false);
         if (!ignore && res.success) {
           setFaqs(res.data);
           setLoading(false);
@@ -52,7 +54,7 @@ export default function FAQAdminPage() {
     const action = editingFaq ? "update" : "create";
     const payload = editingFaq ? { ...editingFaq, ...formData } : formData;
 
-    const res = await fetch("/api/admin", {
+    const res = await adminFetch("/api/admin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ module: "faq", action, payload }),
@@ -69,7 +71,7 @@ export default function FAQAdminPage() {
   const handleDelete = async (id: string, question: string) => {
     if (!confirm(`Are you sure you want to delete FAQ: "${question}"?`)) return;
 
-    const res = await fetch("/api/admin", {
+    const res = await adminFetch("/api/admin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ module: "faq", action: "delete", payload: { id } }),

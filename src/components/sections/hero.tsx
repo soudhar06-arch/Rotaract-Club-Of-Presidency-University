@@ -6,7 +6,8 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, ShieldCheck, Sparkles, ChevronDown, CalendarPlus, Info } from "lucide-react";
 import { CountUp } from "@/components/shared/count-up";
-import { HERO_GALLERY_IMAGES } from "@/services/mock-data";
+import localArchive from "@/data/event-archive.json";
+const HERO_GALLERY_IMAGES = localArchive.flatMap(event => event.images.slice(0, 1));
 import { ROUTES } from "@/constants";
 
 const GOOGLE_CALENDAR_SUBSCRIBE_URL =

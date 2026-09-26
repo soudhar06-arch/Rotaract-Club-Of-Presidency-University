@@ -1,12 +1,16 @@
 "use client";
+import type { MediaItem } from "@/lib/cms-store";
+import type { GalleryItem } from "@/services/content-types";
+import { useCMS } from "@/hooks/use-cms";
 
 import { useState } from "react";
-import Image from "next/image";
+import Image from "@/components/shared/content-image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Maximize2, X } from "lucide-react";
-import { GalleryItem, MOCK_GALLERY } from "@/services/mock-data";
 
 export function GalleryPreviewSection() {
+  const { data: records } = useCMS<MediaItem[]>("gallery", []);
+  const photos = records.map(p => ({ id: p.id, title: p.name, category: "Events" as const, image: p.url, date: p.uploadedAt, description: "" }));
   const [selectedPhoto, setSelectedPhoto] = useState<GalleryItem | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>("All");
 
@@ -14,8 +18,8 @@ export function GalleryPreviewSection() {
 
   const filteredPhotos =
     activeCategory === "All"
-      ? MOCK_GALLERY
-      : MOCK_GALLERY.filter((item) => item.category === activeCategory);
+      ? photos
+      : photos.filter((item) => item.category === activeCategory);
 
   return (
     <section id="gallery" className="section-shell relative z-10">

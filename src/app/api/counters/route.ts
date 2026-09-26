@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 import { getLiveImpactCounters } from "@/lib/google-sheets";
 
-export const revalidate = 300; // Cache for 5 minutes
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
     const counters = await getLiveImpactCounters();
     return NextResponse.json({
       success: true,
-      data: counters,
+      data: { members: counters.members, projects: counters.projects, bod: counters.bod, isLive: counters.isLive, lastUpdated: counters.lastUpdated },
     });
   } catch (error) {
     console.error("[API /api/counters Error]:", error);

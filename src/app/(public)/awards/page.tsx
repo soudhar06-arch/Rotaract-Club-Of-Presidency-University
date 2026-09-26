@@ -1,3 +1,4 @@
+import { readPublicCollection } from "@/lib/public-content";
 import type { Metadata } from "next";
 import { Award, Sparkles } from "lucide-react";
 import { BackButton } from "@/components/shared/back-button";
@@ -8,25 +9,8 @@ export const metadata: Metadata = {
     "Honors and district awards conferred upon the Rotaract Club of Presidency University.",
 };
 
-const AWARDS = [
-  {
-    year: "2025-2026",
-    title: "Best Outstanding Rotaract Club",
-    body: "Conferred by Rotary District 3191 for overall chapter excellence, service impact, and active membership.",
-  },
-  {
-    year: "2024-2025",
-    title: "Best Community Service Project",
-    body: "Awarded for the Green Campus Revolution tree planting initiative.",
-  },
-  {
-    year: "2023-2024",
-    title: "Excellence in Digital Literacy",
-    body: "Honored for building computer learning labs in rural schools.",
-  },
-];
-
-export default function AwardsPage() {
+export default async function AwardsPage() {
+  const awards = await readPublicCollection("awards").catch(() => []);
   return (
     <div className="space-y-16 pt-28 pb-20">
       <section className="container-shell max-w-3xl space-y-3 px-4 sm:px-6 lg:px-8">
@@ -44,7 +28,8 @@ export default function AwardsPage() {
       </section>
 
       <section className="container-shell max-w-3xl space-y-6 px-4 sm:px-6 lg:px-8">
-        {AWARDS.map((award, idx) => (
+        {awards.length === 0 && <p className="text-zinc-400">No published awards are available.</p>}
+        {awards.map((award, idx) => (
           <div
             key={idx}
             className="shadow-medium hover-lift flex items-start gap-5 rounded-3xl border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-6"
@@ -63,7 +48,7 @@ export default function AwardsPage() {
                 {award.title}
               </h2>
               <p className="text-body-small text-[color:var(--color-text-secondary)]">
-                {award.body}
+                {award.description}
               </p>
             </div>
           </div>

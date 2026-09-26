@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import Image from "next/image";
-import initialBoardData from "@/data/bod.json";
+import Image from "@/components/shared/content-image";
+import { useCMS } from "@/hooks/use-cms";
 import { BackButton } from "@/components/shared/back-button";
 import { Search, X, Quote, Sparkles, Mail } from "lucide-react";
 
@@ -30,26 +30,10 @@ interface BoardMember {
 }
 
 export default function BoardPage() {
-  const [boardMembers, setBoardMembers] = useState<BoardMember[]>(initialBoardData as BoardMember[]);
+  const { data: boardMembers, loading, error } = useCMS<BoardMember[]>("bod", []);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [activeMember, setActiveMember] = useState<BoardMember | null>(null);
-
-  // Live fetch from CMS API to reflect admin portal updates instantly
-  useEffect(() => {
-    let active = true;
-    fetch("/api/cms?module=bod")
-      .then((res) => res.json())
-      .then((res) => {
-        if (active && res.success && Array.isArray(res.data)) {
-          setBoardMembers(res.data);
-        }
-      })
-      .catch(() => {});
-    return () => {
-      active = false;
-    };
-  }, []);
 
   // Close modal on ESC key
   useEffect(() => {
@@ -80,6 +64,7 @@ export default function BoardPage() {
   return (
     <div className="section-shell pt-32 pb-24 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <p role="status" className="text-sm text-zinc-400">{loading ? "Loading?" : error || (boardMembers.length === 0 ? "No published records yet." : "")}</p>
         <BackButton fallbackRoute="/#leadership" className="mb-6" />
 
         {/* Header */}
@@ -147,7 +132,7 @@ export default function BoardPage() {
               {/* Photo Container */}
               <div className="relative h-72 w-full overflow-hidden bg-zinc-950">
                 <Image
-                  src={member.image || "/gallery/gallery-1.jpeg"}
+                  src={member.image || "/images/no-photo.svg"}
                   alt={member.name}
                   fill
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
@@ -198,7 +183,7 @@ export default function BoardPage() {
               <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start">
                 <div className="relative h-44 w-44 sm:h-52 sm:w-52 rounded-2xl overflow-hidden border-2 border-[#3B82F6]/40 flex-shrink-0 bg-zinc-950">
                   <Image
-                    src={activeMember.image || "/gallery/gallery-1.jpeg"}
+                    src={activeMember.image || "/images/no-photo.svg"}
                     alt={activeMember.name}
                     fill
                     className="object-cover object-top"

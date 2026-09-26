@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import Image from "next/image";
+import Image from "@/components/shared/content-image";
 import Link from "next/link";
 import {
   Calendar,
@@ -18,13 +18,24 @@ import { useCalendarEvents } from "@/hooks/use-calendar-events";
 import { BackButton } from "@/components/shared/back-button";
 
 export default function EventsPage() {
-  const { upcomingEvents, pastEvents, loading, addToUserCalendar } =
+  const { upcomingEvents, pastEvents, loading, error, addToUserCalendar } =
     useCalendarEvents();
   const [activeTab, setActiveTab] = useState<"all" | "upcoming" | "past">(
     "all",
   );
+  const avenues = ["All", "Club Service", "Community Service", "Professional Development", "International Service", "Public Relations", "Fellowship"];
+  const [activeAvenue, setActiveAvenue] = useState("All");
+  useEffect(() => {
+    const requested = new URLSearchParams(window.location.search).get("avenue");
+    const match = avenues.find(item => item.toLowerCase() === requested?.toLowerCase());
+    if (match) setActiveAvenue(match);
+  }, []);
+  const normalized = (value: string) => value.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const matchesAvenue = (event: CalendarEvent) => activeAvenue === "All" || normalized(event.category) === normalized(activeAvenue);
+  const filteredUpcoming = useMemo(() => upcomingEvents.filter(matchesAvenue), [upcomingEvents, activeAvenue]);
+  const filteredPast = useMemo(() => pastEvents.filter(matchesAvenue), [pastEvents, activeAvenue]);
 
-  const totalCount = upcomingEvents.length + pastEvents.length;
+  const totalCount = filteredUpcoming.length + filteredPast.length;
 
   return (
     <div className="space-y-16 pt-28 pb-20">
@@ -33,18 +44,18 @@ export default function EventsPage() {
         {/* Header */}
         <div className="mx-auto max-w-3xl space-y-4 text-center">
           <span className="text-xs font-semibold tracking-widest text-[#3B82F6] uppercase">
-            LIVE GOOGLE CALENDAR CMS
+            CLUB EVENTS
           </span>
           <h1 className="text-display-l font-bold tracking-tight text-white">
             Events & Conclaves
           </h1>
           <p className="text-base leading-relaxed text-[#9A9A9A]">
             Browse all upcoming flagship conclaves, community drives, and past
-            event archives synced live from Google Calendar.
+            event archives from our club photo collections.
           </p>
 
           {/* Filter Tabs */}
-          <div className="flex items-center justify-center gap-3 pt-6">
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-6">
             <button
               onClick={() => setActiveTab("all")}
               className={`rounded-full px-5 py-2 text-xs font-semibold transition-all ${
@@ -63,7 +74,7 @@ export default function EventsPage() {
                   : "border border-white/10 bg-white/[0.04] text-[#9A9A9A] hover:text-white"
               }`}
             >
-              Upcoming ({upcomingEvents.length})
+              Upcoming ({filteredUpcoming.length})
             </button>
             <button
               onClick={() => setActiveTab("past")}
@@ -73,11 +84,18 @@ export default function EventsPage() {
                   : "border border-white/10 bg-white/[0.04] text-[#9A9A9A] hover:text-white"
               }`}
             >
-              Past Events ({pastEvents.length})
+              Past Events ({filteredPast.length})
             </button>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-2 pt-4" aria-label="Filter events by avenue">
+            {avenues.map(avenue => <button key={avenue} type="button" onClick={() => setActiveAvenue(avenue)}
+              className={`rounded-full border px-3.5 py-1.5 text-xs transition-colors ${activeAvenue === avenue ? "border-[#3B82F6] bg-[#3B82F6]/20 text-white" : "border-white/10 bg-white/[0.03] text-zinc-400 hover:text-white"}`}>
+              {avenue}
+            </button>)}
           </div>
         </div>
 
+        {error && totalCount > 0 && <p role="status" className="mt-6 text-center text-sm text-zinc-400">Some events are temporarily unavailable.</p>}
         {/* Content Sections */}
         {loading ? (
           <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-3">
@@ -95,8 +113,7 @@ export default function EventsPage() {
               No Events Available
             </h3>
             <p className="max-w-md text-xs text-[#9A9A9A]">
-              Create an event in Google Calendar to automatically display it
-              here on the website.
+              {error ? "Events are temporarily unavailable." : "No published events yet. Please check back soon."}
             </p>
           </div>
         ) : (
@@ -107,17 +124,17 @@ export default function EventsPage() {
                 <div className="flex items-center gap-3 border-b border-white/10 pb-3">
                   <Calendar className="h-5 w-5 text-[#3B82F6]" />
                   <h2 className="text-xl font-bold tracking-wide text-white">
-                    Upcoming Events ({upcomingEvents.length})
+                    Upcoming Events ({filteredUpcoming.length})
                   </h2>
                 </div>
 
-                {upcomingEvents.length === 0 ? (
+                {filteredUpcoming.length === 0 ? (
                   <p className="py-8 text-center text-xs text-[#9A9A9A]">
                     No upcoming events scheduled right now.
                   </p>
                 ) : (
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                    {upcomingEvents.map((evt, idx) => (
+                    {filteredUpcoming.map((evt, idx) => (
                       <EventCard
                         key={evt.id}
                         evt={evt}
@@ -136,17 +153,17 @@ export default function EventsPage() {
                 <div className="flex items-center gap-3 border-b border-white/10 pb-3">
                   <History className="h-5 w-5 text-[#71717A]" />
                   <h2 className="text-xl font-bold tracking-wide text-white">
-                    Past Events & Archives ({pastEvents.length})
+                    Past Events & Archives ({filteredPast.length})
                   </h2>
                 </div>
 
-                {pastEvents.length === 0 ? (
+                {filteredPast.length === 0 ? (
                   <p className="py-8 text-center text-xs text-[#9A9A9A]">
-                    No past event archives found on Google Calendar.
+                    No historical events have been published yet.
                   </p>
                 ) : (
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                    {pastEvents.map((evt, idx) => (
+                    {filteredPast.map((evt, idx) => (
                       <EventCard
                         key={evt.id}
                         evt={evt}
@@ -224,7 +241,7 @@ function EventCard({
           </div>
 
           <p className="mt-3 line-clamp-2 text-xs leading-relaxed text-[#9A9A9A]">
-            {evt.description}
+            {evt.shortDescription || evt.description}
           </p>
         </div>
       </div>
@@ -255,7 +272,7 @@ function EventCard({
 
         {/* View Details link */}
         <Link
-          href={`/events/${evt.id}`}
+          href={`/events/${evt.slug || evt.id}`}
           className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-[#3B82F6]/30 bg-[#3B82F6]/[0.07] py-2.5 text-xs font-semibold text-[#3B82F6] transition-all hover:bg-[#3B82F6]/15 hover:border-[#3B82F6]/60 active:scale-95"
         >
           <span>View Event Details</span>

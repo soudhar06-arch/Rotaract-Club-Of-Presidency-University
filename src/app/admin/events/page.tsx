@@ -1,8 +1,10 @@
 "use client";
+import { adminFetch } from "@/lib/admin-fetch";
 
 import { useEffect, useState, useCallback } from "react";
 import { Plus, Edit2, Trash2, Search, Save, X, RefreshCw, Calendar, MapPin, Users } from "lucide-react";
-import { EventItem } from "@/lib/cms-store";
+import { MediaPicker } from "@/components/shared/media-picker";
+import type { EventItem } from "@/lib/cms-store";
 
 export default function EventsAdminPage() {
   const [events, setEvents] = useState<EventItem[]>([]);
@@ -13,17 +15,18 @@ export default function EventsAdminPage() {
 
   const [formData, setFormData] = useState<Partial<EventItem>>({
     title: "",
-    date: new Date().toISOString().split("T")[0],
-    venue: "Presidency University",
+    date: "",
+    venue: "",
     platform: "",
     category: "Fellowship",
-    participants: 0,
+    participants: undefined,
+    published: false,
     description: "",
   });
 
   const loadEvents = useCallback(() => {
     setLoading(true);
-    fetch("/api/admin?module=events")
+    adminFetch("/api/admin?module=events")
       .then((res) => res.json())
       .then((res) => {
         if (res.success) setEvents(res.data);
@@ -33,9 +36,10 @@ export default function EventsAdminPage() {
 
   useEffect(() => {
     let ignore = false;
-    fetch("/api/admin?module=events")
+    adminFetch("/api/admin?module=events")
       .then((res) => res.json())
       .then((res) => {
+        if (!ignore) setLoading(false);
         if (!ignore && res.success) {
           setEvents(res.data);
           setLoading(false);
@@ -56,7 +60,7 @@ export default function EventsAdminPage() {
     const action = editingEvent ? "update" : "create";
     const payload = editingEvent ? { ...editingEvent, ...formData } : formData;
 
-    const res = await fetch("/api/admin", {
+    const res = await adminFetch("/api/admin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ module: "events", action, payload }),
@@ -73,7 +77,7 @@ export default function EventsAdminPage() {
   const handleDelete = async (id: string, title: string) => {
     if (!confirm(`Are you sure you want to delete historical event: ${title}?`)) return;
 
-    const res = await fetch("/api/admin", {
+    const res = await adminFetch("/api/admin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ module: "events", action: "delete", payload: { id } }),
@@ -115,11 +119,12 @@ export default function EventsAdminPage() {
               setEditingEvent(null);
               setFormData({
                 title: "",
-                date: new Date().toISOString().split("T")[0],
-                venue: "Presidency University",
+                date: "",
+                venue: "",
                 platform: "",
                 category: "Fellowship",
-                participants: 0,
+                participants: undefined,
+    published: false,
                 description: "",
               });
               setIsAdding(true);
@@ -149,7 +154,7 @@ export default function EventsAdminPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
           <form
             onSubmit={handleSave}
-            className="w-full max-w-xl rounded-3xl border border-white/15 bg-[#0F121C] p-6 sm:p-8 space-y-5 shadow-2xl relative"
+            className="w-full max-w-xl rounded-3xl border border-white/15 bg-[#0F121C] p-6 sm:p-8 space-y-5 shadow-2xl relative max-h-[90vh] overflow-y-auto"
           >
             <button
               type="button"
@@ -183,11 +188,10 @@ export default function EventsAdminPage() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="block text-xs font-mono uppercase text-zinc-400 mb-1">
-                    Event Date *
+                    Event Date (if supplied)
                   </label>
                   <input
                     type="date"
-                    required
                     value={formData.date || ""}
                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                     className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs text-white"
@@ -245,14 +249,26 @@ export default function EventsAdminPage() {
                 </label>
                 <input
                   type="number"
-                  value={formData.participants || 0}
-                  onChange={(e) => setFormData({ ...formData, participants: parseInt(e.target.value) || 0 })}
+                  min="0"
+                  value={formData.participants ?? ""}
+                  onChange={(e) => setFormData({ ...formData, participants: e.target.value ? parseInt(e.target.value) : undefined })}
                   placeholder="e.g. 50"
                   className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs text-white"
                 />
               </div>
             </div>
 
+            <label className="block space-y-1 text-xs text-zinc-400">Source description<textarea rows={5} value={formData.description || ""} onChange={e => setFormData({ ...formData, description: e.target.value })} className="w-full rounded-xl border border-white/10 bg-white/5 p-3 text-white" /></label>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="text-xs text-zinc-400">Time<input value={formData.time || ""} onChange={e => setFormData({ ...formData, time: e.target.value })} className="mt-1 w-full rounded-lg bg-white/5 p-3 text-white" /></label>
+              <label className="text-xs text-zinc-400">Beneficiaries<input type="number" min="0" value={formData.beneficiaries ?? ""} onChange={e => setFormData({ ...formData, beneficiaries: e.target.value ? Number(e.target.value) : undefined })} className="mt-1 w-full rounded-lg bg-white/5 p-3 text-white" /></label>
+              <label className="text-xs text-zinc-400">Collaborators (comma separated)<input value={formData.collaborators?.join(", ") || ""} onChange={e => setFormData({ ...formData, collaborators: e.target.value.split(",").map(s => s.trim()).filter(Boolean) })} className="mt-1 w-full rounded-lg bg-white/5 p-3 text-white" /></label>
+              <label className="text-xs text-zinc-400">Registration URL<input type="url" value={formData.registrationLink || ""} onChange={e => setFormData({ ...formData, registrationLink: e.target.value })} className="mt-1 w-full rounded-lg bg-white/5 p-3 text-white" /></label>
+              <label className="text-xs text-zinc-400">Folder ID / local folder name<input value={formData.folderId || ""} onChange={e => setFormData({ ...formData, folderId: e.target.value })} className="mt-1 w-full rounded-lg bg-white/5 p-3 text-white" /></label>
+            </div>
+            <MediaPicker category="events" value={formData.coverImage || formData.image} onChange={coverImage => setFormData({ ...formData, coverImage })} />
+            <label className="block text-xs text-zinc-400">Gallery image URLs (one per line)<textarea rows={3} value={formData.images?.join("\n") || ""} onChange={e => setFormData({ ...formData, images: e.target.value.split("\n").filter(Boolean) })} className="mt-1 w-full rounded-xl bg-white/5 p-3 text-white" /></label>
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={formData.published === true} onChange={e => setFormData({ ...formData, published: e.target.checked })} />Published on the public website</label>
             <div className="flex justify-end gap-3 pt-2">
               <button
                 type="button"

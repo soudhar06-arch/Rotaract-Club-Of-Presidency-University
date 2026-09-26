@@ -25,16 +25,22 @@ const PARTNERSHIP_TYPES = [
 export default function CollaboratePage() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({ orgName: "", email: "", proposal: "" });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.orgName || !formData.email) return;
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    setError("");
+    try {
+      const response = await fetch("/api/contact", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: formData.orgName, email: formData.email, subject: "Collaboration proposal", message: formData.proposal }) });
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.error || "Message could not be delivered.");
       setSubmitted(true);
-    }, 800);
+      
+    } catch (error) { setError(error instanceof Error ? error.message : "Message could not be delivered."); }
+    finally { setLoading(false); }
   };
 
   return (
@@ -108,7 +114,8 @@ export default function CollaboratePage() {
                 Tell us about your organization and how we can collaborate.
               </p>
 
-              <form onSubmit={handleSubmit} className="mt-6 space-y-4 text-xs">
+              <><p role="alert" className="text-sm text-red-300">{error}</p>
+          <form onSubmit={handleSubmit} className="mt-6 space-y-4 text-xs">
                 <div>
                   <label className="mb-1.5 block font-mono uppercase tracking-wider text-zinc-400 text-[10px]">
                     Organization / Corporate Name *
@@ -158,7 +165,7 @@ export default function CollaboratePage() {
                   <span>{loading ? "Submitting Proposal..." : "Send Partnership Proposal"}</span>
                   <ArrowRight className="h-4 w-4" />
                 </button>
-              </form>
+              </form></>
             </div>
           )}
         </div>

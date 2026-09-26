@@ -25,8 +25,8 @@ export function AIAssistant() {
     {
       id: "m-1",
       sender: "assistant",
-      text: "Greetings! I am the Rotaract Intelligence Assistant for the Rotaract Club of Presidency University. How may I assist you today?",
-      timestamp: "10:00 AM",
+      text: "Greetings! I am the Leviathan Bot for the Rotaract Club of Presidency University. How may I assist you today?",
+      timestamp: "",
     },
   ]);
 
@@ -38,7 +38,7 @@ export function AIAssistant() {
 
   const handleSend = async (textToSend?: string) => {
     const query = textToSend || input;
-    if (!query.trim()) return;
+    if (!query.trim() || isTyping) return;
 
     const userMsgId = `u-${crypto.randomUUID()}`;
     const userMsgTime = new Date().toLocaleTimeString([], {
@@ -64,13 +64,8 @@ export function AIAssistant() {
         body: JSON.stringify({ message: query }),
       });
 
-      let responseText =
-        "The Rotaract Club of Presidency University is dedicated to youth leadership, professional networking, and community service.";
-
-      if (res.ok) {
-        const data = (await res.json()) as { reply?: string };
-        if (data.reply) responseText = data.reply;
-      }
+      const data = await res.json();
+      const responseText = res.ok && data.reply ? data.reply : data.error || "Leviathan Bot is temporarily unavailable.";
 
       const assistantMsgId = `a-${crypto.randomUUID()}`;
       const assistantMsgTime = new Date().toLocaleTimeString([], {
@@ -115,7 +110,7 @@ export function AIAssistant() {
           whileTap={{ scale: 0.95 }}
           onClick={() => setIsOpen(!isOpen)}
           className="group shadow-glow relative flex h-14 w-14 items-center justify-center rounded-full border border-white/20 bg-[#101010]/80 backdrop-blur-xl"
-          aria-label="Open AI Assistant"
+          aria-label="Open Leviathan Bot"
         >
           <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#3B82F6] to-indigo-600 opacity-20 transition-opacity group-hover:opacity-40" />
           <Bot className="h-6 w-6 text-[#3B82F6] transition-transform group-hover:rotate-12" />
@@ -133,7 +128,7 @@ export function AIAssistant() {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="shadow-large fixed right-6 bottom-24 z-50 flex h-[520px] w-[360px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0A0A0A]/95 backdrop-blur-2xl sm:w-[400px]"
+            className="shadow-large fixed right-3 bottom-24 z-50 flex h-[min(520px,70dvh)] w-[calc(100vw-24px)] flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0A0A0A]/95 backdrop-blur-2xl sm:right-6 sm:w-[400px]"
           >
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-white/10 bg-[#101010]/80 px-4 py-3.5">
@@ -143,7 +138,7 @@ export function AIAssistant() {
                 </div>
                 <div>
                   <h4 className="text-xs font-bold tracking-wide text-white">
-                    Rotaract Intelligence AI
+                    Leviathan Bot
                   </h4>
                   <p className="text-[10px] text-[#9A9A9A]">
                     Official Club Assistant
@@ -151,6 +146,7 @@ export function AIAssistant() {
                 </div>
               </div>
               <button
+                aria-label="Close Leviathan Bot"
                 onClick={() => setIsOpen(false)}
                 className="rounded-lg p-1 text-[#9A9A9A] transition-colors hover:bg-white/10 hover:text-white"
               >

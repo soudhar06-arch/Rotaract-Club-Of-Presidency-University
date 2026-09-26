@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useCalendarEvents } from "@/hooks/use-calendar-events";
-import { Milestone } from "@/services/mock-data";
+import { Milestone } from "@/services/content-types";
 import {
   ChevronLeft,
   ChevronRight,

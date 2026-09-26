@@ -1,0 +1,22 @@
+// Public name/role fields extracted from the authoritative Office Bearers workbook.
+export const BOARD_2026_27 = [
+  ["Deekshitha B", "President"], ["Nirmal M", "Vice President"],
+  ["Soudhar Mendra V", "Secretary"], ["Antony Kenson J", "Joint Secretary"],
+  ["Mehanaz Fathima", "Sergeant At Arms"], ["Keerthan P Bhonsle", "Sergeant At Arms"],
+  ["Raahul R S", "Treasurer"], ["Keshav Palaniappan", "Club Service Director"],
+  ["V Allen Augusto", "Co-Club Service Director"], ["Sanjana Gopalkrishna", "Community Service Director"],
+  ["Abhishek More", "Co-Community Service Director"], ["N Martin Singh", "PD Director"],
+  ["Mohammed Jawadh.Y", "PD Director"], ["Divya V", "PR Director"],
+  ["Hima Shetty", "PR Director"], ["Prathik", "PR Director"],
+  ["Preetham A", "PR Director"], ["Adi Bharath", "PR Director"],
+  ["Akshyata Rai", "International Service Director"], ["Ajit S Naik", "International Service Director"],
+  ["G Harshika", "International Service Director"], ["Gopika M", "Chief Editor"],
+  ["Chetan V", "Chief Editor"], ["Abimanyu K", "Marketing Head"],
+  ["Sonali Rajkumar Bali", "Marketing Head"], ["Sayed Zain Pasha Inamdar", "Marketing Head"],
+  ["Ameera Mohammadi", "Marketing Head"], ["Ganesh D", "Membership Development and Retention Director"],
+  ["Ruthvik K Gowda", "Membership Development and Retention Director"], ["Anivesha", "Membership Development and Retention Director"],
+  ["Vandhiyadevan", "Membership Development and Retention Director"], ["Monish Y Gowda", "Sports and Socio-Culture Director"],
+  ["B Rajesh Kumar Reddy", "Sports and Socio-Culture Director"], ["Mohit Yadav S", "Sports and Socio-Culture Director"],
+  ["Akshara Sajeevan M", "Women and Children Welfare Director"], ["Yogeshwaran", "Women and Children Welfare Director"],
+  ["Sahana Gowda", "Women and Children Welfare Director"],
+] as const;

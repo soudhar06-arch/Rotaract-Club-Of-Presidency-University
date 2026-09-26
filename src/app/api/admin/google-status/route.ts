@@ -1,3 +1,4 @@
+import { clearDataCache } from "@/lib/server-cache";
 import { NextResponse } from "next/server";
 import { getServerSession } from "@/lib/auth-config";
 import { runGoogleDiagnostics } from "@/lib/google-diagnostics";
@@ -9,6 +10,7 @@ export async function GET() {
   }
 
   try {
+    clearDataCache();
     const report = await runGoogleDiagnostics();
     return NextResponse.json({
       success: true,

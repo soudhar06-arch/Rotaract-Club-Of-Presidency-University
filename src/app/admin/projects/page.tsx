@@ -1,7 +1,8 @@
 "use client";
+import { adminFetch } from "@/lib/admin-fetch";
 
 import { useEffect, useState, useCallback } from "react";
-import Image from "next/image";
+import Image from "@/components/shared/content-image";
 import {
   Plus,
   Edit2,
@@ -33,17 +34,17 @@ export default function ProjectsAdminPage() {
     shortDescription: "",
     fullDescription: "",
     category: "Community Service",
-    date: new Date().toISOString().split("T")[0],
-    venue: "Presidency University Campus",
-    coverImage: "/gallery/gallery-1.jpeg",
-    images: ["/gallery/gallery-1.jpeg"],
+    date: "",
+    venue: "",
+    coverImage: "",
+    images: [],
     featured: false,
-    published: true,
+    published: false,
   });
 
   const loadProjects = useCallback(() => {
     setLoading(true);
-    fetch("/api/admin?module=projects")
+    adminFetch("/api/admin?module=projects")
       .then((res) => res.json())
       .then((res) => {
         if (res.success) setProjects(res.data);
@@ -53,9 +54,10 @@ export default function ProjectsAdminPage() {
 
   useEffect(() => {
     let ignore = false;
-    fetch("/api/admin?module=projects")
+    adminFetch("/api/admin?module=projects")
       .then((res) => res.json())
       .then((res) => {
+        if (!ignore) setLoading(false);
         if (!ignore && res.success) {
           setProjects(res.data);
           setLoading(false);
@@ -77,12 +79,12 @@ export default function ProjectsAdminPage() {
       shortDescription: "",
       fullDescription: "",
       category: "Community Service",
-      date: new Date().toISOString().split("T")[0],
-      venue: "Presidency University Campus",
-      coverImage: "/gallery/gallery-1.jpeg",
-      images: ["/gallery/gallery-1.jpeg"],
+      date: "",
+      venue: "",
+      coverImage: "",
+      images: [],
       featured: false,
-      published: true,
+      published: false,
     });
     setNewImageUrl("");
     setIsAdding(true);
@@ -91,14 +93,14 @@ export default function ProjectsAdminPage() {
   const openEditModal = (proj: ProjectItem) => {
     const imagesList = Array.isArray(proj.images) && proj.images.length > 0
       ? proj.images
-      : [proj.coverImage || proj.image || "/gallery/gallery-1.jpeg"];
+      : [proj.coverImage || proj.image || ""].filter(Boolean);
     const cover = proj.coverImage || proj.image || imagesList[0];
 
     setEditingProject(proj);
     setFormData({
       ...proj,
       coverImage: cover,
-      images: imagesList.includes(cover) ? imagesList : [cover, ...imagesList],
+      images: cover && !imagesList.includes(cover) ? [cover, ...imagesList] : imagesList,
     });
     setNewImageUrl("");
   };
@@ -131,7 +133,7 @@ export default function ProjectsAdminPage() {
         uploadData.append("files", files[i]);
       }
 
-      const res = await fetch("/api/admin/drive/upload", {
+      const res = await adminFetch("/api/admin/drive/upload", {
         method: "POST",
         body: uploadData,
       });
@@ -147,7 +149,7 @@ export default function ProjectsAdminPage() {
         });
       }
     } catch {
-      alert("File upload error. Local static fallback retained.");
+      alert("Image upload failed. Please try again.");
     } finally {
       setUploading(false);
     }
@@ -155,16 +157,13 @@ export default function ProjectsAdminPage() {
 
   const handleRemoveImage = (imgToRemove: string) => {
     const currentImages = formData.images || [];
-    if (currentImages.length <= 1) {
-      alert("Projects must contain at least one visual image.");
-      return;
-    }
+
 
     const updatedImages = currentImages.filter((img) => img !== imgToRemove);
     let updatedCover = formData.coverImage;
 
     if (updatedCover === imgToRemove) {
-      updatedCover = updatedImages[0];
+      updatedCover = updatedImages[0] || "";
     }
 
     setFormData({
@@ -207,7 +206,7 @@ export default function ProjectsAdminPage() {
       ? { ...editingProject, ...formData }
       : { ...formData, slug: formData.slug || formData.title?.toLowerCase().replace(/\s+/g, "-") };
 
-    const res = await fetch("/api/admin", {
+    const res = await adminFetch("/api/admin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ module: "projects", action, payload }),
@@ -224,7 +223,7 @@ export default function ProjectsAdminPage() {
   const handleDelete = async (id: string, title: string) => {
     if (!confirm(`Are you sure you want to delete project: ${title}?`)) return;
 
-    const res = await fetch("/api/admin", {
+    const res = await adminFetch("/api/admin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ module: "projects", action: "delete", payload: { id } }),

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -34,6 +34,7 @@ const ADMIN_NAV_ITEMS = [
   { label: "Social Links", href: "/admin/social", icon: Share2 },
   { label: "User Management", href: "/admin/users", icon: ShieldCheck },
   { label: "Audit Log", href: "/admin/audit-log", icon: FileText },
+  { label: "AI & Event Sources", href: "/admin/content", icon: FileText },
   { label: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
@@ -42,6 +43,14 @@ export function AdminNavigation({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [error, setError] = useState("");
+  const [user, setUser] = useState<{ name: string; email: string; role: string } | null>(null);
+  useEffect(() => {
+    const onError = (event: Event) => setError(String((event as CustomEvent).detail));
+    window.addEventListener("admin-error", onError);
+    fetch("/api/admin/auth/me").then(r => r.json()).then(r => setUser(r.user || null)).catch(() => {});
+    return () => window.removeEventListener("admin-error", onError);
+  }, [pathname]);
 
   // Skip sidebar layout for login route
   if (pathname === "/admin/login") {
@@ -98,11 +107,11 @@ export function AdminNavigation({ children }: { children: React.ReactNode }) {
           {/* User Role Badge */}
           <div className="p-3 rounded-2xl border border-white/10 bg-white/5 flex items-center justify-between">
             <div>
-              <div className="text-xs font-bold text-white">Rotaract Secretariat</div>
-              <div className="text-[10px] text-zinc-400">rotaractcpu@gmail.com</div>
+              <div className="text-xs font-bold text-white">{user?.name || "Administrator"}</div>
+              <div className="text-[10px] text-zinc-400">{user?.email}</div>
             </div>
             <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-[#3B82F6]/20 text-[#3B82F6] border border-[#3B82F6]/40 uppercase">
-              OWNER
+              {user?.role}
             </span>
           </div>
 
@@ -150,7 +159,8 @@ export function AdminNavigation({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 p-6 md:p-10 overflow-y-auto min-h-screen">
+      <main className="min-w-0 flex-1 p-4 sm:p-6 md:p-10 overflow-y-auto min-h-screen">
+        {error && <div role="alert" className="mb-5 flex items-start justify-between gap-3 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200"><span>{error}</span><button onClick={() => setError("")} aria-label="Dismiss error"><X size={18} /></button></div>}
         {children}
       </main>
     </div>

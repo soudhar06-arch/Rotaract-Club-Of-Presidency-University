@@ -1,17 +1,12 @@
 "use client";
+import { useCMS } from "@/hooks/use-cms";
 
-import Image from "next/image";
+import Image from "@/components/shared/content-image";
 import { motion } from "framer-motion";
 
-const ENTITIES = [
-  { name: "Rotary International", logo: "/logos/rotary-international.svg" },
-  { name: "Rotaract District 3191", logo: "/logos/district-3191.svg" },
-  { name: "Presidency University", logo: "/logos/presidency-university.svg" },
-  { name: "Rotary Club of Bangalore", logo: "/logos/rotaract-emblem.svg" },
-  { name: "Corporate Partners", logo: "/logos/club_logo.svg" },
-];
-
 export function CredibilityStrip() {
+  const { data: records } = useCMS<{ name: string; logo_url: string }[]>("partners", []);
+  const ENTITIES = records.map(r => ({ ...r, logo: r.logo_url || "/images/no-photo.svg" }));
   return (
     <section className="relative z-10 border-y border-white/[0.06] bg-[#0A0A0A]/60 py-6 backdrop-blur-xl">
       <div className="container-shell px-4 sm:px-6 lg:px-8">

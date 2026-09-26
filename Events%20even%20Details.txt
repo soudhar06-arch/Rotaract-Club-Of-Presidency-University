@@ -1,0 +1,154 @@
+RCPU — EVENT DETAILS SOURCE FILE
+File name: Events even Details.txt
+
+PURPOSE
+This file contains the authoritative descriptive information for conducted/historical events currently documented in the Event Reports PDF.
+The public event gallery should use the Google Drive folder name as the event title and use this file to find the corresponding event description and metadata.
+For new or updated events, the Admin Portal is the management interface. Do not require source-code changes just to add or edit an event description.
+
+DATA RULES
+1. One EVENT block represents one event.
+2. Match an event to its Google Drive folder using the event title, with safe normalization for capitalization, whitespace and punctuation.
+3. Do not use fuzzy matching when it could cause two different events to be confused.
+4. If an event exists in Google Drive but has no matching block here, allow the Admin Portal to add/edit its description.
+5. Never invent a description when no source description exists.
+6. Admin-entered updates should take precedence over the imported historical description for that event.
+7. Keep the existing Google Drive image architecture: one child folder = one event; all images in that folder belong to that event.
+
+========================================================================
+EVENT 1
+TITLE: Fact Or Fiction – Two Truths and a Lie
+DATE: 1st July 2026
+TIME: 7:00 PM Onwards
+VENUE: Google Meet
+DESCRIPTION:
+The Rotaract Club of Presidency University, RID 3192, under the International Service Avenue, collaborated with the Rotaract Club of Kandy Metropolitan, RID 3220, Sri Lanka, to organize "Fact or Fiction – Two Truths and a Lie" on 1st July 2026 through Google Meet. The event was conducted with the objective of strengthening international fellowship, promoting cultural exchange, and encouraging participants to learn about different countries through an engaging and interactive platform.
+
+========================================================================
+EVENT 2
+TITLE: EMBRACE – Love Across Generations
+DATE: 5th July 2026
+TIME: 12:00 PM – 1:00 PM
+VENUE: Avyang Foundation Destitute & Old Age Home
+MODE: Offline Event
+DESCRIPTION:
+The Rotaract Club of Presidency University, RID 3192, under the Community Service Avenue, successfully organized "Embrace – Love Across Generations" on 5th July 2026 at the Avyang Foundation Destitute & Old Age Home. The initiative was conducted with the objective of spreading love, compassion, and companionship among the elderly residents while creating meaningful interactions between Rotaractors and senior citizens. The event served as an opportunity to celebrate the beauty of every generation, reminding the residents that they are loved, valued, and never forgotten. Through conversations, wellness activities, and acts of service, the programme reflected the true spirit of community engagement and humanitarian service.
+
+========================================================================
+EVENT 3
+TITLE: IMPOSTER HUNT – Trust No One, Suspect Everyone
+DATE: 6th July 2026
+TIME: 07:00 PM Onwards
+VENUE: Discord
+MODE: Online Event
+AVENUE: Club Service
+DESCRIPTION:
+The Rotaract Club of Presidency University, under the Club Service Avenue, successfully organized "Imposter Hunt – Trust No One, Suspect Everyone" on 6th July 2026 through Discord. The event was designed to provide members with an engaging and entertaining virtual gaming experience while strengthening fellowship and interaction within the club. Through the popular game Among Us, participants worked together, communicated effectively, and applied strategic thinking to identify the impostors, creating an atmosphere filled with excitement, teamwork, and friendly competition.
+
+========================================================================
+EVENT 4
+TITLE: CORPORATE SIMULATION – Preparing Leaders for the Corporate World Through Experiential Learning
+DATE: 9th July 2026
+TIME: 06:30 PM Onwards
+VENUE: Google Meet
+MODE: Online Event
+DESCRIPTION:
+The Rotaract Club of Presidency University, under the Professional Development Avenue, successfully organized "Corporate Simulation" on 9th July 2026 through Google Meet. The event was designed to provide participants with practical exposure to real-world corporate situations by engaging them in interactive workplace scenarios. The programme focused on enhancing leadership, communication, critical thinking, decision-making, and problem- solving skills while helping members understand how professionals approach challenges in today's corporate environment.
+
+========================================================================
+EVENT 5
+TITLE: DECODE THE DESTINATION – Connecting Places Through Curiosity, Observation & Discovery
+DATE: 10th July 2026
+TIME: 7:00 PM Onwards
+VENUE: Google Meet
+MODE: Virtual Event
+AVENUE: International Service
+DESCRIPTION:
+The Rotaract Club of Presidency University, under the International Service Avenue, successfully organized "Decode the Destination" on 10th July 2026 through Google Meet, in collaboration with the Rotary Club of Port Blair NextGen, Port Blair, Andaman & Nicobar Islands, RID 3291. The event was designed to promote geographical awareness, cultural understanding, and interactive learning through a fun and engaging guessing game. Participants explored various Indian states and countries by interpreting visual clues, making the session both educational and entertaining while strengthening fellowship between the collaborating clubs.
+
+========================================================================
+EVENT 6
+TITLE: BRUSH & BEYOND – Every Stroke Sparks Creativity
+DATE: 11th July 2026
+TIME: 10:00 AM – 11:00 AM
+VENUE: Google Meet
+MODE: Virtual Event
+AVENUE: Club Service
+DESCRIPTION:
+The Rotaract Club of Presidency University, under the Club Service Avenue, successfully organized "Brush & Beyond" on 11th July 2026 through Google Meet. The event was conducted with the objective of encouraging creativity, artistic expression, and interactive learning among participants. The session featured Ms. C. Bala, a talented artist, who guided participants through the fundamentals of drawing while sharing her artistic journey, experiences, and creative insights. The programme provided an engaging platform for members to explore their artistic potential while strengthening fellowship through a unique and interactive learning experience.
+
+========================================================================
+EVENT 7
+TITLE: Project Smiles – Every Smile Creates a Lasting Memory
+DATE: 12th July 2026
+TIME: 2:00 PM – 4:00 PM
+VENUE: Jeevitha Anathashrama
+MODE: Offline
+AVENUE: Community Service
+DESCRIPTION:
+The Rotaract Club of Presidency University, under the Community Service Avenue, successfully organized “Project Smiles – Sharing Love, Creating Smiles & Inspiring Hope” on 12th July 2026 at Jeevitha Anathashrama. The initiative was conducted with the objective of spreading happiness, compassion, and positivity by spending meaningful time with the children of the Ashrama. The event provided members with an opportunity to interact with the children through fun-filled activities, conversations, and engaging moments. Through these interactions, Project Smiles aimed to create cherished memories while promoting empathy, kindness, and social responsibility among the participating Rotaractors.
+
+========================================================================
+EVENT 8
+TITLE: Spotlight – Brand for Impact
+DATE: 14th July 2026
+TIME: 2:30 PM Onwards
+VENUE: Google Meet
+MODE: Online
+AVENUE: Professional Development
+DESCRIPTION:
+The Rotaract Club of Presidency University, under the Professional Development Avenue, successfully organized Spotlight – Brand for Impact on 14th July 2026 through Google Meet. The session was conducted by Dr. Tychicus David, Assistant Professor of English, who shared valuable insights on effective communication, personal branding, leadership, confidence, and career development in today's professional world. The programme provided participants with practical strategies to strengthen their communication skills, build a professional identity, and develop leadership qualities essential for academic and career success. Through interactive discussions and real-world examples, the session encouraged members to become confident communicators and future-ready professionals.
+
+========================================================================
+EVENT 9
+TITLE: Launchpad – Skills For Success
+DATE: 16th July 2026
+TIME: 6:00PM Onwards
+VENUE: Google Meet
+MODE: Online
+AVENUE: Professional Development
+DESCRIPTION:
+The Rotaract Club of Presidency University, under the Professional Development Avenue, successfully organized Skills for Success on 16th July 2026 through Google Meet. The session was led by Dr. Machiavelli Singh, who shared valuable insights into the essential skills, mindset, and habits required to achieve long-term personal and professional success. The programme focused on developing competencies beyond academics by highlighting the importance of communication, leadership, critical thinking, professional ethics, and continuous learning. Through practical examples and engaging discussions, participants gained a broader perspective on preparing themselves for future challenges and opportunities.
+
+========================================================================
+EVENT 10
+TITLE: Faces Across the Globe – Different Faces, One World
+DATE: 17th July 2026
+TIME: 10:00AM Onwards
+VENUE: Google Meet
+MODE: Online
+AVENUE: Club Service
+DESCRIPTION:
+The Rotaract Club of Presidency University, under the Club Service Avenue, successfully organized Faces Across the Globe on 17th July 2026. The event was an interactive personality-identification game designed to test participants' general knowledge and observation skills through a series of progressively challenging rounds. Participants were presented with clues and challenged to identify personalities from different fields, including sports, entertainment, business, literature, and history. With a strict no-Google rule, the session encouraged participants to rely on their knowledge, quick thinking, and teamwork while creating a fun and engaging fellowship experience.
+
+========================================================================
+EVENT 11
+TITLE: NELSON MANDELA DAY – 67 Minutes of Service, A Lifetime of Impact
+DATE: 18th July 2026
+TIME: 7:00 PM Onwards
+VENUE: Google Meet
+MODE: Online
+AVENUE: International Service
+DESCRIPTION:
+The Rotaract Club of Presidency University, under the International Service Avenue, organized a virtual session commemorating Nelson Mandela International Day on 18th July 2026. The session focused on the values of service, kindness, equality, forgiveness, and community responsibility associated with Mandela's legacy. The programme provided participants with an insight into Nelson Mandela's life, his 27 years of imprisonment, his role in ending apartheid, and his journey towards becoming South Africa's first Black President. The session also highlighted the significance of dedicating 67 minutes to community service, representing the 67 years Mandela devoted to fighting for freedom.
+
+========================================================================
+FUTURE / ADMIN-UPDATED EVENT TEMPLATE
+
+Use this structure when adding a new event through the Admin Portal or when a description needs to be updated.
+
+EVENT
+TITLE: <Google Drive folder name>
+DATE: <event date>
+TIME: <event time>
+VENUE: <venue/platform>
+MODE: <Online / Offline / Virtual / Hybrid>
+AVENUE: <club service / community service / professional development / international service / other>
+DESCRIPTION:
+<Short public-facing event description>
+
+OPTIONAL FULL DESCRIPTION:
+<Longer event description if required by the Admin Portal>
+
+IMPLEMENTATION NOTE
+Historical event descriptions above are seeded from the supplied Event Reports PDF. The Admin Portal should allow authorized administrators to edit these descriptions and create new event entries without modifying source code. The public portal should always display the current CMS/admin value when an admin update exists; otherwise it should use the historical value from this file.

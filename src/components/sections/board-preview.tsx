@@ -1,12 +1,14 @@
 "use client";
+import type { BoardMember } from "@/services/content-types";
+import { useCMS } from "@/hooks/use-cms";
 
 import { motion } from "framer-motion";
 import ExpandableProfileCard from "@/components/ui/expandable-profile-card";
-import { MOCK_BOARD, BoardMember } from "@/services/mock-data";
 import { Mail } from "lucide-react";
 import { LinkedinIcon } from "@/components/shared/social-icons";
 
 export function BoardPreviewSection() {
+  const { data: members } = useCMS<BoardMember[]>("bod", []);
   return (
     <section id="leadership" className="section-shell relative z-10">
       <div className="mx-auto max-w-3xl text-center">
@@ -40,7 +42,7 @@ export function BoardPreviewSection() {
       </div>
 
       <div className="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {MOCK_BOARD.map((member: BoardMember, idx: number) => (
+        {members.map((member: BoardMember, idx: number) => (
           <motion.div
             key={member.id}
             initial={{ opacity: 0, y: 20 }}

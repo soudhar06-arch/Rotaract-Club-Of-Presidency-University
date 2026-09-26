@@ -1,4 +1,5 @@
 "use client";
+import { adminFetch } from "@/lib/admin-fetch";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -7,7 +8,6 @@ import {
   Briefcase,
   Award,
   ShieldCheck,
-  Activity,
   CheckCircle2,
   AlertTriangle,
   XCircle,
@@ -30,10 +30,10 @@ export default function AdminDashboardPage() {
     recentLogs: AuditLogItem[];
   } | null>(null);
 
-  const [counters, setCounters] = useState({
-    members: 350,
-    projects: 120,
-    bod: 29,
+  const [counters, setCounters] = useState<{ members: number | null; projects: number | null; bod: number | null }>({
+    members: null,
+    projects: null,
+    bod: null,
   });
 
   const [googleReport, setGoogleReport] = useState<GoogleDiagnosticsReport | null>(null);
@@ -41,7 +41,7 @@ export default function AdminDashboardPage() {
 
   const loadDiagnostics = () => {
     setLoadingDiagnostics(true);
-    fetch("/api/admin/google-status")
+    adminFetch("/api/admin/google-status")
       .then((res) => res.json())
       .then((res) => {
         if (res.success) setGoogleReport(res.report);
@@ -51,14 +51,14 @@ export default function AdminDashboardPage() {
   };
 
   useEffect(() => {
-    fetch("/api/admin?module=dashboard")
+    adminFetch("/api/admin?module=dashboard")
       .then((res) => res.json())
       .then((res) => {
         if (res.success) setData(res.data);
       })
       .catch(console.error);
 
-    fetch("/api/counters")
+    adminFetch("/api/counters")
       .then((res) => res.json())
       .then((res) => {
         if (res.success && res.data) {
@@ -71,7 +71,7 @@ export default function AdminDashboardPage() {
       })
       .catch(console.error);
 
-    fetch("/api/admin/google-status")
+    adminFetch("/api/admin/google-status")
       .then((res) => res.json())
       .then((res) => {
         if (res.success) setGoogleReport(res.report);
@@ -131,7 +131,7 @@ export default function AdminDashboardPage() {
             href="/admin/bod"
             className="px-4 py-2.5 rounded-full text-xs font-semibold bg-[#3B82F6] text-white hover:bg-blue-600 transition-colors shadow-lg shadow-[#3B82F6]/25"
           >
-            Manage BOD (29)
+            Manage BOD
           </Link>
           <Link
             href="/admin/projects"
@@ -150,7 +150,7 @@ export default function AdminDashboardPage() {
             <Users className="w-5 h-5 text-[#3B82F6]" />
           </div>
           <div className="text-3xl font-extrabold text-white">
-            <CountUp end={counters.members} />
+            {counters.members === null ? "?" : <CountUp end={counters.members} />}
           </div>
           <p className="text-[10px] text-zinc-500">Google Form Response Sync</p>
         </div>
@@ -161,7 +161,7 @@ export default function AdminDashboardPage() {
             <Briefcase className="w-5 h-5 text-[#3B82F6]" />
           </div>
           <div className="text-3xl font-extrabold text-white">
-            <CountUp end={counters.projects} />
+            {counters.projects === null ? "?" : <CountUp end={counters.projects} />}
           </div>
           <p className="text-[10px] text-zinc-500">Documented Impact Drives</p>
         </div>
@@ -172,7 +172,7 @@ export default function AdminDashboardPage() {
             <Award className="w-5 h-5 text-[#3B82F6]" />
           </div>
           <div className="text-3xl font-extrabold text-white">
-            <CountUp end={counters.bod} />
+            {counters.bod === null ? "?" : <CountUp end={counters.bod} />}
           </div>
           <p className="text-[10px] text-zinc-500">Executive & Directors Roster</p>
         </div>
@@ -183,7 +183,7 @@ export default function AdminDashboardPage() {
             <ShieldCheck className="w-5 h-5 text-[#3B82F6]" />
           </div>
           <div className="text-3xl font-extrabold text-white">
-            <CountUp end={data?.usersCount || 2} />
+            {data ? <CountUp end={data.usersCount} /> : "?"}
           </div>
           <p className="text-[10px] text-zinc-500">Server-Side Protected Roles</p>
         </div>
@@ -198,7 +198,7 @@ export default function AdminDashboardPage() {
             </span>
             <h2 className="text-xl font-bold text-white mt-0.5 flex items-center gap-2">
               <Cloud className="w-5 h-5 text-[#3B82F6]" />
-              <span>Google Sheets & Google Drive Integration Status</span>
+              <span>Integration diagnostics</span>
             </h2>
           </div>
 
@@ -227,7 +227,7 @@ export default function AdminDashboardPage() {
                 : "bg-amber-500/10 text-amber-300 border border-amber-500/30"
             }`}
           >
-            {googleReport?.serviceAccountConfigured ? "KEY LOADED" : "DEV FALLBACK MODE"}
+            {googleReport?.serviceAccountConfigured ? "KEY LOADED" : "CONFIGURATION REQUIRED"}
           </span>
         </div>
 
@@ -236,7 +236,7 @@ export default function AdminDashboardPage() {
           <div className="space-y-3">
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
               <FileSpreadsheet className="w-4 h-4 text-[#3B82F6]" />
-              <span>Google Sheets Counters</span>
+              <span>Google Sheets Sources</span>
             </h3>
 
             <div className="space-y-2">
@@ -292,36 +292,9 @@ export default function AdminDashboardPage() {
 
       {/* Grid: System Status & Audit Trail */}
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Protected Infrastructure Status */}
-        <div className="p-6 rounded-3xl border border-white/10 bg-[#0E121E]/80 backdrop-blur-xl space-y-4">
-          <div className="flex items-center justify-between border-b border-white/10 pb-4">
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <Activity className="w-4 h-4 text-[#3B82F6]" />
-              Infrastructure & Security Health
-            </h3>
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-              OPERATIONAL
-            </span>
-          </div>
-
-          <div className="space-y-3 text-xs text-zinc-300">
-            <div className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/5">
-              <span>Server-Side Authentication & Session Cookies</span>
-              <span className="text-emerald-400 font-mono font-bold">Active</span>
-            </div>
-            <div className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/5">
-              <span>Multi-Image Project Gallery Engine</span>
-              <span className="text-emerald-400 font-mono font-bold">Enabled</span>
-            </div>
-            <div className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/5">
-              <span>Google Service Account API Integration</span>
-              <span className="text-emerald-400 font-mono font-bold">Ready</span>
-            </div>
-            <div className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/5">
-              <span>Disk JSON Persistence Engine</span>
-              <span className="text-emerald-400 font-mono font-bold">Sync Active</span>
-            </div>
-          </div>
+        <div className="space-y-4 rounded-3xl border border-white/10 bg-[#0E121E]/80 p-6">
+          <h3 className="text-base font-bold">Calendar, AI, database, storage & email</h3>
+          {googleReport?.services.map(item => <div key={item.name} className="space-y-2 rounded-xl bg-white/5 p-4"><div className="flex flex-wrap items-center justify-between gap-2"><span className="text-sm font-semibold">{item.name}</span>{renderStatusBadge(item)}</div><p className="text-xs text-zinc-400">{item.message}</p></div>)}
         </div>
 
         {/* Recent Audit Trail Preview */}

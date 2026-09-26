@@ -1,130 +1,33 @@
-import { CMSStore } from "@/lib/cms-store";
+import "server-only";
+import { CMSStore } from "./cms-store";
+import { getSheetRowCount, type SheetCounterResult } from "@/lib/google-sheets-service";
 
 export interface CounterData {
-  members: number;
-  projects: number;
-  bod: number;
+  members: number | null;
+  projects: number | null;
+  bod: number | null;
   isLive: {
     members: boolean;
     projects: boolean;
     bod: boolean;
   };
+  diagnostics: {
+    members: SheetCounterResult;
+    projects: SheetCounterResult;
+    bod: SheetCounterResult;
+  };
   lastUpdated: string;
 }
 
-/**
- * Utility to parse CSV text into rows of columns.
- */
-function parseCsvRows(csvText: string): string[][] {
-  const lines = csvText.split(/\r?\n/);
-  const rows: string[][] = [];
-
-  for (const line of lines) {
-    if (!line.trim()) continue;
-    const cols = line.split(",").map((col) => col.trim().replace(/^"|"$/g, ""));
-    rows.push(cols);
-  }
-
-  return rows;
-}
-
-/**
- * Filter out header rows, blank rows, and malformed rows.
- */
-function filterValidRows(rows: string[][]): string[][] {
-  if (rows.length === 0) return [];
-  const dataRows = rows.slice(1);
-
-  return dataRows.filter((row) => {
-    const hasData = row.some((cell) => cell.trim().length > 0);
-    const isPlaceholder =
-      row.join(" ").toLowerCase().includes("blank") ||
-      row.join(" ").toLowerCase().includes("empty");
-    return hasData && !isPlaceholder;
-  });
-}
-
-/**
- * Fetches row count from a public Google Sheet.
- */
-async function fetchSheetRowCount(sheetUrlOrId: string | undefined): Promise<{ count: number; isLive: boolean }> {
-  if (!sheetUrlOrId || !sheetUrlOrId.trim()) {
-    return { count: 0, isLive: false };
-  }
-
-  try {
-    let fetchUrl = sheetUrlOrId.trim();
-
-    if (fetchUrl.includes("docs.google.com/spreadsheets/d/")) {
-      const match = fetchUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
-      if (match && match[1]) {
-        const sheetId = match[1];
-        fetchUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`;
-      }
-    } else if (!fetchUrl.startsWith("http")) {
-      fetchUrl = `https://docs.google.com/spreadsheets/d/${fetchUrl}/export?format=csv`;
-    }
-
-    const response = await fetch(fetchUrl, {
-      next: { revalidate: 300 },
-      headers: {
-        "User-Agent": "RCPU-Website-Counter/1.0",
-      },
-    });
-
-    if (!response.ok) {
-      return { count: 0, isLive: false };
-    }
-
-    const csvText = await response.text();
-    const parsedRows = parseCsvRows(csvText);
-    const validRows = filterValidRows(parsedRows);
-
-    return { count: validRows.length, isLive: true };
-  } catch (error) {
-    console.error("[Google Sheets Counter Error]:", error);
-    return { count: 0, isLive: false };
-  }
-}
-
-/**
- * Centralized service to get live impact counters across all three sources.
- */
+/** Counters use the same authoritative records as the public lists. */
 export async function getLiveImpactCounters(): Promise<CounterData> {
-  const config = CMSStore.getConfig();
-
-  const membersSheetSource =
-    config.googleSheetsMembersUrl ||
-    process.env.GOOGLE_SHEET_MEMBERS_URL ||
-    process.env.NEXT_PUBLIC_MEMBERSHIP_FORM_SHEET_URL;
-
-  const projectsSheetSource =
-    config.googleSheetsProjectsUrl ||
-    process.env.GOOGLE_SHEET_PROJECTS_URL;
-
-  const bodSheetSource =
-    config.googleSheetsBodUrl ||
-    process.env.GOOGLE_SHEET_BOD_URL;
-
-  const [membersRes, projectsRes, bodRes] = await Promise.all([
-    fetchSheetRowCount(membersSheetSource),
-    fetchSheetRowCount(projectsSheetSource),
-    fetchSheetRowCount(bodSheetSource),
-  ]);
-
-  const fallbackBODCount = CMSStore.getBODMembers().length;
-  const fallbackProjectsCount = CMSStore.getProjects().length;
-  const fallbackMembersCount = 350;
-
-  return {
-    members: membersRes.isLive ? membersRes.count : fallbackMembersCount,
-    projects: projectsRes.isLive ? projectsRes.count : fallbackProjectsCount,
-    bod: bodRes.isLive ? bodRes.count : fallbackBODCount,
-    isLive: {
-      members: membersRes.isLive,
-      projects: projectsRes.isLive,
-      bod: bodRes.isLive,
-    },
-    lastUpdated: new Date().toISOString(),
+  const fromCMS = async (read: () => Promise<unknown[]>): Promise<SheetCounterResult> => {
+    try { return { count: (await read()).length, isLive: true, source: "CMS", status: "CONNECTED" }; }
+    catch { return { count: null, isLive: false, source: "UNAVAILABLE", status: "NOT_CONFIGURED", errorMessage: "Configure Supabase and apply supabase/schema.sql. BOD and project counters use their published CMS lists." }; }
   };
+  const [members, projects, bod] = await Promise.all([
+    getSheetRowCount(process.env.GOOGLE_SHEETS_MEMBERSHIP_ID, process.env.GOOGLE_SHEETS_MEMBERSHIP_TAB),
+    fromCMS(() => CMSStore.getProjects()), fromCMS(() => CMSStore.getBODMembers()),
+  ]);
+  return { members: members.count, projects: projects.count, bod: bod.count, isLive: { members: members.isLive, projects: projects.isLive, bod: bod.isLive }, diagnostics: { members, projects, bod }, lastUpdated: new Date().toISOString() };
 }

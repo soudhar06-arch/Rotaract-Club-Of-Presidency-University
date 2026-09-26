@@ -1,9 +1,11 @@
 "use client";
+import { adminFetch } from "@/lib/admin-fetch";
 
 import { useEffect, useState, useCallback } from "react";
-import Image from "next/image";
+import Image from "@/components/shared/content-image";
 import { Plus, Trash2, Search, Save, X, RefreshCw } from "lucide-react";
-import { MediaItem } from "@/lib/cms-store";
+import { MediaPicker } from "@/components/shared/media-picker";
+import type { MediaItem } from "@/lib/cms-store";
 
 export default function GalleryAdminPage() {
   const [items, setItems] = useState<MediaItem[]>([]);
@@ -13,14 +15,14 @@ export default function GalleryAdminPage() {
 
   const [formData, setFormData] = useState<Partial<MediaItem>>({
     name: "",
-    url: "/gallery/gallery-1.jpeg",
+    url: "",
     category: "Gallery",
     uploadedAt: new Date().toISOString().split("T")[0],
   });
 
   const loadGallery = useCallback(() => {
     setLoading(true);
-    fetch("/api/admin?module=gallery")
+    adminFetch("/api/admin?module=gallery")
       .then((res) => res.json())
       .then((res) => {
         if (res.success) setItems(res.data);
@@ -30,9 +32,10 @@ export default function GalleryAdminPage() {
 
   useEffect(() => {
     let ignore = false;
-    fetch("/api/admin?module=gallery")
+    adminFetch("/api/admin?module=gallery")
       .then((res) => res.json())
       .then((res) => {
+        if (!ignore) setLoading(false);
         if (!ignore && res.success) {
           setItems(res.data);
           setLoading(false);
@@ -50,7 +53,7 @@ export default function GalleryAdminPage() {
     e.preventDefault();
     if (!formData.name || !formData.url) return;
 
-    const res = await fetch("/api/admin", {
+    const res = await adminFetch("/api/admin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ module: "gallery", action: "create", payload: formData }),
@@ -66,7 +69,7 @@ export default function GalleryAdminPage() {
   const handleDelete = async (id: string, name: string) => {
     if (!confirm(`Are you sure you want to delete media item: "${name}"?`)) return;
 
-    const res = await fetch("/api/admin", {
+    const res = await adminFetch("/api/admin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ module: "gallery", action: "delete", payload: { id } }),
@@ -106,7 +109,7 @@ export default function GalleryAdminPage() {
             onClick={() => {
               setFormData({
                 name: "",
-                url: "/gallery/gallery-1.jpeg",
+                url: "",
                 category: "Gallery",
                 uploadedAt: new Date().toISOString().split("T")[0],
               });
@@ -197,6 +200,7 @@ export default function GalleryAdminPage() {
               </div>
             </div>
 
+            <MediaPicker category="gallery" value={formData.url} onChange={url => setFormData({ ...formData, url })} />
             <div className="flex justify-end gap-3 pt-2">
               <button
                 type="button"

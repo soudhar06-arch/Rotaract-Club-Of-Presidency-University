@@ -1,9 +1,12 @@
 "use client";
+import { adminFetch } from "@/lib/admin-fetch";
 
 import { useEffect, useState, useCallback } from "react";
-import Image from "next/image";
+import Image from "@/components/shared/content-image";
 import { Plus, Edit2, Trash2, Search, Save, X, RefreshCw } from "lucide-react";
-import { BODMember } from "@/lib/cms-store";
+import { MediaPicker } from "@/components/shared/media-picker";
+import { BOARD_ROLES } from "@/lib/board-order";
+import type { BODMember } from "@/lib/cms-store";
 
 export default function BODAdminPage() {
   const [members, setMembers] = useState<BODMember[]>([]);
@@ -18,7 +21,9 @@ export default function BODAdminPage() {
     category: "Director",
     bio: "",
     quote: "",
-    image: "/gallery/gallery-1.jpeg",
+    image: "",
+    isActive: true,
+    displayOrder: 0,
     instagram: "",
     linkedin: "",
     email: "",
@@ -26,7 +31,7 @@ export default function BODAdminPage() {
 
   const loadMembers = useCallback(() => {
     setLoading(true);
-    fetch("/api/admin?module=bod")
+    adminFetch("/api/admin?module=bod")
       .then((res) => res.json())
       .then((res) => {
         if (res.success) setMembers(res.data);
@@ -36,9 +41,10 @@ export default function BODAdminPage() {
 
   useEffect(() => {
     let ignore = false;
-    fetch("/api/admin?module=bod")
+    adminFetch("/api/admin?module=bod")
       .then((res) => res.json())
       .then((res) => {
+        if (!ignore) setLoading(false);
         if (!ignore && res.success) {
           setMembers(res.data);
           setLoading(false);
@@ -61,7 +67,7 @@ export default function BODAdminPage() {
       ? { ...editingMember, ...formData }
       : formData;
 
-    const res = await fetch("/api/admin", {
+    const res = await adminFetch("/api/admin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ module: "bod", action, payload }),
@@ -78,7 +84,7 @@ export default function BODAdminPage() {
   const handleDelete = async (id: string, name: string) => {
     if (!confirm(`Are you sure you want to remove ${name} from the BOD list?`)) return;
 
-    const res = await fetch("/api/admin", {
+    const res = await adminFetch("/api/admin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ module: "bod", action: "delete", payload: { id } }),
@@ -123,7 +129,9 @@ export default function BODAdminPage() {
                 category: "Director",
                 bio: "",
                 quote: "",
-                image: "/gallery/gallery-1.jpeg",
+                image: "",
+    isActive: true,
+    displayOrder: 0,
                 instagram: "",
                 linkedin: "",
                 email: "",
@@ -155,7 +163,7 @@ export default function BODAdminPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
           <form
             onSubmit={handleSave}
-            className="w-full max-w-2xl rounded-3xl border border-white/15 bg-[#0F121C] p-6 sm:p-8 space-y-5 shadow-2xl relative"
+            className="w-full max-w-2xl rounded-3xl border border-white/15 bg-[#0F121C] p-6 sm:p-8 space-y-5 shadow-2xl relative max-h-[90vh] overflow-y-auto"
           >
             <button
               type="button"
@@ -168,6 +176,7 @@ export default function BODAdminPage() {
               <X className="w-4 h-4" />
             </button>
 
+            <datalist id="board-roles">{BOARD_ROLES.map(role => <option key={role} value={role} />)}</datalist>
             <h2 className="text-xl font-bold text-white">
               {editingMember ? `Edit Profile — ${editingMember.name}` : "Add New BOD Member"}
             </h2>
@@ -192,6 +201,7 @@ export default function BODAdminPage() {
                 </label>
                 <input
                   required
+                  list="board-roles"
                   value={formData.role || ""}
                   onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                   placeholder="e.g. President"
@@ -215,19 +225,12 @@ export default function BODAdminPage() {
                 </select>
               </div>
 
-              <div>
-                <label className="block text-xs font-mono uppercase text-zinc-400 mb-1">
-                  Profile Photo URL
-                </label>
-                <input
-                  value={formData.image || ""}
-                  onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                  placeholder="/gallery/gallery-1.jpeg"
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs text-white"
-                />
-              </div>
             </div>
 
+            <MediaPicker value={formData.image} onChange={image => setFormData({ ...formData, image })} />
+            <label className="block text-sm">Order within this role<input type="number" min="0" value={formData.displayOrder ?? 0} onChange={e => setFormData({ ...formData, displayOrder: Number(e.target.value) })} className="ml-3 w-24 rounded-lg bg-white/5 p-2" /></label>
+            <p className="text-xs text-zinc-400">Roles follow Hierarchy.txt; this value reorders members with the same role.</p>
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={formData.isActive !== false} onChange={e => setFormData({ ...formData, isActive: e.target.checked })} />Active on the public website</label>
             <div>
               <label className="block text-xs font-mono uppercase text-zinc-400 mb-1">
                 Bio / Role Description
@@ -291,13 +294,13 @@ export default function BODAdminPage() {
               <div className="space-y-3">
                 <div className="relative h-44 w-full rounded-xl overflow-hidden bg-zinc-900 border border-white/10">
                   <Image
-                    src={member.image || "/gallery/gallery-1.jpeg"}
+                    src={member.image || "/images/no-photo.svg"}
                     alt={member.name}
                     fill
                     className="object-cover object-top"
                   />
                   <span className="absolute top-2 right-2 px-2.5 py-0.5 rounded-full text-[9px] font-mono uppercase bg-black/60 backdrop-blur-md text-blue-300 border border-white/10 font-bold">
-                    {member.category}
+                    {member.category} ? {member.isActive === false ? "Inactive" : "Active"}
                   </span>
                 </div>
 

@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
-import { CMSStore } from "@/lib/cms-store";
+import { CMSConfigurationError, CMSStore } from "@/lib/cms-store";
+import { getPublicGallery } from "@/lib/gallery-service";
+import { readPublicCollection } from "@/lib/public-content";
+import { getEventFeed } from "@/lib/event-service";
+import { getDriveBoard, getDriveProjects } from "@/lib/google-drive-service";
 
-export const revalidate = 0; // Live data endpoint without caching lag
+export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -10,32 +14,39 @@ export async function GET(req: Request) {
   try {
     switch (moduleName) {
       case "bod":
-        return NextResponse.json({ success: true, data: CMSStore.getBODMembers() });
+        try { return NextResponse.json({ success: true, data: await CMSStore.getBODMembers() }); }
+        catch { return NextResponse.json({ success: true, data: await getDriveBoard() }); }
       case "projects":
-        return NextResponse.json({ success: true, data: CMSStore.getProjects() });
+        try { return NextResponse.json({ success: true, data: await CMSStore.getProjects() }); }
+        catch { return NextResponse.json({ success: true, data: await getDriveProjects() }); }
       case "events":
-        return NextResponse.json({ success: true, data: CMSStore.getEvents() });
+        return NextResponse.json({ success: true, data: (await getEventFeed()).events });
       case "faq":
-        return NextResponse.json({ success: true, data: CMSStore.getFAQs() });
+        return NextResponse.json({ success: true, data: await CMSStore.getFAQs() });
       case "gallery":
-        return NextResponse.json({ success: true, data: CMSStore.getGallery() });
+        return NextResponse.json({ success: true, data: await getPublicGallery() });
       case "config":
-        return NextResponse.json({ success: true, data: CMSStore.getConfig() });
-      default:
-        return NextResponse.json({
-          success: true,
-          data: {
-            bod: CMSStore.getBODMembers(),
-            projects: CMSStore.getProjects(),
-            events: CMSStore.getEvents(),
-            faq: CMSStore.getFAQs(),
-            gallery: CMSStore.getGallery(),
-            config: CMSStore.getConfig(),
-          },
-        });
+        return NextResponse.json({ success: true, data: await CMSStore.getConfig() });
+      case "partners":
+      case "awards":
+      case "testimonials":
+      case "timeline":
+      case "avenues":
+        return NextResponse.json({ success: true, data: await readPublicCollection(moduleName) });
+      default: {
+        const [bod, projects, events, faq, gallery, config] = await Promise.all([
+          CMSStore.getBODMembers(),
+          CMSStore.getProjects(),
+          CMSStore.getEvents(),
+          CMSStore.getFAQs(),
+          CMSStore.getGallery(),
+          CMSStore.getConfig(),
+        ]);
+        return NextResponse.json({ success: true, data: { bod, projects, events, faq, gallery, config } });
+      }
     }
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Public CMS API error";
-    return NextResponse.json({ success: false, error: message }, { status: 500 });
+  } catch (error) {
+    const configured = !(error instanceof CMSConfigurationError);
+    return NextResponse.json({ success: false, configured, error: "Content is temporarily unavailable." }, { status: configured ? 500 : 503 });
   }
 }

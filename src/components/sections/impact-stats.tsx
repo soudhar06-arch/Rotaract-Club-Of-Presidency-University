@@ -1,42 +1,14 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { CountUp } from "@/components/shared/count-up";
-import { Users, Heart, Award, Calendar } from "lucide-react";
-
-const STATS = [
-  {
-    icon: Users,
-    label: "Active Members",
-    value: 250,
-    suffix: "+",
-    description:
-      "Passionate student leaders across engineering, business, & design.",
-  },
-  {
-    icon: Heart,
-    label: "Blood Units Donated",
-    value: 450,
-    suffix: "+",
-    description: "Collected through annual mega blood donation drives.",
-  },
-  {
-    icon: Calendar,
-    label: "Projects Completed",
-    value: 65,
-    suffix: "+",
-    description: "Community, professional, and environmental initiatives.",
-  },
-  {
-    icon: Award,
-    label: "District Awards",
-    value: 12,
-    suffix: "+",
-    description: "Conferred by Rotary International District 3191.",
-  },
-];
+import { Users, Award, Calendar } from "lucide-react";
 
 export function ImpactStatsSection() {
+  const [counts, setCounts] = useState<{ members: number | null; projects: number | null; bod: number | null }>({ members: null, projects: null, bod: null });
+  useEffect(() => { fetch("/api/counters").then(r => r.json()).then(r => { if (r.success) setCounts(r.data); }).catch(() => {}); }, []);
+  const stats = [{ icon: Users, label: "Members", value: counts.members, description: "Membership responses" }, { icon: Calendar, label: "Projects", value: counts.projects, description: "Published projects" }, { icon: Award, label: "BOD Members", value: counts.bod, description: "Active leadership" }];
   return (
     <section className="section-shell relative z-10">
       <div className="mx-auto max-w-3xl text-center">
@@ -60,7 +32,7 @@ export function ImpactStatsSection() {
       </div>
 
       <div className="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {STATS.map((stat, idx) => {
+        {stats.map((stat, idx) => {
           const Icon = stat.icon;
           return (
             <motion.div
@@ -75,7 +47,7 @@ export function ImpactStatsSection() {
                 <Icon className="h-6 w-6" />
               </div>
               <div className="text-3xl font-extrabold text-white sm:text-4xl">
-                <CountUp end={stat.value} suffix={stat.suffix} once={false} />
+                {stat.value === null ? "?" : <CountUp end={stat.value} once={false} />}
               </div>
               <h3 className="mt-2 text-sm font-semibold text-white">
                 {stat.label}

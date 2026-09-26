@@ -1,33 +1,12 @@
 "use client";
+import { useCMS } from "@/hooks/use-cms";
 
 import { motion } from "framer-motion";
 import { Award, Sparkles } from "lucide-react";
 
-const AWARDS_TIMELINE = [
-  {
-    year: "2025-2026",
-    title: "Best Outstanding Rotaract Club (District 3191)",
-    category: "District Excellence",
-    description:
-      "Awarded for exceptional community impact, financial transparency, and active membership engagement across all chapter avenues.",
-  },
-  {
-    year: "2024-2025",
-    title: "Best Community Service Initiative",
-    category: "Project Honor",
-    description:
-      "Recognized for the Green Campus Revolution ecological campaign planting over 1,000 native trees.",
-  },
-  {
-    year: "2023-2024",
-    title: "Excellence in Youth Leadership & Literacy",
-    category: "Leadership Recognition",
-    description:
-      "Honored for conducting over 15 digital literacy workshops in rural public schools.",
-  },
-];
-
 export function AwardsPreviewSection() {
+  const { data: records } = useCMS<{ title: string; year: string; description: string; awarding_body: string }[]>("awards", []);
+  const AWARDS_TIMELINE = records.map(r => ({ ...r, category: r.awarding_body }));
   return (
     <section className="section-shell border-y border-[color:var(--color-border)] bg-[color:var(--color-bg-secondary)]/30 py-20">
       <div className="mx-auto mb-16 max-w-xl space-y-3 text-center">
@@ -38,7 +17,7 @@ export function AwardsPreviewSection() {
           A Legacy of Excellence
         </h2>
         <p className="text-body text-[color:var(--color-text-secondary)]">
-          Our chapter continuously earns recognition across Rotary District 3191
+          Our chapter continuously earns recognition across Rotary District 3192
           for impactful service and leadership.
         </p>
       </div>

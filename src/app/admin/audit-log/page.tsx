@@ -1,4 +1,5 @@
 "use client";
+import { adminFetch } from "@/lib/admin-fetch";
 
 import { useEffect, useState, useCallback } from "react";
 import { FileText, RefreshCw } from "lucide-react";
@@ -8,7 +9,7 @@ export default function AuditAdminPage() {
   const [logs, setLogs] = useState<AuditLogItem[]>([]);
 
   const loadLogs = useCallback(() => {
-    fetch("/api/admin?module=audit")
+    adminFetch("/api/admin?module=audit")
       .then((res) => res.json())
       .then((res) => {
         if (res.success) setLogs(res.data);
@@ -18,7 +19,7 @@ export default function AuditAdminPage() {
 
   useEffect(() => {
     let ignore = false;
-    fetch("/api/admin?module=audit")
+    adminFetch("/api/admin?module=audit")
       .then((res) => res.json())
       .then((res) => {
         if (!ignore && res.success) {

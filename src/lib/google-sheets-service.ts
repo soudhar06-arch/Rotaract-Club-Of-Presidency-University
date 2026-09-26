@@ -1,169 +1,78 @@
+import "server-only";
+import { cached } from "./server-cache";
+import { configuredValue, googleResourceId } from "./google-auth";
 import { google } from "googleapis";
-import { CMSStore } from "@/lib/cms-store";
 
 export interface SheetCounterResult {
-  count: number;
+  count: number | null;
   isLive: boolean;
-  source: "SERVICE_ACCOUNT" | "PUBLIC_CSV" | "FALLBACK";
-  status: "CONNECTED" | "NOT_CONFIGURED" | "AUTHENTICATION_FAILED" | "PERMISSION_DENIED" | "RESOURCE_NOT_FOUND" | "ERROR";
+  source: "SERVICE_ACCOUNT" | "PUBLIC_CSV" | "CMS" | "UNAVAILABLE";
+  status: "CONNECTED" | "NOT_CONFIGURED" | "AUTHENTICATION_FAILED" | "PERMISSION_DENIED" | "RESOURCE_NOT_FOUND" | "API_ERROR";
   errorMessage?: string;
 }
 
-// Service Account JWT Client
 function getGoogleAuthClient() {
-  const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-  let privateKey = process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;
-
-  if (!clientEmail || !privateKey) {
-    return null;
-  }
-
-  // Handle escaped newline characters in private key string
-  if (privateKey.includes("\\n")) {
-    privateKey = privateKey.replace(/\\n/g, "\n");
-  }
-
-  try {
-    return new google.auth.JWT({
-      email: clientEmail,
-      key: privateKey,
-      scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
-    });
-  } catch (err) {
-    console.error("[Google Auth Error]:", err);
-    return null;
-  }
-}
-
-/**
- * Filter out header rows, blank rows, and placeholder entries.
- */
-function filterValidSheetRows(rows: string[][]): string[][] {
-  if (!rows || rows.length <= 1) return [];
-  const dataRows = rows.slice(1);
-
-  return dataRows.filter((row) => {
-    const hasContent = row.some((cell) => cell && cell.trim().length > 0);
-    const textContent = row.join(" ").toLowerCase();
-    const isPlaceholder = textContent.includes("blank") || textContent.includes("empty placeholder");
-    return hasContent && !isPlaceholder;
+  const email = configuredValue(process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL);
+  const rawKey = configuredValue(process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY);
+  if (!email || !rawKey) return null;
+  return new google.auth.JWT({
+    email,
+    key: rawKey.replace(/\\n/g, "\n"),
+    scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
   });
 }
 
-/**
- * Count rows from Google Sheet using Service Account API with CSV fallback.
- */
-export async function getSheetRowCount(
-  spreadsheetId?: string,
-  tabName?: string
-): Promise<SheetCounterResult> {
-  const sheetId = spreadsheetId?.trim();
-  if (!sheetId) {
-    return {
-      count: 0,
-      isLive: false,
-      source: "FALLBACK",
-      status: "NOT_CONFIGURED",
-      errorMessage: "Sheet ID is not configured in environment variables.",
-    };
-  }
+function countDataRows(rows: string[][] | undefined): number {
+  if (!rows?.length) return 0;
+  return rows.slice(1).filter((row) => row.some((cell) => String(cell ?? "").trim())).length;
+}
 
-  // 1. Try Service Account Google Sheets API
-  const auth = getGoogleAuthClient();
-  if (auth) {
-    try {
-      const sheets = google.sheets({ version: "v4", auth });
-      const range = tabName ? `'${tabName}'!A:Z` : "A:Z";
-
-      const res = await sheets.spreadsheets.values.get({
-        spreadsheetId: sheetId,
-        range,
-      });
-
-      const rows = res.data.values as string[][] | undefined;
-      const validRows = filterValidSheetRows(rows || []);
-
-      return {
-        count: validRows.length,
-        isLive: true,
-        source: "SERVICE_ACCOUNT",
-        status: "CONNECTED",
-      };
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.warn(`[Google Sheets API Warning for ${sheetId}]:`, msg);
-      // Fallback to public CSV export below
-    }
-  }
-
-  // 2. Try Public CSV Export URL
-  try {
-    const csvUrl = sheetId.includes("docs.google.com")
-      ? sheetId
-      : `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv${tabName ? `&sheet=${encodeURIComponent(tabName)}` : ""}`;
-
-    const res = await fetch(csvUrl, {
-      next: { revalidate: 300 },
-      headers: { "User-Agent": "RCPU-Website-Sheets/1.0" },
-    });
-
-    if (res.ok) {
-      const text = await res.text();
-      const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
-      const rows = lines.map((l) => l.split(",").map((c) => c.replace(/^"|"$/g, "").trim()));
-      const validRows = filterValidSheetRows(rows);
-
-      return {
-        count: validRows.length,
-        isLive: true,
-        source: "PUBLIC_CSV",
-        status: "CONNECTED",
-      };
-    }
-  } catch {
-    // CSV fallback failed
-  }
-
-  return {
-    count: 0,
-    isLive: false,
-    source: "FALLBACK",
-    status: "PERMISSION_DENIED",
-    errorMessage: "Could not access Google Sheet. Please share sheet with service account email.",
-  };
+function statusFromError(error: unknown): SheetCounterResult["status"] {
+  const message = error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
+  if (message.includes("403") || message.includes("permission")) return "PERMISSION_DENIED";
+  if (message.includes("404") || message.includes("not found")) return "RESOURCE_NOT_FOUND";
+  if (message.includes("auth") || message.includes("credential")) return "AUTHENTICATION_FAILED";
+  return "API_ERROR";
 }
 
 /**
- * Fetch live counts for Membership, Projects, and BOD sheets.
+ * Counts real data rows only. There are no production content fallbacks: an
+ * unavailable source is reported as unavailable so the UI can render an
+ * honest empty state and the admin diagnostics can explain why.
  */
-export async function getLiveGoogleCounters() {
-  const memSheet = process.env.GOOGLE_SHEETS_MEMBERSHIP_ID || process.env.GOOGLE_SHEET_MEMBERS_URL;
-  const projSheet = process.env.GOOGLE_SHEETS_PROJECTS_ID || process.env.GOOGLE_SHEET_PROJECTS_URL;
-  const bodSheet = process.env.GOOGLE_SHEETS_BOD_ID || process.env.GOOGLE_SHEET_BOD_URL;
+export async function getSheetRowCount(spreadsheetId?: string, tabName?: string): Promise<SheetCounterResult> {
+  const sheetId = googleResourceId(spreadsheetId);
+  if (!sheetId) {
+    return { count: null, isLive: false, source: "UNAVAILABLE", status: "NOT_CONFIGURED", errorMessage: "Configure the spreadsheet ID and tab name." };
+  }
 
-  const [membershipRes, projectsRes, bodRes] = await Promise.all([
-    getSheetRowCount(memSheet, process.env.GOOGLE_SHEETS_MEMBERSHIP_TAB),
-    getSheetRowCount(projSheet, process.env.GOOGLE_SHEETS_PROJECTS_TAB),
-    getSheetRowCount(bodSheet, process.env.GOOGLE_SHEETS_BOD_TAB),
+  const auth = getGoogleAuthClient();
+  if (!auth) {
+    return { count: null, isLive: false, source: "UNAVAILABLE", status: "AUTHENTICATION_FAILED", errorMessage: "Set GOOGLE_SERVICE_ACCOUNT_EMAIL and GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY." };
+  }
+
+  try {
+    const sheets = google.sheets({ version: "v4", auth });
+    const range = tabName?.trim() ? `'${tabName.trim().replace(/'/g, "''")}'!A:ZZ` : "A:ZZ";
+    const { data } = await cached(`sheet:${sheetId}:${range}`, 60000, () => sheets.spreadsheets.values.get({ spreadsheetId: sheetId, range }, { timeout: 15000 }));
+    return { count: countDataRows(data.values as string[][] | undefined), isLive: true, source: "SERVICE_ACCOUNT", status: "CONNECTED" };
+  } catch (error) {
+    return {
+      count: null,
+      isLive: false,
+      source: "UNAVAILABLE",
+      status: statusFromError(error),
+      errorMessage: error instanceof Error ? error.message : "Google Sheets request failed.",
+    };
+  }
+}
+
+export async function getLiveGoogleCounters() {
+  const [membership, projects, bod] = await Promise.all([
+    getSheetRowCount(process.env.GOOGLE_SHEETS_MEMBERSHIP_ID, process.env.GOOGLE_SHEETS_MEMBERSHIP_TAB),
+    getSheetRowCount(process.env.GOOGLE_SHEETS_PROJECTS_ID, process.env.GOOGLE_SHEETS_PROJECTS_TAB),
+    getSheetRowCount(process.env.GOOGLE_SHEETS_BOD_ID, process.env.GOOGLE_SHEETS_BOD_TAB),
   ]);
 
-  const fallbackBOD = CMSStore.getBODMembers().length;
-  const fallbackProjects = CMSStore.getProjects().length;
-  const fallbackMembers = 350;
-
-  return {
-    membership: {
-      count: membershipRes.isLive ? membershipRes.count : fallbackMembers,
-      details: membershipRes,
-    },
-    projects: {
-      count: projectsRes.isLive ? projectsRes.count : fallbackProjects,
-      details: projectsRes,
-    },
-    bod: {
-      count: bodRes.isLive ? bodRes.count : fallbackBOD,
-      details: bodRes,
-    },
-    lastUpdated: new Date().toISOString(),
-  };
+  return { membership, projects, bod, lastUpdated: new Date().toISOString() };
 }

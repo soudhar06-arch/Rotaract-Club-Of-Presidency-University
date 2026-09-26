@@ -1,12 +1,15 @@
 "use client";
+import type { ProjectItem } from "@/lib/cms-store";
+import { useCMS } from "@/hooks/use-cms";
 
 import { useState } from "react";
 import { motion } from "framer-motion";
 import ExpandableProfileCard from "@/components/ui/expandable-profile-card";
-import { MOCK_PROJECTS } from "@/services/mock-data";
 import { Tag, Trophy } from "lucide-react";
 
 export function FeaturedProjectSection() {
+  const { data: records } = useCMS<ProjectItem[]>("projects", []);
+  const projects = records.map(p => ({ ...p, summary: p.shortDescription || "", description: p.fullDescription || p.description || "", image: p.image || "/images/no-photo.svg", impactMetric: p.participants !== undefined ? `${p.participants} participants` : "", tags: [p.category], year: p.date?.slice(0, 4) || "" }));
   const [activeFilter, setActiveFilter] = useState<string>("All");
 
   const categories = [
@@ -19,8 +22,8 @@ export function FeaturedProjectSection() {
 
   const filteredProjects =
     activeFilter === "All"
-      ? MOCK_PROJECTS
-      : MOCK_PROJECTS.filter((p) => p.category === activeFilter);
+      ? projects
+      : projects.filter((p) => p.category === activeFilter);
 
   return (
     <section id="projects" className="section-shell relative z-10">

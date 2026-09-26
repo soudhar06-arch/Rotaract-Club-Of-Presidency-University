@@ -74,7 +74,7 @@ export function Card5({ event, onClose }: Card5Props) {
       <CardContent className="p-0 relative">
         <div className="relative aspect-16/9 w-full overflow-hidden">
           <Image
-            src={displayEvent.image}
+            src={displayEvent.image || "/images/no-photo.svg"}
             alt={displayEvent.title}
             fill
             sizes="(max-width: 768px) 100vw, 600px"
@@ -84,7 +84,7 @@ export function Card5({ event, onClose }: Card5Props) {
 
           <div className="absolute top-4 left-4 flex gap-2">
             <Badge variant="default" className="bg-[#3B82F6] text-white border-0">
-              {displayEvent.category}
+              {displayEvent.category || "Club Calendar"}
             </Badge>
             <Badge variant="secondary" className="bg-black/60 backdrop-blur-md text-xs text-white">
               {displayEvent.status === "upcoming" ? "Upcoming" : "Past Event"}

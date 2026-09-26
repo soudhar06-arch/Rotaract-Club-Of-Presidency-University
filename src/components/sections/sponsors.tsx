@@ -1,16 +1,11 @@
 "use client";
+import { useCMS } from "@/hooks/use-cms";
 
 import { motion } from "framer-motion";
 
-const SPONSORS = [
-  { name: "Rotary District 3191", category: "Parent District" },
-  { name: "Presidency University", category: "Charter Partner" },
-  { name: "Karnataka Forest Dept", category: "Environmental Partner" },
-  { name: "Red Cross Society", category: "Health Partner" },
-  { name: "Youth Empowerment Trust", category: "Community Sponsor" },
-];
-
 export function SponsorsSection() {
+  const { data: records } = useCMS<{ name: string; description: string }[]>("partners", []);
+  const SPONSORS = records.map(r => ({ ...r, category: r.description }));
   return (
     <section className="section-shell border-t border-[color:var(--color-border)] bg-[color:var(--color-bg-primary)] py-16">
       <div className="mb-10 text-center">

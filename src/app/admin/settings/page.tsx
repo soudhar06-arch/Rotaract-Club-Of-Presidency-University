@@ -1,4 +1,5 @@
 "use client";
+import { adminFetch } from "@/lib/admin-fetch";
 
 import { useEffect, useState, useCallback } from "react";
 import { Save, RefreshCw, CheckCircle, Building, Mail, Phone, Link2, Share2 } from "lucide-react";
@@ -20,21 +21,22 @@ export default function SettingsAdminPage() {
 
   const loadConfig = useCallback(() => {
     setLoading(true);
-    fetch("/api/admin?module=config")
+    adminFetch("/api/admin?module=config")
       .then((res) => res.json())
       .then((res) => {
-        if (res.success) setConfig(res.data);
+        if (res.success) setConfig(res.data || {});
       })
       .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
     let ignore = false;
-    fetch("/api/admin?module=config")
+    adminFetch("/api/admin?module=config")
       .then((res) => res.json())
       .then((res) => {
+        if (!ignore) setLoading(false);
         if (!ignore && res.success) {
-          setConfig(res.data);
+          setConfig(res.data || {});
           setLoading(false);
         }
       })
@@ -52,7 +54,7 @@ export default function SettingsAdminPage() {
     setSavedSuccess(false);
 
     try {
-      const res = await fetch("/api/admin", {
+      const res = await adminFetch("/api/admin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ module: "config", action: "update", payload: config }),
@@ -93,7 +95,7 @@ export default function SettingsAdminPage() {
       {savedSuccess && (
         <div className="p-4 rounded-2xl border border-green-500/30 bg-green-500/10 text-green-400 text-xs font-semibold flex items-center gap-2">
           <CheckCircle className="w-4 h-4" />
-          <span>Site settings successfully updated and saved to disk persistence!</span>
+          <span>Site settings successfully updated and saved to the database!</span>
         </div>
       )}
 

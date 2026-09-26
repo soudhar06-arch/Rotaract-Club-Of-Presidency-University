@@ -1,5 +1,7 @@
 "use client";
 
+import { useCMS } from "@/hooks/use-cms";
+import type { SiteConfig } from "@/lib/cms-store";
 import { useState } from "react";
 import {
   Sparkles,
@@ -11,10 +13,6 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { BackButton } from "@/components/shared/back-button";
-
-const DEFAULT_FORM_URL =
-  process.env.NEXT_PUBLIC_MEMBERSHIP_FORM_URL ||
-  "https://docs.google.com/forms/d/e/1FAIpQLSe-RotaractCPU-Membership/viewform?embedded=true";
 
 const VALUE_PILLARS = [
   {
@@ -36,7 +34,8 @@ const VALUE_PILLARS = [
 
 export default function JoinPage() {
   const [iframeError, setIframeError] = useState(false);
-  const membershipFormUrl = DEFAULT_FORM_URL;
+  const { data: config, loading } = useCMS<SiteConfig | null>("config", null);
+  const membershipFormUrl = config?.membershipFormUrl || process.env.NEXT_PUBLIC_MEMBERSHIP_FORM_URL || "";
 
   return (
     <div className="section-shell pt-32 pb-24 min-h-screen">
@@ -89,9 +88,10 @@ export default function JoinPage() {
             </div>
 
             <a
-              href={membershipFormUrl}
+              href={membershipFormUrl || undefined}
               target="_blank"
               rel="noopener noreferrer"
+              hidden={!membershipFormUrl}
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold bg-[#3B82F6] text-white hover:bg-blue-600 transition-colors shadow-lg shadow-[#3B82F6]/25 shrink-0"
             >
               <span>Open in New Tab</span>
@@ -99,7 +99,7 @@ export default function JoinPage() {
             </a>
           </div>
 
-          {!iframeError ? (
+          {!membershipFormUrl ? <p className="py-12 text-center text-zinc-400">{loading ? "Loading registration?" : "Membership registration is currently unavailable. Please contact the club."}</p> : !iframeError ? (
             <div className="relative w-full rounded-2xl overflow-hidden bg-black/40 border border-white/10 min-h-[700px]">
               <iframe
                 src={membershipFormUrl}
@@ -119,7 +119,7 @@ export default function JoinPage() {
                 If the form does not load directly inside your browser window, please click below to complete your application.
               </p>
               <a
-                href={membershipFormUrl}
+                href={membershipFormUrl || undefined}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-6 inline-flex items-center gap-2 px-8 py-3.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-[#3B82F6] text-white hover:bg-blue-600 transition-colors shadow-lg shadow-[#3B82F6]/30"

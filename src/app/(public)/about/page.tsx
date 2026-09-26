@@ -26,12 +26,19 @@ export default function AboutPage() {
           </div>
 
           <h1 className="mt-4 text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-white uppercase font-sans">
-            We Are <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] via-blue-400 to-indigo-400">RCPU.</span>
+            We Are RCPU. <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] via-blue-400 to-indigo-400">We Are Team Leviathan.</span>
           </h1>
 
-          <p className="mt-4 text-base sm:text-xl text-zinc-300 max-w-3xl leading-relaxed">
-            {clubData.mediumDescription}
-          </p>
+          <p className="mt-4 text-xl font-semibold text-zinc-200">One team. One vision. Limitless impact.</p>
+          <div className="mt-6 max-w-4xl space-y-4 text-base leading-relaxed text-zinc-300">
+            <p>We are the Rotaract Club of Presidency University — Team Leviathan. A powerhouse of passionate young leaders, bold ideas, unstoppable energy, and a shared commitment to making a difference.</p>
+            <p>Under Rotary International District 3192, we bring together driven individuals who believe that leadership is earned through action, service creates change, and fellowship turns a group of individuals into one unstoppable team.</p>
+            <p>From transforming communities to building careers, creating unforgettable memories to connecting across borders, we don&apos;t just participate — we lead, innovate, and make things happen.</p>
+            <p>Through Community Service, Professional Development, International Service, Club Service, Public Relations, Fellowship, and Sports, we turn ideas into initiatives, challenges into opportunities, and ambition into measurable impact.</p>
+            <p>We are more than a club. We are a community, a family, and a force that moves forward together.</p>
+            <p className="font-semibold text-white">We are RCPU. We are Leviathan. And we&apos;re just getting started.</p>
+            <p className="font-mono text-sm font-bold tracking-[0.2em] text-[#3B82F6]">SERVICE. LEADERSHIP. FELLOWSHIP. IMPACT.</p>
+          </div>
         </div>
 
         {/* Charter & Institutional Metadata */}

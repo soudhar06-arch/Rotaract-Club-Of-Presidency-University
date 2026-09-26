@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-import initialFaqData from "@/data/faq.json";
+import { useState, useMemo } from "react";
+import { useCMS } from "@/hooks/use-cms";
 import { BackButton } from "@/components/shared/back-button";
 import { Search, X, Sparkles, HelpCircle, ArrowRight } from "lucide-react";
 import Link from "next/link";
@@ -20,25 +20,9 @@ interface FaqItem {
 }
 
 export default function FaqPage() {
-  const [faqItems, setFaqItems] = useState<FaqItem[]>(initialFaqData as FaqItem[]);
+  const { data: faqItems, loading, error } = useCMS<FaqItem[]>("faq", []);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState<string>("");
-
-  // Live fetch from CMS API
-  useEffect(() => {
-    let active = true;
-    fetch("/api/cms?module=faq")
-      .then((res) => res.json())
-      .then((res) => {
-        if (active && res.success && Array.isArray(res.data)) {
-          setFaqItems(res.data);
-        }
-      })
-      .catch(() => {});
-    return () => {
-      active = false;
-    };
-  }, []);
 
   const categories = useMemo(() => {
     const cats = Array.from(new Set(faqItems.map((f) => f.category)));
@@ -60,6 +44,7 @@ export default function FaqPage() {
   return (
     <div className="section-shell pt-32 pb-24 min-h-screen">
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
+        <p role="status" className="text-sm text-zinc-400">{loading ? "Loading?" : error || (faqItems.length === 0 ? "No published records yet." : "")}</p>
         <BackButton fallbackRoute="/#faq" className="mb-6" />
 
         {/* Header */}

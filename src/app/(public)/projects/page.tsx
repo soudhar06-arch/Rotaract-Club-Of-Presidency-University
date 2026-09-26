@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Calendar, MapPin, MoveRight, X } from "lucide-react";
-import initialProjectsData from "@/data/projects.json";
 import { ProjectSlideshow } from "@/components/shared/project-slideshow";
+import { useCMS } from "@/hooks/use-cms";
 import { BackButton } from "@/components/shared/back-button";
 
 export interface ProjectItem {
@@ -30,57 +30,9 @@ export interface ProjectItem {
 }
 
 export default function ProjectsPage() {
-  const [projects, setProjects] = useState<ProjectItem[]>(
-    (initialProjectsData as Array<Record<string, unknown>>).map((p) => ({
-      id: String(p.id || ""),
-      title: String(p.title || ""),
-      category: String(p.category || "General"),
-      date: String(p.date || ""),
-      venue: String(p.venue || ""),
-      description: String(p.description || p.shortDescription || ""),
-      shortDescription: String(p.shortDescription || p.description || ""),
-      fullDescription: String(p.fullDescription || p.description || ""),
-      image: String(p.image || "/gallery/gallery-1.jpeg"),
-      featured: Boolean(p.featured),
-      participants: typeof p.participants === "number" ? p.participants : undefined,
-      beneficiaries: typeof p.beneficiaries === "number" ? p.beneficiaries : undefined,
-      volunteers: typeof p.volunteers === "number" ? p.volunteers : undefined,
-    }))
-  );
+  const { data: projects, loading, error } = useCMS<ProjectItem[]>("projects", []);
   const [selectedProject, setSelectedProject] = useState<ProjectItem | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>("All");
-
-  // Fetch live CMS data
-  useEffect(() => {
-    let active = true;
-    fetch("/api/cms?module=projects")
-      .then((res) => res.json())
-      .then((res) => {
-        if (active && res.success && Array.isArray(res.data)) {
-          setProjects(
-            res.data.map((p: Record<string, unknown>) => ({
-              id: String(p.id || ""),
-              title: String(p.title || ""),
-              category: String(p.category || "General"),
-              date: String(p.date || ""),
-              venue: String(p.venue || ""),
-              description: String(p.shortDescription || p.description || ""),
-              shortDescription: String(p.shortDescription || p.description || ""),
-              fullDescription: String(p.fullDescription || p.description || ""),
-              image: String(p.image || "/gallery/gallery-1.jpeg"),
-              featured: Boolean(p.featured),
-              participants: typeof p.participants === "number" ? p.participants : undefined,
-              beneficiaries: typeof p.beneficiaries === "number" ? p.beneficiaries : undefined,
-              volunteers: typeof p.volunteers === "number" ? p.volunteers : undefined,
-            }))
-          );
-        }
-      })
-      .catch(() => {});
-    return () => {
-      active = false;
-    };
-  }, []);
 
   const categories = [
     "All",
@@ -110,6 +62,7 @@ export default function ProjectsPage() {
   return (
     <div className="section-shell pt-32 pb-20">
       <div className="max-w-6xl mx-auto space-y-8">
+        <p role="status" className="text-sm text-zinc-400">{loading ? "Loading?" : error || (projects.length === 0 ? "No published records yet." : "")}</p>
         <BackButton fallbackRoute="/#projects" className="mb-2" />
 
         {/* Page Hero */}

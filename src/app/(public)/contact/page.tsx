@@ -27,14 +27,15 @@ function LinkedinIcon({ className }: { className?: string }) {
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
   const [contactInfo, setContactInfo] = useState({
-    email: "rotaractcpu@gmail.com",
-    phone: "+91 8884466773",
-    instagram: "https://instagram.com/rotaract_presidency",
-    linkedin: "https://linkedin.com/company/rotaract-presidency",
-    location: "Presidency University Campus, Dibburu, Itgalpur, Rajankunte, Yelahanka, Bengaluru, Karnataka 560064",
-    membershipFormUrl: "https://forms.google.com/",
+    email: "",
+    phone: "",
+    instagram: "",
+    linkedin: "",
+    location: "",
+    membershipFormUrl: "",
   });
 
   useEffect(() => {
@@ -45,12 +46,12 @@ export default function ContactPage() {
         if (active && res.success && res.data) {
           setContactInfo((prev) => ({
             ...prev,
-            email: res.data.email || prev.email,
-            phone: res.data.phone || prev.phone,
-            instagram: res.data.instagram || prev.instagram,
-            linkedin: res.data.linkedin || prev.linkedin,
-            location: res.data.universityAddress || prev.location,
-            membershipFormUrl: res.data.membershipFormUrl || prev.membershipFormUrl,
+            email: res.data.email || "",
+            phone: res.data.phone || "",
+            instagram: res.data.instagram || "",
+            linkedin: res.data.linkedin || "",
+            location: res.data.universityAddress || "",
+            membershipFormUrl: res.data.membershipFormUrl || "",
           }));
         }
       })
@@ -60,14 +61,19 @@ export default function ContactPage() {
     };
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || !form.email || !form.message) return;
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    setError("");
+    try {
+      const response = await fetch("/api/contact", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: form.name, email: form.email, subject: form.subject, message: form.message }) });
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.error || "Message could not be delivered.");
       setSubmitted(true);
-    }, 800);
+      
+    } catch (error) { setError(error instanceof Error ? error.message : "Message could not be delivered."); }
+    finally { setLoading(false); }
   };
 
   return (
@@ -192,7 +198,8 @@ export default function ContactPage() {
                   </button>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <><p role="alert" className="text-sm text-red-300">{error}</p>
+          <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
                       <label className="block text-xs font-mono uppercase text-zinc-400 mb-1">Your Name *</label>
@@ -247,7 +254,7 @@ export default function ContactPage() {
                     <Send className="w-4 h-4" />
                     <span>{loading ? "Sending..." : "Submit Message"}</span>
                   </button>
-                </form>
+                </form></>
               )}
             </div>
           </div>

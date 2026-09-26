@@ -1,9 +1,14 @@
 "use client";
 
 import { useMemo, useState, useRef, useEffect } from "react";
-import Image from "next/image";
+import Image from "@/components/shared/content-image";
 import Link from "next/link";
-import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
+import {
+  AnimatePresence,
+  motion,
+  useScroll,
+  useTransform,
+} from "framer-motion";
 import {
   ArrowRight,
   CalendarDays,
@@ -12,24 +17,25 @@ import {
   Clock3,
   ExternalLink,
   MapPin,
+  Images,
   Maximize2,
   MoveRight,
   X,
 } from "lucide-react";
+import { useCMS } from "@/hooks/use-cms";
+import type {
+  BODMember,
+  ProjectItem,
+  FAQItem,
+  SiteConfig,
+  MediaItem,
+} from "@/lib/cms-store";
+import { ProjectSlideshow } from "@/components/shared/project-slideshow";
 import clubData from "@/data/club.json";
-import projectsData from "@/data/projects.json";
-import bodData from "@/data/bod.json";
-import faqData from "@/data/faq.json";
-import partnersData from "@/data/partners.json";
-import socialData from "@/data/social.json";
 import { useCalendarEvents } from "@/hooks/use-calendar-events";
 import { usePersistedState } from "@/hooks/use-persisted-state";
 import { CountUp } from "@/components/shared/count-up";
-import {
-  normalizeProjectToCalendarEvent,
-  type CalendarEvent,
-  type ProjectItem,
-} from "@/lib/google-calendar";
+import { type CalendarEvent } from "@/lib/google-calendar";
 
 export interface AvenueImageItem {
   url: string;
@@ -55,9 +61,18 @@ const AVENUES: AvenueItem[] = [
     details:
       "Our flagship avenue drives impactful initiatives such as annual blood donation drives, free medical screening camps, environmental tree plantation drives, and educational support for underprivileged students.",
     images: [
-      { url: "/gallery/gallery-2.jpg", caption: "Public health & blood donation camp" },
-      { url: "/gallery/gallery-1.jpeg", caption: "On-ground volunteer outreach & aid distribution" },
-      { url: "/gallery/gallery-8.jpeg", caption: "Cleanliness drive & eco-sustainability action" },
+      {
+        url: "/gallery/gallery-2.jpg",
+        caption: "Public health & blood donation camp",
+      },
+      {
+        url: "/gallery/gallery-1.jpeg",
+        caption: "On-ground volunteer outreach & aid distribution",
+      },
+      {
+        url: "/gallery/gallery-8.jpeg",
+        caption: "Cleanliness drive & eco-sustainability action",
+      },
     ],
   },
   {
@@ -69,9 +84,18 @@ const AVENUES: AvenueItem[] = [
     details:
       "Empowering members through corporate mentorship, resume refinement bootcamps, public speaking forums, industry panel discussions, and career navigation summits.",
     images: [
-      { url: "/gallery/gallery-4.jpeg", caption: "Leadership workshop & career strategy session" },
-      { url: "/gallery/gallery-9.jpeg", caption: "Keynote panel with corporate leaders" },
-      { url: "/gallery/gallery-10.jpeg", caption: "Skill enhancement bootcamp & team debate" },
+      {
+        url: "/gallery/gallery-4.jpeg",
+        caption: "Leadership workshop & career strategy session",
+      },
+      {
+        url: "/gallery/gallery-9.jpeg",
+        caption: "Keynote panel with corporate leaders",
+      },
+      {
+        url: "/gallery/gallery-10.jpeg",
+        caption: "Skill enhancement bootcamp & team debate",
+      },
     ],
   },
   {
@@ -83,9 +107,18 @@ const AVENUES: AvenueItem[] = [
     details:
       "Fostering lifelong friendships and team cohesion through cultural festivals, sports leagues, new member orientation assemblies, icebreakers, and annual retreats.",
     images: [
-      { url: "/gallery/gallery-7.jpeg", caption: "Annual club orientation & team icebreakers" },
-      { url: "/gallery/gallery-11.jpeg", caption: "Cultural celebration & fellowship night" },
-      { url: "/gallery/gallery-12.jpeg", caption: "Sports league & member retreat" },
+      {
+        url: "/gallery/gallery-7.jpeg",
+        caption: "Annual club orientation & team icebreakers",
+      },
+      {
+        url: "/gallery/gallery-11.jpeg",
+        caption: "Cultural celebration & fellowship night",
+      },
+      {
+        url: "/gallery/gallery-12.jpeg",
+        caption: "Sports league & member retreat",
+      },
     ],
   },
   {
@@ -97,9 +130,18 @@ const AVENUES: AvenueItem[] = [
     details:
       "Collaborating with international Rotaract chapters to host cross-cultural exchanges, global youth forums, UN Sustainable Development Goal (SDG) awareness, and peace assemblies.",
     images: [
-      { url: "/gallery/gallery-3.jpeg", caption: "Global youth exchange & cultural forum" },
-      { url: "/gallery/gallery-13.jpeg", caption: "International Rotaract district exchange" },
-      { url: "/gallery/gallery-1.jpeg", caption: "Peace assembly & UN SDG dialogue" },
+      {
+        url: "/gallery/gallery-3.jpeg",
+        caption: "Global youth exchange & cultural forum",
+      },
+      {
+        url: "/gallery/gallery-13.jpeg",
+        caption: "International Rotaract district exchange",
+      },
+      {
+        url: "/gallery/gallery-1.jpeg",
+        caption: "Peace assembly & UN SDG dialogue",
+      },
     ],
   },
   {
@@ -111,9 +153,18 @@ const AVENUES: AvenueItem[] = [
     details:
       "Managing general body meetings, venue bookings, event logistics, member directory tracking, and administrative governance to power club operations seamlessly.",
     images: [
-      { url: "/gallery/gallery-5.jpeg", caption: "Operational strategy & board planning" },
-      { url: "/gallery/gallery-6.jpeg", caption: "General body assembly & event execution" },
-      { url: "/gallery/gallery-8.jpeg", caption: "Logistics coordination & member onboarding" },
+      {
+        url: "/gallery/gallery-5.jpeg",
+        caption: "Operational strategy & board planning",
+      },
+      {
+        url: "/gallery/gallery-6.jpeg",
+        caption: "General body assembly & event execution",
+      },
+      {
+        url: "/gallery/gallery-8.jpeg",
+        caption: "Logistics coordination & member onboarding",
+      },
     ],
   },
   {
@@ -125,43 +176,153 @@ const AVENUES: AvenueItem[] = [
     details:
       "Crafting digital media campaigns, newsletter publications, social media storytelling, press releases, and campus visibility drives.",
     images: [
-      { url: "/gallery/gallery-6.jpeg", caption: "Public relations campaign & media outreach" },
-      { url: "/gallery/gallery-9.jpeg", caption: "Digital content creation & branding" },
-      { url: "/gallery/gallery-2.jpg", caption: "Campus awareness & press coverage" },
+      {
+        url: "/gallery/gallery-6.jpeg",
+        caption: "Public relations campaign & media outreach",
+      },
+      {
+        url: "/gallery/gallery-9.jpeg",
+        caption: "Digital content creation & branding",
+      },
+      {
+        url: "/gallery/gallery-2.jpg",
+        caption: "Campus awareness & press coverage",
+      },
     ],
   },
 ];
 
-const STAT_ITEMS = [
-  { value: "350+", label: "Members" },
-  { value: "120+", label: "Impact-led actions" },
-  { value: "20K+", label: "Volunteer hours" },
-];
+const PUBLIC_PROJECT_COUNT = 24;
+const PUBLIC_BOD_COUNT = 43;
 
 export function PremiumHomePage() {
-  const { upcomingEvents } = useCalendarEvents();
-  const [activeAvenue, setActiveAvenue] = usePersistedState("rcpu_active_avenue", AVENUES[0]);
+  const { upcomingEvents, error: eventsError } = useCalendarEvents(true);
+  const { data: projectsData } = useCMS<ProjectItem[]>("projects", []);
+  const { data: bodData } = useCMS<BODMember[]>("bod", []);
+  const { data: faqData } = useCMS<FAQItem[]>("faq", []);
+  const { data: partnersData } = useCMS<{ name: string }[]>("partners", []);
+  const { data: galleryData } = useCMS<MediaItem[]>("gallery", []);
+  const { data: socialConfig } = useCMS<SiteConfig | null>("config", null);
+  const socialData: Partial<SiteConfig> = socialConfig || {};
+  const heroPhotos = useMemo(() => {
+    const seenAlbums = new Set<string>();
+    return galleryData.filter((photo) => {
+      const albumTitle = photo.name
+        .replace(/\s+(?:—|–|-)\s+photo\s+\d+$/i, "")
+        .trim();
+      const albumKey = albumTitle.toLowerCase();
+      if (seenAlbums.has(albumKey)) return false;
+      seenAlbums.add(albumKey);
+      return true;
+    });
+  }, [galleryData]);
+  const [heroImageIndex, setHeroImageIndex] = useState(0);
+  const heroPhoto = heroPhotos.length
+    ? heroPhotos[heroImageIndex % heroPhotos.length]
+    : {
+        id: "hero-fallback",
+        name: "RCPU team and event atmosphere",
+        url: "/gallery/gallery-9.jpeg",
+      };
+  const [memberCount, setMemberCount] = useState<number | null>(null);
+  useEffect(() => {
+    if (heroPhotos.length < 2) return;
+    const timer = window.setInterval(() => {
+      setHeroImageIndex((current) => (current + 1) % heroPhotos.length);
+    }, 6000);
+    return () => window.clearInterval(timer);
+  }, [heroPhotos.length]);
+  useEffect(() => {
+    let active = true;
+    const refresh = () =>
+      fetch("/api/counters", { cache: "no-store" })
+        .then((r) => r.json())
+        .then((r) => {
+          if (active && r.success) setMemberCount(r.data.members);
+        })
+        .catch(() => {});
+    void refresh();
+    const timer = setInterval(refresh, 60000);
+    return () => {
+      active = false;
+      clearInterval(timer);
+    };
+  }, []);
+  const statItems = [
+    { value: memberCount, label: "Members" },
+    { value: PUBLIC_PROJECT_COUNT, label: "Projects Completed" },
+    { value: PUBLIC_BOD_COUNT, label: "BOD Members" },
+  ];
+  const [avenueItems, setAvenueItems] = useState(AVENUES);
+  const [activeAvenue, setActiveAvenue] = usePersistedState(
+    "rcpu_active_avenue",
+    AVENUES[0],
+  );
   const [avenueImageIndex, setAvenueImageIndex] = useState(0);
-  const [selectedAvenueDetail, setSelectedAvenueDetail] = useState<AvenueItem | null>(null);
+  const [selectedAvenueDetail, setSelectedAvenueDetail] =
+    useState<AvenueItem | null>(null);
 
-  const [selectedProject, setSelectedProject] = useState<(typeof projectsData)[number] | null>(null);
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [selectedProject, setSelectedProject] = useState<
+    (typeof projectsData)[number] | null
+  >(null);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
+    null,
+  );
+
+  useEffect(() => {
+    let mounted = true;
+    fetch("/api/avenues", { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((result) => {
+        if (!mounted || !Array.isArray(result?.avenues)) return;
+        const imagesByName = new Map<string, AvenueImageItem[]>(
+          result.avenues
+            .filter(
+              (item: { name?: unknown; images?: unknown }) =>
+                typeof item.name === "string" && Array.isArray(item.images),
+            )
+            .map((item: { name: string; images: AvenueImageItem[] }) => [
+              item.name,
+              item.images,
+            ]),
+        );
+        const updated = AVENUES.map((avenue) => {
+          const images = imagesByName.get(avenue.name);
+          return images?.length ? { ...avenue, images } : avenue;
+        });
+        setAvenueItems(updated);
+        setActiveAvenue(
+          (current) =>
+            updated.find((item) => item.name === current.name) || updated[0],
+        );
+      })
+      .catch(() => {});
+    return () => {
+      mounted = false;
+    };
+  }, [setActiveAvenue]);
 
   // Reset image index on active avenue change
   useEffect(() => {
-    setAvenueImageIndex(0);
+    const timer = setTimeout(() => setAvenueImageIndex(0), 0);
+    return () => clearTimeout(timer);
   }, [activeAvenue?.name]);
 
   // Automatic slideshow cycle (5 seconds)
   useEffect(() => {
-    if (!activeAvenue || !activeAvenue.images || activeAvenue.images.length <= 1) return;
+    if (
+      !activeAvenue ||
+      !activeAvenue.images ||
+      activeAvenue.images.length <= 1
+    )
+      return;
 
     const timer = setInterval(() => {
       setAvenueImageIndex((prev) => (prev + 1) % activeAvenue.images.length);
     }, 5000);
 
     return () => clearInterval(timer);
-  }, [activeAvenue, avenueImageIndex]);
+  }, [activeAvenue]);
 
   // Global ESC Key Listener to Close Modals
   useEffect(() => {
@@ -185,7 +346,10 @@ export function PremiumHomePage() {
   const handlePrevAvenueImage = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!activeAvenue?.images?.length) return;
-    setAvenueImageIndex((prev) => (prev - 1 + activeAvenue.images.length) % activeAvenue.images.length);
+    setAvenueImageIndex(
+      (prev) =>
+        (prev - 1 + activeAvenue.images.length) % activeAvenue.images.length,
+    );
   };
 
   const editorialRef = useRef<HTMLDivElement>(null);
@@ -205,7 +369,7 @@ export function PremiumHomePage() {
 
   const projectHighlights = useMemo(
     () => projectsData.filter((item) => item.featured).slice(0, 3),
-    [],
+    [projectsData],
   );
 
   const liveUpcoming = useMemo(
@@ -213,20 +377,7 @@ export function PremiumHomePage() {
     [upcomingEvents],
   );
 
-  const projectEvents = useMemo(
-    () =>
-      projectsData
-        .filter((project) => project.featured)
-        .map((project) =>
-          normalizeProjectToCalendarEvent(project as unknown as ProjectItem),
-        ),
-    [],
-  );
-
-  const eventRows = useMemo(
-    () => [...liveUpcoming, ...projectEvents],
-    [liveUpcoming, projectEvents],
-  );
+  const eventRows = liveUpcoming;
 
   const selectedEventDescription = useMemo(() => {
     if (!selectedEvent) return "";
@@ -245,14 +396,28 @@ export function PremiumHomePage() {
     <div className="brand-shell">
       <section className="hero-shell">
         <div className="hero-backdrop">
-          <Image
-            src="/gallery/gallery-9.jpeg"
-            alt="RCPU team and event atmosphere"
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover opacity-65 brightness-105"
-          />
+          <AnimatePresence initial={false}>
+            <motion.div
+              key={heroPhoto.id}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1 }}
+              className="absolute inset-0"
+            >
+              <Image
+                src={heroPhoto.url}
+                alt={
+                  heroPhoto.name.replace(/\s+[—-]\s+photo\s+\d+$/i, "") ||
+                  "RCPU event photo"
+                }
+                fill
+                priority={heroImageIndex === 0}
+                sizes="100vw"
+                className="object-cover opacity-65 brightness-105"
+              />
+            </motion.div>
+          </AnimatePresence>
           <div className="hero-noise" />
           <div className="hero-vignette" />
         </div>
@@ -311,24 +476,55 @@ export function PremiumHomePage() {
         </div>
       </section>
 
-      <section id="about" ref={editorialRef} className="section-shell editorial-shell">
-        <div className="editorial-label">WE ARE RCPU.</div>
+      <section
+        id="about"
+        ref={editorialRef}
+        className="section-shell editorial-shell"
+      >
+        <div className="editorial-label">
+          WE ARE RCPU. WE ARE TEAM LEVIATHAN.
+        </div>
         <div className="editorial-grid">
           <div className="editorial-copy">
-            <p>
-              A student-led community built around service, leadership, fellowship
-              and measurable action.
-            </p>
+            <p>One team. One vision. Limitless impact.</p>
           </div>
           <div className="editorial-words">
-            <motion.span style={{ opacity: word1Opacity, x: word1X }}>SERVICE.</motion.span>
-            <motion.span style={{ opacity: word2Opacity, x: word2X }}>LEADERSHIP.</motion.span>
-            <motion.span style={{ opacity: word3Opacity, x: word3X }}>FELLOWSHIP.</motion.span>
-            <motion.span style={{ opacity: word4Opacity, x: word4X }}>IMPACT.</motion.span>
+            <motion.span style={{ opacity: word1Opacity, x: word1X }}>
+              SERVICE.
+            </motion.span>
+            <motion.span style={{ opacity: word2Opacity, x: word2X }}>
+              LEADERSHIP.
+            </motion.span>
+            <motion.span style={{ opacity: word3Opacity, x: word3X }}>
+              FELLOWSHIP.
+            </motion.span>
+            <motion.span style={{ opacity: word4Opacity, x: word4X }}>
+              IMPACT.
+            </motion.span>
           </div>
         </div>
-        <div className="editorial-text">
-          {clubData.detailedDescription}
+        <div className="editorial-text space-y-4">
+          <p>
+            We are the Rotaract Club of Presidency University — Team Leviathan.
+            A powerhouse of passionate young leaders, bold ideas, unstoppable
+            energy, and a shared commitment to making a difference.
+          </p>
+          <p>
+            Under Rotary International District 3192, we believe leadership is
+            earned through action, service creates change, and fellowship turns
+            individuals into one unstoppable team.
+          </p>
+          <p>
+            Through Community Service, Professional Development, International
+            Service, Club Service, Public Relations, Fellowship, and Sports, we
+            turn ideas into initiatives, challenges into opportunities, and
+            ambition into measurable impact.
+          </p>
+          <p>
+            We are more than a club. We are a community, a family, and a force
+            that moves forward together. We are RCPU. We are Leviathan. And
+            we&apos;re just getting started.
+          </p>
         </div>
       </section>
 
@@ -344,7 +540,7 @@ export function PremiumHomePage() {
         </div>
 
         <div className="impact-grid">
-          {STAT_ITEMS.map((item) => (
+          {statItems.map((item) => (
             <motion.div
               key={item.label}
               initial={{ opacity: 0, y: 26 }}
@@ -354,7 +550,11 @@ export function PremiumHomePage() {
               className="impact-item"
             >
               <span>
-                <CountUp value={item.value} once={false} />
+                {item.value === null ? (
+                  <span aria-label="Data unavailable">?</span>
+                ) : (
+                  <CountUp end={item.value} once={false} />
+                )}
               </span>
               <small>{item.label}</small>
             </motion.div>
@@ -372,7 +572,7 @@ export function PremiumHomePage() {
 
         <div className="avenues-layout">
           <div className="avenues-list">
-            {AVENUES.map((avenue) => (
+            {avenueItems.map((avenue) => (
               <button
                 key={avenue.name}
                 onClick={() => {
@@ -395,7 +595,7 @@ export function PremiumHomePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45 }}
             onClick={() => setSelectedAvenueDetail(activeAvenue)}
-            className="avenue-feature group cursor-pointer rounded-3xl overflow-hidden border border-[color:var(--line)] bg-[#0e0e0e] shadow-xl relative min-h-[440px] flex flex-col justify-end"
+            className="avenue-feature group relative flex min-h-[440px] cursor-pointer flex-col justify-end overflow-hidden rounded-3xl border border-[color:var(--line)] bg-[#0e0e0e] shadow-xl"
           >
             <AnimatePresence mode="wait">
               <motion.div
@@ -424,7 +624,7 @@ export function PremiumHomePage() {
               <button
                 type="button"
                 onClick={handlePrevAvenueImage}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-black/60 text-white backdrop-blur-md transition-all hover:bg-black hover:border-white/40 hover:scale-105 active:scale-95"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-black/60 text-white backdrop-blur-md transition-all hover:scale-105 hover:border-white/40 hover:bg-black active:scale-95"
                 aria-label="Previous Image"
                 title="Previous Image"
               >
@@ -433,7 +633,7 @@ export function PremiumHomePage() {
               <button
                 type="button"
                 onClick={handleNextAvenueImage}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-black/60 text-white backdrop-blur-md transition-all hover:bg-black hover:border-white/40 hover:scale-105 active:scale-95"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-black/60 text-white backdrop-blur-md transition-all hover:scale-105 hover:border-white/40 hover:bg-black active:scale-95"
                 aria-label="Next Image"
                 title="Next Image"
               >
@@ -449,10 +649,17 @@ export function PremiumHomePage() {
               <div className="eyebrow small">{activeAvenue.label}</div>
               <h3>{activeAvenue.name}</h3>
               <p>{activeAvenue.description}</p>
+              <Link
+                href={`/events?avenue=${encodeURIComponent(activeAvenue.name)}`}
+                onClick={(event) => event.stopPropagation()}
+                className="mt-4 inline-flex items-center gap-2 rounded-full border border-[#3B82F6]/40 bg-[#3B82F6]/15 px-4 py-2 text-xs font-semibold text-white hover:bg-[#3B82F6]/25"
+              >
+                View {activeAvenue.name} events <ChevronRight size={14} />
+              </Link>
 
               {/* Image Description / Caption */}
-              <div className="mt-4 inline-flex items-center gap-2 rounded-xl border border-white/10 bg-black/70 px-3.5 py-1.5 backdrop-blur-md text-xs text-white/90">
-                <span className="h-2 w-2 rounded-full bg-[#3B82F6] animate-pulse" />
+              <div className="mt-4 inline-flex items-center gap-2 rounded-xl border border-white/10 bg-black/70 px-3.5 py-1.5 text-xs text-white/90 backdrop-blur-md">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-[#3B82F6]" />
                 <span>
                   {activeAvenue.images[avenueImageIndex]?.caption ||
                     activeAvenue.images[0].caption}
@@ -484,7 +691,9 @@ export function PremiumHomePage() {
               transition={{ duration: 0.6, delay: index * 0.08 }}
               className="story-item"
             >
-              <div className="story-index">{String(index + 1).padStart(2, "0")}</div>
+              <div className="story-index">
+                {String(index + 1).padStart(2, "0")}
+              </div>
 
               <div className="story-image-wrap">
                 <Image
@@ -501,8 +710,19 @@ export function PremiumHomePage() {
                 <h3>{project.title}</h3>
                 <p>{project.description}</p>
                 <div className="story-meta">
-                  <span>{project.date ? new Date(project.date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "TBA"}</span>
-                  <button onClick={() => setSelectedProject(project)} className="story-link">
+                  <span>
+                    {project.date
+                      ? new Date(project.date).toLocaleDateString("en-IN", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })
+                      : "TBA"}
+                  </span>
+                  <button
+                    onClick={() => setSelectedProject(project)}
+                    className="story-link"
+                  >
                     View detail <MoveRight size={14} />
                   </button>
                 </div>
@@ -513,6 +733,9 @@ export function PremiumHomePage() {
       </section>
 
       <section className="section-shell events-shell" id="events">
+        {eventsError && (
+          <p className="text-zinc-400">Events are temporarily unavailable.</p>
+        )}
         <div className="section-header-row">
           <div>
             <div className="eyebrow">Calendar</div>
@@ -537,8 +760,16 @@ export function PremiumHomePage() {
                 className="event-row"
               >
                 <div className="event-date">
-                  <span>{new Date(event.date).toLocaleDateString("en-IN", { day: "numeric" })}</span>
-                  <small>{new Date(event.date).toLocaleDateString("en-IN", { month: "short" })}</small>
+                  <span>
+                    {new Date(event.date).toLocaleDateString("en-IN", {
+                      day: "numeric",
+                    })}
+                  </span>
+                  <small>
+                    {new Date(event.date).toLocaleDateString("en-IN", {
+                      month: "short",
+                    })}
+                  </small>
                 </div>
                 <div className="event-main">
                   <div className="event-label">{event.category}</div>
@@ -548,7 +779,8 @@ export function PremiumHomePage() {
                       <Clock3 size={12} /> {event.time || "TBD"}
                     </span>
                     <span>
-                      <MapPin size={12} /> {event.location || event.venue || "Campus"}
+                      <MapPin size={12} />{" "}
+                      {event.location || event.venue || "Campus"}
                     </span>
                   </div>
                 </div>
@@ -561,7 +793,8 @@ export function PremiumHomePage() {
           ) : (
             <div className="empty-panel">
               <CalendarDays size={18} />
-              Live Google Calendar data is not configured yet. Add the calendar environment values to display upcoming events.
+              Live Google Calendar data is not configured yet. Add the calendar
+              environment values to display upcoming events.
             </div>
           )}
         </div>
@@ -573,11 +806,16 @@ export function PremiumHomePage() {
             <div className="eyebrow">Leadership</div>
             <h2>The people behind the momentum.</h2>
           </div>
-          <Link href="/leadership" className="inline-action">
+          <Link href="/board" className="inline-action">
             Meet the team <ChevronRight size={16} />
           </Link>
         </div>
 
+        {bodData.length === 0 && (
+          <p className="text-zinc-400">
+            Leadership information is currently unavailable.
+          </p>
+        )}
         <div className="leader-grid">
           {bodData.slice(0, 5).map((member) => (
             <motion.div
@@ -587,7 +825,7 @@ export function PremiumHomePage() {
             >
               <div className="leader-image-wrap">
                 <Image
-                  src={member.image || "/gallery/gallery-1.jpeg"}
+                  src={member.image || "/images/no-photo.svg"}
                   alt={member.name}
                   fill
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 250px"
@@ -614,21 +852,35 @@ export function PremiumHomePage() {
           </Link>
         </div>
 
+        {galleryData.length === 0 && (
+          <p className="text-zinc-400">No published gallery images yet.</p>
+        )}
         <div className="gallery-grid">
-          {[
-            "/gallery/gallery-1.jpeg",
-            "/gallery/gallery-2.jpg",
-            "/gallery/gallery-3.jpeg",
-            "/gallery/gallery-4.jpeg",
-            "/gallery/gallery-5.jpeg",
-            "/gallery/gallery-6.jpeg",
-          ].map((image, index) => (
-            <div
-              key={image}
+          {galleryData.slice(0, 6).map((item, index) => (
+            <Link
+              href="/gallery"
+              key={item.id}
               className={`gallery-tile tile-${index + 1}`}
             >
-              <Image src={image} alt="RCPU gallery moment" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover" />
-            </div>
+              <Image
+                src={item.url}
+                alt={item.name || "RCPU gallery moment"}
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                className="object-cover"
+              />
+              {index === 5 && galleryData.length > 6 && (
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/65 text-white backdrop-blur-sm">
+                  <Images size={28} className="mb-2 text-[#3B82F6]" />
+                  <strong className="text-xl">
+                    +{galleryData.length - 6} photos
+                  </strong>
+                  <span className="mt-1 text-xs text-zinc-300">
+                    Open combined collection
+                  </span>
+                </div>
+              )}
+            </Link>
           ))}
         </div>
       </section>
@@ -661,6 +913,9 @@ export function PremiumHomePage() {
           </Link>
         </div>
 
+        {faqData.length === 0 && (
+          <p className="text-zinc-400">No published FAQs yet.</p>
+        )}
         <div className="faq-list">
           {faqData.slice(0, 4).map((item) => (
             <div key={item.id} className="faq-item">
@@ -699,13 +954,13 @@ export function PremiumHomePage() {
               exit={{ opacity: 0, y: 20, scale: 0.98 }}
               transition={{ duration: 0.25 }}
               onClick={(event) => event.stopPropagation()}
-              className="modal-card avenue-detail-modal relative rounded-3xl overflow-hidden border border-white/10 bg-[#101010]"
+              className="modal-card avenue-detail-modal relative overflow-hidden rounded-3xl border border-white/10 bg-[#101010]"
             >
               {/* Visible X Close Button */}
               <button
                 type="button"
                 onClick={() => setSelectedAvenueDetail(null)}
-                className="absolute top-4 right-4 z-30 flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-black/70 text-white backdrop-blur-md transition-all hover:bg-black hover:border-white/40 hover:scale-105 active:scale-95"
+                className="absolute top-4 right-4 z-30 flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-black/70 text-white backdrop-blur-md transition-all hover:scale-105 hover:border-white/40 hover:bg-black active:scale-95"
                 aria-label="Close Avenue Modal"
               >
                 <X className="h-5 w-5" />
@@ -713,7 +968,10 @@ export function PremiumHomePage() {
 
               <div className="modal-visual relative min-h-[280px]">
                 <Image
-                  src={selectedAvenueDetail.images[0]?.url || "/gallery/gallery-1.jpeg"}
+                  src={
+                    selectedAvenueDetail.images[0]?.url ||
+                    "/gallery/gallery-1.jpeg"
+                  }
                   alt={selectedAvenueDetail.name}
                   fill
                   sizes="(max-width: 768px) 100vw, 600px"
@@ -723,21 +981,34 @@ export function PremiumHomePage() {
               </div>
 
               <div className="modal-copy p-6 md:p-8">
-                <div className="eyebrow small">{selectedAvenueDetail.label}</div>
-                <h3 className="text-3xl font-bold text-white mt-1">{selectedAvenueDetail.name}</h3>
-                <p className="mt-4 text-sm md:text-base text-[color:var(--text-soft)] leading-relaxed">
+                <div className="eyebrow small">
+                  {selectedAvenueDetail.label}
+                </div>
+                <h3 className="mt-1 text-3xl font-bold text-white">
+                  {selectedAvenueDetail.name}
+                </h3>
+                <p className="mt-4 text-sm leading-relaxed text-[color:var(--text-soft)] md:text-base">
                   {selectedAvenueDetail.details}
                 </p>
 
                 {/* Key Initiatives Gallery Preview */}
                 <div className="mt-6 space-y-2">
-                  <div className="text-xs font-semibold text-[#3B82F6] uppercase tracking-wider">
+                  <div className="text-xs font-semibold tracking-wider text-[#3B82F6] uppercase">
                     Associated Avenue Imagery
                   </div>
                   <div className="grid grid-cols-3 gap-2 pt-1">
                     {selectedAvenueDetail.images.map((img, i) => (
-                      <div key={i} className="relative h-20 rounded-xl overflow-hidden border border-white/10">
-                        <Image src={img.url} alt={img.caption} fill className="object-cover" sizes="150px" />
+                      <div
+                        key={i}
+                        className="relative h-20 overflow-hidden rounded-xl border border-white/10"
+                      >
+                        <Image
+                          src={img.url}
+                          alt={img.caption}
+                          fill
+                          className="object-cover"
+                          sizes="150px"
+                        />
                       </div>
                     ))}
                   </div>
@@ -772,13 +1043,13 @@ export function PremiumHomePage() {
               exit={{ opacity: 0, y: 20, scale: 0.98 }}
               transition={{ duration: 0.25 }}
               onClick={(event) => event.stopPropagation()}
-              className="modal-card relative rounded-3xl overflow-hidden border border-white/10 bg-[#101010]"
+              className="modal-card relative overflow-hidden rounded-3xl border border-white/10 bg-[#101010]"
             >
               {/* Visible X Close Button */}
               <button
                 type="button"
                 onClick={() => setSelectedProject(null)}
-                className="absolute top-4 right-4 z-30 flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-black/70 text-white backdrop-blur-md transition-all hover:bg-black hover:border-white/40 hover:scale-105 active:scale-95"
+                className="absolute top-4 right-4 z-30 flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-black/70 text-white backdrop-blur-md transition-all hover:scale-105 hover:border-white/40 hover:bg-black active:scale-95"
                 aria-label="Close Project Modal"
               >
                 <X className="h-5 w-5" />
@@ -786,7 +1057,7 @@ export function PremiumHomePage() {
 
               <div className="modal-visual">
                 <Image
-                  src={selectedProject.image ?? "/gallery/gallery-1.jpeg"}
+                  src={selectedProject.image || "/images/no-photo.svg"}
                   alt={selectedProject.title}
                   fill
                   sizes="(max-width: 768px) 100vw, 600px"
@@ -797,12 +1068,24 @@ export function PremiumHomePage() {
                 <div className="eyebrow">{selectedProject.category}</div>
                 <h3>{selectedProject.title}</h3>
                 <div className="modal-meta">
-                  <span>{selectedProject.date ? new Date(selectedProject.date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "Date TBD"}</span>
-                  <span>{selectedProject.venue || "Campus"}</span>
+                  <span>
+                    {selectedProject.date
+                      ? new Date(selectedProject.date).toLocaleDateString(
+                          "en-IN",
+                          { day: "numeric", month: "short", year: "numeric" },
+                        )
+                      : "Date TBD"}
+                  </span>
+                  <span>{selectedProject.venue}</span>
                 </div>
-                <p>{selectedProject.objective || selectedProject.description}</p>
+                <p>
+                  {selectedProject.objective || selectedProject.description}
+                </p>
                 <p>{selectedProject.description}</p>
-                <button onClick={() => setSelectedProject(null)} className="secondary-button modal-close-button">
+                <button
+                  onClick={() => setSelectedProject(null)}
+                  className="secondary-button modal-close-button"
+                >
                   Close
                 </button>
               </div>
@@ -825,38 +1108,188 @@ export function PremiumHomePage() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.98 }}
               onClick={(event) => event.stopPropagation()}
-              className="modal-card event-modal relative rounded-3xl overflow-hidden border border-white/10 bg-[#101010] max-h-[90vh] overflow-y-auto"
+              className="modal-card event-modal relative max-h-[90vh] overflow-hidden overflow-y-auto rounded-3xl border border-white/10 bg-[#101010]"
               role="dialog"
               aria-modal="true"
               aria-labelledby="event-modal-title"
             >
-              <button type="button" onClick={() => setSelectedEvent(null)} aria-label="Close event details" className="absolute top-4 right-4 z-30 flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-black/70 text-white backdrop-blur-md transition-all hover:bg-black hover:border-white/40 hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3B82F6] focus-visible:ring-offset-2 focus-visible:ring-offset-black"><X className="h-5 w-5" /></button>
-              {selectedEvent.image ? (<div className="relative h-48 w-full overflow-hidden"><Image src={selectedEvent.image} alt={selectedEvent.title || "Event image"} fill sizes="(max-width: 768px) 100vw, 600px" className="object-cover" /></div>) : null}
+              <button
+                type="button"
+                onClick={() => setSelectedEvent(null)}
+                aria-label="Close event details"
+                className="absolute top-4 right-4 z-30 flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-black/70 text-white backdrop-blur-md transition-all hover:scale-105 hover:border-white/40 hover:bg-black focus-visible:ring-2 focus-visible:ring-[#3B82F6] focus-visible:ring-offset-2 focus-visible:ring-offset-black focus-visible:outline-none active:scale-95"
+              >
+                <X className="h-5 w-5" />
+              </button>
+              <ProjectSlideshow
+                title={selectedEvent.title}
+                coverImage={selectedEvent.image}
+                images={selectedEvent.images}
+              />
               <div className="modal-copy p-6 md:p-8">
                 <div className="eyebrow">{selectedEvent.category}</div>
                 <h3 id="event-modal-title">{selectedEvent.title}</h3>
                 <div className="modal-meta">
-                  <span>{new Date(selectedEvent.date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</span>
-                  <span>{selectedEvent.time || "TBD"}</span>
-                  <span><MapPin size={12} /> {selectedEvent.venue || selectedEvent.location || "Venue TBD"}</span>
+                  <span>
+                    {selectedEvent.date &&
+                      new Date(selectedEvent.date).toLocaleDateString("en-IN", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                  </span>
+                  <span>{selectedEvent.time}</span>
+                  <span>
+                    <MapPin size={12} />{" "}
+                    {selectedEvent.venue || selectedEvent.location}
+                  </span>
                 </div>
-                <div className="text-xs font-bold text-[#3B82F6] uppercase tracking-wider mt-4">DESCRIPTION</div>
-                <div className="mt-2 max-h-[45vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                <div className="mt-4 text-xs font-bold tracking-wider text-[#3B82F6] uppercase">
+                  DESCRIPTION
+                </div>
+                <div className="mt-2 max-h-[45vh] scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent overflow-y-auto pr-2">
                   {selectedEventDescription ? (
-                    selectedEventDescription.split(/\n+/).map((paragraph) => paragraph.trim()).filter(Boolean).map((paragraph, index) => <p key={index} className="mb-3 last:mb-0 text-sm text-white/80">{paragraph}</p>)
+                    selectedEventDescription
+                      .split(/\n+/)
+                      .map((paragraph) => paragraph.trim())
+                      .filter(Boolean)
+                      .map((paragraph, index) => (
+                        <p
+                          key={index}
+                          className="mb-3 text-sm text-white/80 last:mb-0"
+                        >
+                          {paragraph}
+                        </p>
+                      ))
                   ) : (
-                    <p className="mb-3 last:mb-0 text-sm text-white/80">Event details will be updated soon.</p>
+                    <p className="mb-3 text-sm text-white/80 last:mb-0">
+                      Event details will be updated soon.
+                    </p>
                   )}
                 </div>
-                {selectedEvent.objective?.trim() ? (<div className="mt-4 rounded-xl border border-white/10 bg-white/[0.03] p-4"><div className="text-xs font-bold text-[#3B82F6] uppercase tracking-wider">OBJECTIVE</div><p className="mt-1 text-sm text-white/90">{selectedEvent.objective}</p></div>) : null}
-                {Array.isArray(selectedEvent.highlights) && selectedEvent.highlights.length > 0 ? (<div className="mt-4 rounded-xl border border-white/10 bg-white/[0.03] p-4"><div className="text-xs font-bold text-[#3B82F6] uppercase tracking-wider">HIGHLIGHTS</div><ul className="mt-1 list-disc list-inside text-sm text-white/90 space-y-1">{selectedEvent.highlights.map((highlight, index) => <li key={index}>{highlight}</li>)}</ul></div>) : null}
-                {typeof selectedEvent.participants === "number" && selectedEvent.participants > 0 ? (<div className="mt-4 rounded-xl border border-white/10 bg-white/[0.03] p-4"><div className="text-xs font-bold text-[#3B82F6] uppercase tracking-wider">PARTICIPANTS</div><p className="mt-1 text-sm text-white/90">{selectedEvent.participants}</p></div>) : null}
-                {selectedEvent.beneficiaries !== undefined && selectedEvent.beneficiaries !== null ? (<div className="mt-4 rounded-xl border border-white/10 bg-white/[0.03] p-4"><div className="text-xs font-bold text-[#3B82F6] uppercase tracking-wider">BENEFICIARIES</div><p className="mt-1 text-sm text-white/90">{selectedEvent.beneficiaries}</p></div>) : null}
-                {Array.isArray(selectedEvent.collaborators) && selectedEvent.collaborators.length > 0 ? (<div className="mt-4 rounded-xl border border-white/10 bg-white/[0.03] p-4"><div className="text-xs font-bold text-[#3B82F6] uppercase tracking-wider">COLLABORATORS</div><div className="mt-2 flex flex-wrap gap-2">{selectedEvent.collaborators.map((collaborator, index) => <span key={index} className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-white">{collaborator}</span>)}</div></div>) : null}
-                {(Array.isArray(selectedEvent.gallery) ? selectedEvent.gallery : Array.isArray(selectedEvent.images) ? selectedEvent.images.slice(1) : []).length > 0 ? (<div className="mt-4"><div className="text-xs font-bold text-[#3B82F6] uppercase tracking-wider">GALLERY</div><div className="mt-2 grid grid-cols-2 gap-2">{(Array.isArray(selectedEvent.gallery) ? selectedEvent.gallery : Array.isArray(selectedEvent.images) ? selectedEvent.images.slice(1) : []).map((imageUrl, index) => (<div key={index} className="relative h-32 w-full overflow-hidden rounded-lg"><Image src={imageUrl} alt={`Event gallery ${index + 1}`} fill sizes="150px" className="object-cover" /></div>))}</div></div>) : null}
-                {selectedEvent.registrationLink ? (<a href={selectedEvent.registrationLink} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#3B82F6]/40 bg-[#3B82F6]/10 py-3 text-xs font-semibold text-[#3B82F6] transition-all hover:bg-[#3B82F6]/20">Register for This Event</a>) : null}
-                {selectedEvent.googleCalendarLink ? (<a href={selectedEvent.googleCalendarLink} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.05] py-3 text-xs font-semibold text-white transition-all hover:bg-white/10">Open in Google Calendar</a>) : null}
-                <div className="modal-actions mt-6 flex justify-end"><a href="/calendar" className="primary-button small-button">Calendar page <ArrowRight size={14} /></a></div>
+                {selectedEvent.objective?.trim() ? (
+                  <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.03] p-4">
+                    <div className="text-xs font-bold tracking-wider text-[#3B82F6] uppercase">
+                      OBJECTIVE
+                    </div>
+                    <p className="mt-1 text-sm text-white/90">
+                      {selectedEvent.objective}
+                    </p>
+                  </div>
+                ) : null}
+                {Array.isArray(selectedEvent.highlights) &&
+                selectedEvent.highlights.length > 0 ? (
+                  <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.03] p-4">
+                    <div className="text-xs font-bold tracking-wider text-[#3B82F6] uppercase">
+                      HIGHLIGHTS
+                    </div>
+                    <ul className="mt-1 list-inside list-disc space-y-1 text-sm text-white/90">
+                      {selectedEvent.highlights.map((highlight, index) => (
+                        <li key={index}>{highlight}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {typeof selectedEvent.participants === "number" &&
+                selectedEvent.participants > 0 ? (
+                  <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.03] p-4">
+                    <div className="text-xs font-bold tracking-wider text-[#3B82F6] uppercase">
+                      PARTICIPANTS
+                    </div>
+                    <p className="mt-1 text-sm text-white/90">
+                      {selectedEvent.participants}
+                    </p>
+                  </div>
+                ) : null}
+                {selectedEvent.beneficiaries !== undefined &&
+                selectedEvent.beneficiaries !== null ? (
+                  <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.03] p-4">
+                    <div className="text-xs font-bold tracking-wider text-[#3B82F6] uppercase">
+                      BENEFICIARIES
+                    </div>
+                    <p className="mt-1 text-sm text-white/90">
+                      {selectedEvent.beneficiaries}
+                    </p>
+                  </div>
+                ) : null}
+                {Array.isArray(selectedEvent.collaborators) &&
+                selectedEvent.collaborators.length > 0 ? (
+                  <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.03] p-4">
+                    <div className="text-xs font-bold tracking-wider text-[#3B82F6] uppercase">
+                      COLLABORATORS
+                    </div>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {selectedEvent.collaborators.map(
+                        (collaborator, index) => (
+                          <span
+                            key={index}
+                            className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-white"
+                          >
+                            {collaborator}
+                          </span>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                ) : null}
+                {(Array.isArray(selectedEvent.gallery)
+                  ? selectedEvent.gallery
+                  : Array.isArray(selectedEvent.images)
+                    ? selectedEvent.images.slice(1)
+                    : []
+                ).length > 0 ? (
+                  <div className="mt-4">
+                    <div className="text-xs font-bold tracking-wider text-[#3B82F6] uppercase">
+                      GALLERY
+                    </div>
+                    <div className="mt-2 grid grid-cols-2 gap-2">
+                      {(Array.isArray(selectedEvent.gallery)
+                        ? selectedEvent.gallery
+                        : Array.isArray(selectedEvent.images)
+                          ? selectedEvent.images.slice(1)
+                          : []
+                      ).map((imageUrl, index) => (
+                        <div
+                          key={index}
+                          className="relative h-32 w-full overflow-hidden rounded-lg"
+                        >
+                          <Image
+                            src={imageUrl}
+                            alt={`Event gallery ${index + 1}`}
+                            fill
+                            sizes="150px"
+                            className="object-cover"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+                {selectedEvent.registrationLink ? (
+                  <a
+                    href={selectedEvent.registrationLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#3B82F6]/40 bg-[#3B82F6]/10 py-3 text-xs font-semibold text-[#3B82F6] transition-all hover:bg-[#3B82F6]/20"
+                  >
+                    Register for This Event
+                  </a>
+                ) : null}
+                {selectedEvent.googleCalendarLink ? (
+                  <a
+                    href={selectedEvent.googleCalendarLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.05] py-3 text-xs font-semibold text-white transition-all hover:bg-white/10"
+                  >
+                    Open in Google Calendar
+                  </a>
+                ) : null}
+                <div className="modal-actions mt-6 flex justify-end">
+                  <a href="/calendar" className="primary-button small-button">
+                    Calendar page <ArrowRight size={14} />
+                  </a>
+                </div>
               </div>
             </motion.div>
           </motion.div>
@@ -876,12 +1309,23 @@ export function PremiumHomePage() {
           <Link href="/contact">Contact</Link>
         </div>
         <div className="social-row">
-          {socialData.instagram ? <a href={socialData.instagram} target="_blank" rel="noreferrer">Instagram</a> : null}
-          {socialData.linkedin ? <a href={socialData.linkedin} target="_blank" rel="noreferrer">LinkedIn</a> : null}
-          <a href={`mailto:${clubData.name.includes("Presidency") ? "rotaract@presidencyuniversity.in" : "contact@rotaract"}`}>Email</a>
+          {socialData.instagram ? (
+            <a href={socialData.instagram} target="_blank" rel="noreferrer">
+              Instagram
+            </a>
+          ) : null}
+          {socialData.linkedin ? (
+            <a href={socialData.linkedin} target="_blank" rel="noreferrer">
+              LinkedIn
+            </a>
+          ) : null}
+          <a
+            href={`mailto:${clubData.name.includes("Presidency") ? "rotaract@presidencyuniversity.in" : "contact@rotaract"}`}
+          >
+            Email
+          </a>
         </div>
       </div>
     </div>
   );
 }
-

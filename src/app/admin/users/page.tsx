@@ -1,4 +1,5 @@
 "use client";
+import { adminFetch } from "@/lib/admin-fetch";
 
 import { useEffect, useState, useCallback } from "react";
 import { ShieldCheck, UserCheck, AlertCircle, RefreshCw } from "lucide-react";
@@ -8,9 +9,17 @@ export default function UsersAdminPage() {
   const [users, setUsers] = useState<UserAccount[]>([]);
   const [errorMsg, setErrorMsg] = useState("");
 
+  const [newUser, setNewUser] = useState({ name: "", email: "", password: "", role: "VIEWER" });
+  const [saving, setSaving] = useState(false);
+  async function accountAction(payload: Record<string, unknown>) {
+    setSaving(true);
+    try { const result = await (await adminFetch("/api/admin/users", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })).json(); if (result.success) { setNewUser({ name: "", email: "", password: "", role: "VIEWER" }); loadUsers(); } }
+    finally { setSaving(false); }
+  }
+
   const loadUsers = useCallback(() => {
     setErrorMsg("");
-    fetch("/api/admin?module=users")
+    adminFetch("/api/admin?module=users")
       .then((res) => res.json())
       .then((res) => {
         if (res.success) setUsers(res.data);
@@ -22,7 +31,7 @@ export default function UsersAdminPage() {
 
   useEffect(() => {
     let ignore = false;
-    fetch("/api/admin?module=users")
+    adminFetch("/api/admin?module=users")
       .then((res) => res.json())
       .then((res) => {
         if (!ignore && res.success) {
@@ -42,7 +51,7 @@ export default function UsersAdminPage() {
   const handleRoleChange = async (userId: string, newRole: Role) => {
     setErrorMsg("");
     try {
-      const res = await fetch("/api/admin", {
+      const res = await adminFetch("/api/admin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -90,6 +99,15 @@ export default function UsersAdminPage() {
         </div>
       )}
 
+      <form onSubmit={e => { e.preventDefault(); void accountAction({ action: "create", ...newUser }); }} className="grid gap-3 rounded-2xl border border-white/10 bg-white/5 p-5 sm:grid-cols-2">
+        <h2 className="font-semibold sm:col-span-2">Create account</h2>
+        <input aria-label="Account name" required placeholder="Name" value={newUser.name} onChange={e => setNewUser({ ...newUser, name: e.target.value })} className="min-w-0 rounded-lg bg-black/30 p-3 text-sm" />
+        <input aria-label="Account email" required type="email" placeholder="Email" value={newUser.email} onChange={e => setNewUser({ ...newUser, email: e.target.value })} className="min-w-0 rounded-lg bg-black/30 p-3 text-sm" />
+        <input aria-label="Account password" required type="password" minLength={12} autoComplete="new-password" placeholder="Password (12+ characters)" value={newUser.password} onChange={e => setNewUser({ ...newUser, password: e.target.value })} className="min-w-0 rounded-lg bg-black/30 p-3 text-sm" />
+        <select aria-label="Account role" value={newUser.role} onChange={e => setNewUser({ ...newUser, role: e.target.value })} className="rounded-lg bg-[#151922] p-3 text-sm">{["OWNER", "ADMIN", "EDITOR", "VIEWER"].map(role => <option key={role}>{role}</option>)}</select>
+        <button disabled={saving} className="rounded-full bg-blue-500 px-5 py-2 text-sm disabled:opacity-50">{saving ? "Saving?" : "Create account"}</button>
+        <p className="text-xs text-zinc-400">OWNER manages access and settings. ADMIN manages content. EDITOR adds gallery media and event drafts. VIEWER has read access.</p>
+      </form>
       {/* Users Table Card */}
       <div className="rounded-3xl border border-white/10 bg-[#0E121E]/90 backdrop-blur-xl overflow-hidden shadow-2xl">
         <div className="p-6 border-b border-white/10 flex items-center justify-between">
@@ -156,6 +174,7 @@ export default function UsersAdminPage() {
                       <option value="EDITOR">EDITOR</option>
                       <option value="VIEWER">VIEWER</option>
                     </select>
+                    <div className="mt-2 flex justify-end gap-3"><button disabled={saving || u.role === "OWNER"} onClick={() => accountAction({ action: "status", id: u.id, active: u.status !== "Active" })} className="text-blue-300 disabled:opacity-40">{u.status === "Active" ? "Deactivate" : "Activate"}</button><button disabled={saving || u.role === "OWNER"} onClick={() => { if (confirm(`Delete account ${u.email}?`)) void accountAction({ action: "delete", id: u.id }); }} className="text-red-300 disabled:opacity-40">Delete</button></div>
                   </td>
                 </tr>
               ))}

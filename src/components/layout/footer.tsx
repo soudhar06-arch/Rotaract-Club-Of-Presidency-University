@@ -9,10 +9,10 @@ import clubData from "@/data/club.json";
 export function Footer() {
   const currentYear = new Date().getFullYear();
   const [config, setConfig] = useState({
-    universityAddress: "Presidency University Campus, Dibburu, Itgalpur, Rajankunte, Yelahanka, Bengaluru, Karnataka 560064",
-    phone: "+91 8884466773",
-    email: "rotaractcpu@gmail.com",
-    membershipFormUrl: "https://forms.google.com/",
+    universityAddress: "",
+    phone: "",
+    email: "",
+    membershipFormUrl: "",
   });
 
   useEffect(() => {

@@ -8,7 +8,7 @@ import {
   addToUserGoogleCalendar,
 } from "@/lib/google-calendar";
 
-export function useCalendarEvents() {
+export function useCalendarEvents(calendarOnly = false) {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [diagnostics, setDiagnostics] =
     useState<GoogleCalendarDiagnostics | null>(null);
@@ -20,7 +20,7 @@ export function useCalendarEvents() {
 
     async function executeFetch() {
       try {
-        const result = await fetchGoogleCalendarEventsWithDiagnostics();
+        const result = await fetchGoogleCalendarEventsWithDiagnostics(calendarOnly);
         if (!isMounted) return;
         setEvents(result.events);
         setDiagnostics(result.diagnostics);
@@ -46,17 +46,21 @@ export function useCalendarEvents() {
     }
 
     executeFetch();
+    const timer = setInterval(executeFetch, 60000);
+    window.addEventListener("focus", executeFetch);
 
     return () => {
       isMounted = false;
+      clearInterval(timer);
+      window.removeEventListener("focus", executeFetch);
     };
-  }, []);
+  }, [calendarOnly]);
 
   const refresh = async () => {
     setLoading(true);
     setError(null);
     try {
-      const result = await fetchGoogleCalendarEventsWithDiagnostics();
+      const result = await fetchGoogleCalendarEventsWithDiagnostics(calendarOnly);
       setEvents(result.events);
       setDiagnostics(result.diagnostics);
       if (

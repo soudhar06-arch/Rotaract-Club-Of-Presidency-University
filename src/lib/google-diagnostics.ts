@@ -1,220 +1,92 @@
-import { google } from "googleapis";
+import "server-only";
+import { getSheetRowCount } from "./google-sheets-service";
+import { listDriveChildren } from "./google-drive-service";
+import { configuredValue, googleResourceId } from "./google-auth";
+import { getCalendarFeed } from "./calendar-service";
+import { aiConfiguration } from "./ai-service";
+import { CMSStore, getCMSClient } from "./cms-store";
 
 export interface DiagnosticItem {
   name: string;
-  type: "SHEETS" | "DRIVE";
+  type: "SHEETS" | "DRIVE" | "CALENDAR" | "AI" | "DATABASE" | "STORAGE" | "EMAIL";
   id?: string;
-  status: "CONNECTED" | "NOT_CONFIGURED" | "AUTHENTICATION_FAILED" | "PERMISSION_DENIED" | "RESOURCE_NOT_FOUND" | "ERROR";
+  status: "CONNECTED" | "NOT_CONFIGURED" | "AUTHENTICATION_FAILED" | "PERMISSION_DENIED" | "RESOURCE_NOT_FOUND" | "API_ERROR" | "ERROR";
   message: string;
   actionableStep?: string;
 }
-
 export interface GoogleDiagnosticsReport {
   serviceAccountEmail: string | null;
   serviceAccountConfigured: boolean;
   sheets: DiagnosticItem[];
   drive: DiagnosticItem[];
+  services: DiagnosticItem[];
   timestamp: string;
 }
-
-function getAuthJwt() {
-  const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-  let key = process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;
-
-  if (!email || !key) return null;
-
-  if (key.includes("\\n")) {
-    key = key.replace(/\\n/g, "\n");
-  }
-
-  try {
-    return new google.auth.JWT({
-      email,
-      key,
-      scopes: [
-        "https://www.googleapis.com/auth/spreadsheets.readonly",
-        "https://www.googleapis.com/auth/drive.readonly",
-      ],
-    });
-  } catch {
-    return null;
-  }
+function failure(name: string, type: DiagnosticItem["type"], error: unknown): DiagnosticItem {
+  const message = error instanceof Error ? error.message : "Request failed.";
+  const status = /placeholder|configure|Set valid/.test(message) ? "NOT_CONFIGURED" : /401|auth|credential|invalid_grant/i.test(message) ? "AUTHENTICATION_FAILED" : /403|permission/i.test(message) ? "PERMISSION_DENIED" : /404|not found/i.test(message) ? "RESOURCE_NOT_FOUND" : "API_ERROR";
+  return { name, type, status, message };
 }
-
-async function testSheetConnection(
-  name: string,
-  id: string | undefined,
-  auth: ReturnType<typeof getAuthJwt>,
-  serviceEmail: string | null
-): Promise<DiagnosticItem> {
-  if (!id || !id.trim()) {
-    return {
-      name,
-      type: "SHEETS",
-      status: "NOT_CONFIGURED",
-      message: "Environment variable not set in .env.local / Vercel.",
-      actionableStep: `Configure ${name} Sheet ID in environment variables.`,
-    };
-  }
-
-  if (!auth) {
-    return {
-      name,
-      type: "SHEETS",
-      id,
-      status: "AUTHENTICATION_FAILED",
-      message: "Google Service Account credentials missing or invalid.",
-      actionableStep: "Set GOOGLE_SERVICE_ACCOUNT_EMAIL and GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY.",
-    };
-  }
-
-  try {
-    const sheets = google.sheets({ version: "v4", auth });
-    const res = await sheets.spreadsheets.get({ spreadsheetId: id.trim() });
-
-    return {
-      name,
-      type: "SHEETS",
-      id,
-      status: "CONNECTED",
-      message: `Connected to spreadsheet "${res.data.properties?.title || id}" successfully.`,
-    };
-  } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err);
-
-    if (msg.includes("403") || msg.includes("permission") || msg.includes("Access Not Configured")) {
-      return {
-        name,
-        type: "SHEETS",
-        id,
-        status: "PERMISSION_DENIED",
-        message: "Access denied by Google Sheets API.",
-        actionableStep: serviceEmail
-          ? `Share this Google Sheet with "${serviceEmail}" giving Viewer access.`
-          : "Share sheet with your service account email.",
-      };
-    }
-
-    if (msg.includes("404") || msg.includes("not found")) {
-      return {
-        name,
-        type: "SHEETS",
-        id,
-        status: "RESOURCE_NOT_FOUND",
-        message: "Spreadsheet ID not found on Google Drive.",
-        actionableStep: "Verify the Spreadsheet ID extracted from the Google Sheets URL.",
-      };
-    }
-
-    return {
-      name,
-      type: "SHEETS",
-      id,
-      status: "ERROR",
-      message: `Sheet test failed: ${msg}`,
-      actionableStep: "Verify Google Sheets API is enabled in Google Cloud Console.",
-    };
-  }
+async function sheet(name: string, id: string | undefined, tab: string | undefined): Promise<DiagnosticItem> {
+  const result = await getSheetRowCount(id, tab);
+  return { name, type: "SHEETS", id: googleResourceId(id), status: result.status, message: result.isLive ? `Read ${result.count} data rows from tab ${tab || "first tab"}.` : result.errorMessage || "Sheet unavailable.", actionableStep: "Verify the sheet ID and exact tab name; enable Google Sheets API; share the sheet with GOOGLE_SERVICE_ACCOUNT_EMAIL as Viewer." };
 }
-
-async function testDriveFolderConnection(
-  name: string,
-  id: string | undefined,
-  auth: ReturnType<typeof getAuthJwt>,
-  serviceEmail: string | null
-): Promise<DiagnosticItem> {
-  if (!id || !id.trim()) {
-    return {
-      name,
-      type: "DRIVE",
-      status: "NOT_CONFIGURED",
-      message: "Drive folder ID not set.",
-      actionableStep: `Configure ${name} Drive Folder ID in environment variables.`,
-    };
-  }
-
-  if (!auth) {
-    return {
-      name,
-      type: "DRIVE",
-      id,
-      status: "AUTHENTICATION_FAILED",
-      message: "Service Account credentials missing.",
-      actionableStep: "Configure Service Account keys.",
-    };
-  }
-
-  try {
-    const drive = google.drive({ version: "v3", auth });
-    const res = await drive.files.get({ fileId: id.trim(), fields: "id, name, mimeType" });
-
-    return {
-      name,
-      type: "DRIVE",
-      id,
-      status: "CONNECTED",
-      message: `Connected to Drive Folder "${res.data.name || id}" successfully.`,
-    };
-  } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err);
-
-    if (msg.includes("403") || msg.includes("permission")) {
-      return {
-        name,
-        type: "DRIVE",
-        id,
-        status: "PERMISSION_DENIED",
-        message: "Access denied by Google Drive API.",
-        actionableStep: serviceEmail
-          ? `Share this Drive Folder with "${serviceEmail}" giving Content Manager access.`
-          : "Share folder with your service account email.",
-      };
-    }
-
-    if (msg.includes("404") || msg.includes("not found")) {
-      return {
-        name,
-        type: "DRIVE",
-        id,
-        status: "RESOURCE_NOT_FOUND",
-        message: "Folder ID not found in Google Drive.",
-        actionableStep: "Verify the Drive Folder ID extracted from your Drive URL.",
-      };
-    }
-
-    return {
-      name,
-      type: "DRIVE",
-      id,
-      status: "ERROR",
-      message: `Drive test error: ${msg}`,
-      actionableStep: "Verify Google Drive API is enabled in Google Cloud Console.",
-    };
-  }
+async function drive(name: string, variable: string, value?: string): Promise<DiagnosticItem> {
+  const id = googleResourceId(value);
+  if (!id) return { name, type: "DRIVE", status: "NOT_CONFIGURED", message: `Set ${variable} to a real folder ID.` };
+  try { const children = await listDriveChildren(id); return { name, type: "DRIVE", id, status: "CONNECTED", message: `Listed ${children.length} child entries. Read access verified; upload permission is checked when uploading.` }; }
+  catch (error) { return { ...failure(name, "DRIVE", error), actionableStep: "Enable Drive API and share this folder with the service account. Uploads require Content manager access to a Shared Drive." }; }
 }
-
+async function database(): Promise<DiagnosticItem> {
+  if (!CMSStore.isConfigured()) return { name: "Supabase database", type: "DATABASE", status: "NOT_CONFIGURED", message: "Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY, then run supabase/schema.sql." };
+  try {
+    const client = getCMSClient();
+    for (const table of ["bod_members", "projects", "historical_events", "media_assets", "faqs", "profiles", "audit_logs", "site_settings", "content_documents", "event_descriptions"]) {
+      const { error } = await client.from(table).select("*", { head: true, count: "exact" });
+      if (error) throw new Error(`${table}: ${error.message}`);
+    }
+    return { name: "Supabase database", type: "DATABASE", status: "CONNECTED", message: "All required CMS tables are readable. Write persistence is verified by saving content." };
+  } catch (error) { return failure("Supabase database", "DATABASE", error); }
+}
+async function storage(): Promise<DiagnosticItem> {
+  if (!CMSStore.isConfigured()) return { name: "Supabase storage", type: "STORAGE", status: "NOT_CONFIGURED", message: "Configure Supabase, or use the Google Drive upload folders." };
+  try {
+    const bucket = process.env.SUPABASE_STORAGE_BUCKET || "club-media";
+    const { data, error } = await getCMSClient().storage.getBucket(bucket);
+    if (error) throw new Error(error.message);
+    if (!data.public) throw new Error(`Bucket ${bucket} must be public for website photos.`);
+    return { name: "Supabase storage", type: "STORAGE", status: "CONNECTED", message: `Public ${bucket} bucket verified. Upload a photo to verify write access.` };
+  } catch (error) { return failure("Supabase storage", "STORAGE", error); }
+}
+async function ai(): Promise<DiagnosticItem> {
+  const { apiKey, model } = aiConfiguration();
+  if (!apiKey || !model) return { name: "Leviathan Bot / event AI", type: "AI", status: "NOT_CONFIGURED", message: "Set OPENAI_API_KEY and OPENAI_MODEL. Both features share this provider." };
+  try {
+    const response = await fetch(`https://api.openai.com/v1/models/${encodeURIComponent(model)}`, { headers: { Authorization: `Bearer ${apiKey}` }, signal: AbortSignal.timeout(15000) });
+    if (!response.ok) throw new Error(`AI model check returned ${response.status}.`);
+    return { name: "Leviathan Bot / event AI", type: "AI", status: "CONNECTED", message: `Model access verified for ${model}. No generation request was made by diagnostics.` };
+  } catch (error) { return failure("Leviathan Bot / event AI", "AI", error); }
+}
+async function email(): Promise<DiagnosticItem> {
+  const apiKey = configuredValue(process.env.RESEND_API_KEY);
+  if (!apiKey || !process.env.CLUB_APPLICATION_EMAIL || !process.env.RESEND_FROM_EMAIL) return { name: "Resend email", type: "EMAIL", status: "NOT_CONFIGURED", message: "Set RESEND_API_KEY, RESEND_FROM_EMAIL and CLUB_APPLICATION_EMAIL. Sender must use a verified Resend domain." };
+  try {
+    const response = await fetch("https://api.resend.com/domains", { headers: { Authorization: `Bearer ${apiKey}` }, signal: AbortSignal.timeout(15000) });
+    if (!response.ok) throw new Error(`Resend domain check returned ${response.status}. A send-only key cannot run this read check; delivery has not been tested.`);
+    const data = await response.json();
+    const address = process.env.RESEND_FROM_EMAIL.match(/<([^>]+)>/)?.[1] || process.env.RESEND_FROM_EMAIL;
+    const domain = address.split("@")[1];
+    if (!data.data?.some((item: { name: string; status: string }) => item.name === domain && item.status === "verified")) throw new Error("The sender domain is not verified in Resend.");
+    return { name: "Resend email", type: "EMAIL", status: "CONNECTED", message: "API authentication and sender domain verified. No email was sent; delivery is not yet verified." };
+  } catch (error) { return failure("Resend email", "EMAIL", error); }
+}
 export async function runGoogleDiagnostics(): Promise<GoogleDiagnosticsReport> {
-  const serviceEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || null;
-  const auth = getAuthJwt();
-
-  const sheetsTests = await Promise.all([
-    testSheetConnection("Membership Responses", process.env.GOOGLE_SHEETS_MEMBERSHIP_ID || process.env.GOOGLE_SHEET_MEMBERS_URL, auth, serviceEmail),
-    testSheetConnection("Project & Event Archive", process.env.GOOGLE_SHEETS_PROJECTS_ID || process.env.GOOGLE_SHEET_PROJECTS_URL, auth, serviceEmail),
-    testSheetConnection("BOD Leadership", process.env.GOOGLE_SHEETS_BOD_ID || process.env.GOOGLE_SHEET_BOD_URL, auth, serviceEmail),
+  const [sheets, folders, calendar, db, media, model, mail] = await Promise.all([
+    Promise.all([sheet("Membership responses", process.env.GOOGLE_SHEETS_MEMBERSHIP_ID, process.env.GOOGLE_SHEETS_MEMBERSHIP_TAB), sheet("Projects source (optional import)", process.env.GOOGLE_SHEETS_PROJECTS_ID, process.env.GOOGLE_SHEETS_PROJECTS_TAB), sheet("BOD source (optional import)", process.env.GOOGLE_SHEETS_BOD_ID, process.env.GOOGLE_SHEETS_BOD_TAB)]),
+    Promise.all([drive("Event archive", "GOOGLE_DRIVE_ROOT_FOLDER_ID", process.env.GOOGLE_DRIVE_ROOT_FOLDER_ID), drive("Projects uploads", "GOOGLE_DRIVE_PROJECTS_FOLDER_ID", process.env.GOOGLE_DRIVE_PROJECTS_FOLDER_ID), drive("Gallery uploads", "GOOGLE_DRIVE_GALLERY_FOLDER_ID", process.env.GOOGLE_DRIVE_GALLERY_FOLDER_ID), drive("BOD uploads", "GOOGLE_DRIVE_BOD_FOLDER_ID", process.env.GOOGLE_DRIVE_BOD_FOLDER_ID)]),
+    getCalendarFeed(), database(), storage(), ai(), email(),
   ]);
-
-  const driveTests = await Promise.all([
-    testDriveFolderConnection("Root Storage Folder", process.env.GOOGLE_DRIVE_ROOT_FOLDER_ID, auth, serviceEmail),
-    testDriveFolderConnection("Projects Media Folder", process.env.GOOGLE_DRIVE_PROJECTS_FOLDER_ID, auth, serviceEmail),
-    testDriveFolderConnection("Gallery Media Folder", process.env.GOOGLE_DRIVE_GALLERY_FOLDER_ID, auth, serviceEmail),
-    testDriveFolderConnection("BOD Media Folder", process.env.GOOGLE_DRIVE_BOD_FOLDER_ID, auth, serviceEmail),
-  ]);
-
-  return {
-    serviceAccountEmail: serviceEmail,
-    serviceAccountConfigured: Boolean(serviceEmail && process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY),
-    sheets: sheetsTests,
-    drive: driveTests,
-    timestamp: new Date().toISOString(),
-  };
+  const diagnostic = calendar.diagnostics;
+  return { serviceAccountEmail: configuredValue(process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL) || null, serviceAccountConfigured: Boolean(configuredValue(process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL) && configuredValue(process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY)), sheets, drive: folders,
+    services: [{ name: "Google Calendar", type: "CALENDAR", status: diagnostic.status === "MISSING_CONFIG" ? "NOT_CONFIGURED" : diagnostic.status === "API_ERROR" ? diagnostic.statusCode === 403 ? "PERMISSION_DENIED" : "API_ERROR" : "CONNECTED", message: diagnostic.message }, db, media, model, mail], timestamp: new Date().toISOString() };
 }
