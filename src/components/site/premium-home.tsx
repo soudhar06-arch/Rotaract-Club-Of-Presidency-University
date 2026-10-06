@@ -195,12 +195,30 @@ const AVENUES: AvenueItem[] = [
 const PUBLIC_PROJECT_COUNT = 24;
 const PUBLIC_BOD_COUNT = 43;
 
+function shuffledPhotoIndexes(count: number, avoidFirst?: number) {
+  const indexes = Array.from({ length: count }, (_, index) => index);
+  for (let index = indexes.length - 1; index > 0; index--) {
+    const randomIndex = Math.floor(Math.random() * (index + 1));
+    [indexes[index], indexes[randomIndex]] = [
+      indexes[randomIndex],
+      indexes[index],
+    ];
+  }
+  if (count > 1 && indexes[0] === avoidFirst) {
+    const replacementIndex = 1 + Math.floor(Math.random() * (count - 1));
+    [indexes[0], indexes[replacementIndex]] = [
+      indexes[replacementIndex],
+      indexes[0],
+    ];
+  }
+  return indexes;
+}
+
 export function PremiumHomePage() {
   const { upcomingEvents, error: eventsError } = useCalendarEvents(true);
   const { data: projectsData } = useCMS<ProjectItem[]>("projects", []);
   const { data: bodData } = useCMS<BODMember[]>("bod", []);
   const { data: faqData } = useCMS<FAQItem[]>("faq", []);
-  const { data: partnersData } = useCMS<{ name: string }[]>("partners", []);
   const { data: galleryData } = useCMS<MediaItem[]>("gallery", []);
   const { data: socialConfig } = useCMS<SiteConfig | null>("config", null);
   const socialData: Partial<SiteConfig> = socialConfig || {};
@@ -216,7 +234,10 @@ export function PremiumHomePage() {
       return true;
     });
   }, [galleryData]);
+  const heroPhotoSignature = heroPhotos.map((photo) => photo.id).join("|");
   const [heroImageIndex, setHeroImageIndex] = useState(0);
+  const heroSequence = useRef<number[]>([]);
+  const heroSequencePosition = useRef(0);
   const heroPhoto = heroPhotos.length
     ? heroPhotos[heroImageIndex % heroPhotos.length]
     : {
@@ -226,12 +247,28 @@ export function PremiumHomePage() {
       };
   const [memberCount, setMemberCount] = useState<number | null>(null);
   useEffect(() => {
+    heroSequence.current = shuffledPhotoIndexes(heroPhotos.length);
+    heroSequencePosition.current = 0;
+    setHeroImageIndex(heroSequence.current[0] ?? 0);
     if (heroPhotos.length < 2) return;
+
     const timer = window.setInterval(() => {
-      setHeroImageIndex((current) => (current + 1) % heroPhotos.length);
+      if (heroSequencePosition.current >= heroSequence.current.length - 1) {
+        const lastIndex = heroSequence.current.at(-1);
+        heroSequence.current = shuffledPhotoIndexes(
+          heroPhotos.length,
+          lastIndex,
+        );
+        heroSequencePosition.current = 0;
+      } else {
+        heroSequencePosition.current += 1;
+      }
+
+      const nextIndex = heroSequence.current[heroSequencePosition.current];
+      if (nextIndex !== undefined) setHeroImageIndex(nextIndex);
     }, 6000);
     return () => window.clearInterval(timer);
-  }, [heroPhotos.length]);
+  }, [heroPhotoSignature, heroPhotos.length]);
   useEffect(() => {
     let active = true;
     const refresh = () =>
@@ -250,7 +287,7 @@ export function PremiumHomePage() {
   }, []);
   const statItems = [
     { value: memberCount, label: "Members" },
-    { value: PUBLIC_PROJECT_COUNT, label: "Projects Completed" },
+    { value: PUBLIC_PROJECT_COUNT, label: "Events Held" },
     { value: PUBLIC_BOD_COUNT, label: "BOD Members" },
   ];
   const [avenueItems, setAvenueItems] = useState(AVENUES);
@@ -368,9 +405,51 @@ export function PremiumHomePage() {
   const word4X = useTransform(editorialProgress, [0.6, 0.8], [-16, 0]);
 
   const projectHighlights = useMemo(
-    () => projectsData.filter((item) => item.featured).slice(0, 3),
+    () =>
+      projectsData
+        .filter((item) => item.featured)
+        .slice(0, 3)
+        .map((item) => ({
+          ...item,
+          category: item.category?.toLowerCase().includes("project")
+            ? "Event"
+            : item.category || "Event",
+        })),
     [projectsData],
   );
+
+  const defaultFaqs: FAQItem[] = [
+    {
+      id: "faq-default-1",
+      question: "What is Rotaract?",
+      answer:
+        "Rotaract is a youth-led service organization that connects leadership, fellowship, and community impact through Rotary values.",
+      category: "General",
+    },
+    {
+      id: "faq-default-2",
+      question: "Who can join Rotaract?",
+      answer:
+        "Any student who is interested in service, leadership, and personal growth can apply to be part of Rotaract.",
+      category: "Membership",
+    },
+    {
+      id: "faq-default-3",
+      question: "What do members usually do?",
+      answer:
+        "Members take part in service projects, leadership workshops, networking events, club activities, and community outreach programs.",
+      category: "Activities",
+    },
+    {
+      id: "faq-default-4",
+      question: "Why is Rotaract important?",
+      answer:
+        "Rotaract gives students a platform to lead, create impact, build friendships, and grow through meaningful service and collaboration.",
+      category: "Impact",
+    },
+  ];
+
+  const displayFaqs = faqData.length > 0 ? faqData.slice(0, 4) : defaultFaqs;
 
   const liveUpcoming = useMemo(
     () => upcomingEvents.slice(0, 3),
@@ -454,8 +533,8 @@ export function PremiumHomePage() {
             transition={{ duration: 0.7, delay: 0.2 }}
             className="hero-actions"
           >
-            <Link href="/projects" className="primary-button">
-              Explore RCPU
+            <Link href="/events" className="primary-button">
+              Explore events
               <ArrowRight size={16} />
             </Link>
             <Link href="/join" className="secondary-button">
@@ -534,8 +613,8 @@ export function PremiumHomePage() {
             <div className="eyebrow">Impact</div>
             <h2>Measured by action.</h2>
           </div>
-          <Link href="/projects" className="inline-action">
-            See our projects <ChevronRight size={16} />
+          <Link href="/events" className="inline-action">
+            See our events <ChevronRight size={16} />
           </Link>
         </div>
 
@@ -673,11 +752,11 @@ export function PremiumHomePage() {
       <section className="section-shell projects-shell" id="projects">
         <div className="section-header-row">
           <div>
-            <div className="eyebrow">Featured projects</div>
-            <h2>Story-led impact.</h2>
+            <div className="eyebrow">Events that happened</div>
+            <h2>Moments that shaped us.</h2>
           </div>
-          <Link href="/projects" className="inline-action">
-            View all <ChevronRight size={16} />
+          <Link href="/events" className="inline-action">
+            View all events <ChevronRight size={16} />
           </Link>
         </div>
 
@@ -885,23 +964,6 @@ export function PremiumHomePage() {
         </div>
       </section>
 
-      <section className="section-shell partners-shell">
-        <div className="section-header-row">
-          <div>
-            <div className="eyebrow">Partners</div>
-            <h2>Built in collaboration.</h2>
-          </div>
-        </div>
-
-        <div className="partners-grid">
-          {partnersData.slice(0, 6).map((partner) => (
-            <div key={partner.name} className="partner-item">
-              <span>{partner.name}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
       <section className="section-shell faq-shell">
         <div className="section-header-row">
           <div>
@@ -913,11 +975,8 @@ export function PremiumHomePage() {
           </Link>
         </div>
 
-        {faqData.length === 0 && (
-          <p className="text-zinc-400">No published FAQs yet.</p>
-        )}
         <div className="faq-list">
-          {faqData.slice(0, 4).map((item) => (
+          {displayFaqs.map((item) => (
             <div key={item.id} className="faq-item">
               <strong>{item.question}</strong>
               <p>{item.answer}</p>

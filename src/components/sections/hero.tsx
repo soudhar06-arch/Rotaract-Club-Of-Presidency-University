@@ -4,10 +4,19 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ShieldCheck, Sparkles, ChevronDown, CalendarPlus, Info } from "lucide-react";
+import {
+  ArrowRight,
+  ShieldCheck,
+  Sparkles,
+  ChevronDown,
+  CalendarPlus,
+  Info,
+} from "lucide-react";
 import { CountUp } from "@/components/shared/count-up";
 import localArchive from "@/data/event-archive.json";
-const HERO_GALLERY_IMAGES = localArchive.flatMap(event => event.images.slice(0, 1));
+const HERO_GALLERY_IMAGES = localArchive.flatMap((event) =>
+  event.images.slice(0, 1),
+);
 import { ROUTES } from "@/constants";
 
 const GOOGLE_CALENDAR_SUBSCRIBE_URL =
@@ -22,14 +31,17 @@ export function HeroSection() {
     const handle = requestAnimationFrame(() => {
       setIsMounted(true);
       if (typeof window !== "undefined") {
-        const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+        const mediaQuery = window.matchMedia(
+          "(prefers-reduced-motion: reduce)",
+        );
         setPrefersReducedMotion(mediaQuery.matches);
       }
     });
 
     if (typeof window !== "undefined") {
       const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-      const listener = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+      const listener = (e: MediaQueryListEvent) =>
+        setPrefersReducedMotion(e.matches);
       mediaQuery.addEventListener("change", listener);
       return () => {
         cancelAnimationFrame(handle);
@@ -52,13 +64,17 @@ export function HeroSection() {
 
   const handleSubscribeCalendar = () => {
     if (typeof window !== "undefined") {
-      window.open(GOOGLE_CALENDAR_SUBSCRIBE_URL, "_blank", "noopener,noreferrer");
+      window.open(
+        GOOGLE_CALENDAR_SUBSCRIBE_URL,
+        "_blank",
+        "noopener,noreferrer",
+      );
     }
   };
 
   const stats = [
     { value: "500+", label: "Active Rotaractors" },
-    { value: "50+", label: "Projects Executed" },
+    { value: "50+", label: "Events Held" },
     { value: "10K+", label: "Lives Impacted" },
   ];
 
@@ -72,10 +88,23 @@ export function HeroSection() {
         <AnimatePresence mode="popLayout">
           <motion.div
             key={currentImageIndex}
-            initial={prefersReducedMotion ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 1.04 }}
-            animate={prefersReducedMotion ? { opacity: 1, scale: 1 } : { opacity: 0.65, scale: 1 }}
-            exit={prefersReducedMotion ? { opacity: 1, scale: 1 } : { opacity: 0 }}
-            transition={{ duration: prefersReducedMotion ? 0 : 1.6, ease: "easeInOut" }}
+            initial={
+              prefersReducedMotion
+                ? { opacity: 1, scale: 1 }
+                : { opacity: 0, scale: 1.04 }
+            }
+            animate={
+              prefersReducedMotion
+                ? { opacity: 1, scale: 1 }
+                : { opacity: 0.65, scale: 1 }
+            }
+            exit={
+              prefersReducedMotion ? { opacity: 1, scale: 1 } : { opacity: 0 }
+            }
+            transition={{
+              duration: prefersReducedMotion ? 0 : 1.6,
+              ease: "easeInOut",
+            }}
             className="absolute inset-0"
           >
             <Image
@@ -178,7 +207,10 @@ export function HeroSection() {
             className="mt-4 flex items-center justify-center gap-2 text-[11px] text-[#71717A]"
           >
             <Info className="h-3.5 w-3.5 text-[#3B82F6]" />
-            <span>Subscribing adds club events to your Google Calendar where you can configure mobile alerts.</span>
+            <span>
+              Subscribing adds club events to your Google Calendar where you can
+              configure mobile alerts.
+            </span>
           </motion.div>
 
           {/* Stats Bar */}
@@ -193,7 +225,9 @@ export function HeroSection() {
                 <span className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
                   <CountUp value={stat.value} once={false} />
                 </span>
-                <span className="mt-1 text-xs text-[#9A9A9A]">{stat.label}</span>
+                <span className="mt-1 text-xs text-[#9A9A9A]">
+                  {stat.label}
+                </span>
               </div>
             ))}
           </motion.div>

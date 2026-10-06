@@ -7,19 +7,42 @@ export function useCMS<T>(module: string, initial: T) {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     let active = true;
+    let activeRequest: Promise<void> | undefined;
     const refresh = async () => {
+      if (activeRequest) return activeRequest;
+      activeRequest = (async () => {
+        try {
+          const response = await fetch(
+            `/api/cms?module=${encodeURIComponent(module)}`,
+            { cache: "no-store" },
+          );
+          const result = await response.json();
+          if (!result.success)
+            throw new Error("Content is temporarily unavailable.");
+          if (active) {
+            setData(result.data);
+            setError(null);
+          }
+        } catch {
+          if (active) setError("Content is temporarily unavailable.");
+        } finally {
+          if (active) setLoading(false);
+        }
+      })();
       try {
-        const response = await fetch(`/api/cms?module=${encodeURIComponent(module)}`, { cache: "no-store" });
-        const result = await response.json();
-        if (!result.success) throw new Error("Content is temporarily unavailable.");
-        if (active) { setData(result.data); setError(null); }
-      } catch { if (active) setError("Content is temporarily unavailable."); }
-      finally { if (active) setLoading(false); }
+        await activeRequest;
+      } finally {
+        activeRequest = undefined;
+      }
     };
     void refresh();
-    const timer = setInterval(refresh, 60000);
+    const timer = setInterval(refresh, 300000);
     window.addEventListener("focus", refresh);
-    return () => { active = false; clearInterval(timer); window.removeEventListener("focus", refresh); };
+    return () => {
+      active = false;
+      clearInterval(timer);
+      window.removeEventListener("focus", refresh);
+    };
   }, [module]);
   return { data, error, loading };
 }

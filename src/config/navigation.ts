@@ -46,13 +46,6 @@ export const NAV_ITEMS: NavItemConfig[] = [
     type: "section",
   },
   {
-    id: "projects",
-    label: "Projects",
-    route: "/#projects",
-    sectionId: "projects",
-    type: "section",
-  },
-  {
     id: "events",
     label: "Events",
     route: "/events",

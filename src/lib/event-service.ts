@@ -10,6 +10,7 @@ import {
 } from "./event-details";
 import { findEventAvenue, readAvenueEventRecords } from "./avenue-service";
 import { applyCachedDescriptions } from "./event-descriptions";
+import { cached } from "./server-cache";
 import localArchive from "@/data/event-archive.json";
 import type { CalendarEvent } from "./google-calendar";
 
@@ -88,7 +89,7 @@ export function mergeHistoricalEvents(
   );
 }
 
-export async function getEventFeed() {
+async function buildEventFeed() {
   const driveConfigured = Boolean(
     configuredValue(process.env.GOOGLE_DRIVE_ROOT_FOLDER_ID),
   );
@@ -169,4 +170,8 @@ export async function getEventFeed() {
     errors,
     warnings,
   };
+}
+
+export function getEventFeed() {
+  return cached("public-event-feed", 60_000, buildEventFeed);
 }

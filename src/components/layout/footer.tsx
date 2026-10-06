@@ -61,12 +61,17 @@ export function Footer() {
 
             <p className="max-w-md text-sm leading-relaxed text-[#9A9A9A]">
               The official Rotaract Club of Presidency University is a premier
-              student-led organization operating under {clubData.rotaryDistrict}. Partnered with {clubData.partnerRotaryClub}. Dedicated to leadership development, community impact, and global fellowship.
+              student-led organization operating under {clubData.rotaryDistrict}
+              . Partnered with {clubData.partnerRotaryClub}. Dedicated to
+              leadership development, community impact, and global fellowship.
             </p>
 
             <div className="flex items-center gap-3 text-xs text-[#71717A]">
               <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
-              <span>Chartered under {clubData.rotaryDistrict} (Charter #{clubData.charterNumber})</span>
+              <span>
+                Chartered under {clubData.rotaryDistrict} (Charter #
+                {clubData.charterNumber})
+              </span>
             </div>
           </div>
 
@@ -77,32 +82,50 @@ export function Footer() {
             </h3>
             <ul className="space-y-2.5 text-sm text-[#9A9A9A]">
               <li>
-                <Link href="/#hero" className="transition-colors hover:text-white">
+                <Link
+                  href="/#hero"
+                  className="transition-colors hover:text-white"
+                >
                   Home & Overview
                 </Link>
               </li>
               <li>
-                <Link href="/#about" className="transition-colors hover:text-white">
+                <Link
+                  href="/#about"
+                  className="transition-colors hover:text-white"
+                >
                   About & Mission
                 </Link>
               </li>
               <li>
-                <Link href="/projects" className="transition-colors hover:text-white">
-                  Featured Projects
+                <Link
+                  href="/events"
+                  className="transition-colors hover:text-white"
+                >
+                  Featured Events
                 </Link>
               </li>
               <li>
-                <Link href="/events" className="transition-colors hover:text-white">
+                <Link
+                  href="/events"
+                  className="transition-colors hover:text-white"
+                >
                   Events & Calendar
                 </Link>
               </li>
               <li>
-                <Link href="/gallery" className="transition-colors hover:text-white">
+                <Link
+                  href="/gallery"
+                  className="transition-colors hover:text-white"
+                >
                   Photo Gallery
                 </Link>
               </li>
               <li>
-                <Link href="/board" className="transition-colors hover:text-white">
+                <Link
+                  href="/board"
+                  className="transition-colors hover:text-white"
+                >
                   Board of Directors
                 </Link>
               </li>
@@ -153,11 +176,21 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/[0.08] pt-8 sm:flex-row text-xs text-[#71717A]">
-          <p>© {currentYear} Rotaract Club of Presidency University. All rights reserved.</p>
+        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/[0.08] pt-8 text-xs text-[#71717A] sm:flex-row">
+          <p>
+            © {currentYear} Rotaract Club of Presidency University. All rights
+            reserved.
+          </p>
           <div className="flex gap-6">
-            <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
-            <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+            <Link
+              href="/privacy"
+              className="transition-colors hover:text-white"
+            >
+              Privacy Policy
+            </Link>
+            <Link href="/terms" className="transition-colors hover:text-white">
+              Terms of Service
+            </Link>
           </div>
         </div>
       </div>

@@ -71,7 +71,7 @@ export function Hero3({
   logoText = "Rotaract Presidency",
   navItems = [
     { label: "About", href: "#about" },
-    { label: "Projects", href: "#projects" },
+    { label: "Events", href: "/events" },
     { label: "Calendar", href: "/calendar" },
     { label: "FAQ", href: "/faq" },
   ],
@@ -88,7 +88,7 @@ export function Hero3({
   backgroundImage = "/gallery/gallery-1.jpeg",
   stats = [
     { value: "500+", label: "Active Members" },
-    { value: "50+", label: "Projects Executed" },
+    { value: "50+", label: "Events Held" },
     { value: "10K+", label: "Lives Impacted" },
   ],
   scrollText = "Scroll to Discover",
@@ -97,7 +97,7 @@ export function Hero3({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <section className="dark bg-[#050505] text-white relative min-h-screen w-full overflow-hidden font-sans">
+    <section className="dark relative min-h-screen w-full overflow-hidden bg-[#050505] font-sans text-white">
       {backgroundImage && (
         <div className="absolute inset-0 z-0">
           <Image
@@ -120,9 +120,9 @@ export function Hero3({
         <div className="flex max-w-full items-center justify-between px-6 py-6 sm:px-10 md:px-16 lg:px-20">
           <Link
             href="/"
-            className="text-white flex items-center gap-2.5 text-xl font-bold tracking-tight"
+            className="flex items-center gap-2.5 text-xl font-bold tracking-tight text-white"
           >
-            <span className="text-[#3B82F6] flex items-center justify-center">
+            <span className="flex items-center justify-center text-[#3B82F6]">
               {logo || <ShieldCheck className="size-7" />}
             </span>
             <span>{logoText}</span>
@@ -133,7 +133,7 @@ export function Hero3({
               <a
                 key={item.label}
                 href={item.href}
-                className="group text-[#9A9A9A] hover:text-white flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider transition-colors duration-200"
+                className="group flex items-center gap-1.5 text-xs font-semibold tracking-wider text-[#9A9A9A] uppercase transition-colors duration-200 hover:text-white"
               >
                 <span>{item.label}</span>
                 {item.hasDropdown && (
@@ -146,7 +146,7 @@ export function Hero3({
           <div className="hidden md:block">
             <Link
               href={signInHref}
-              className="border-white/10 bg-white/[0.04] text-white hover:bg-[#3B82F6] rounded-xl border px-5 py-2 text-xs font-semibold backdrop-blur-sm transition-all duration-200"
+              className="rounded-xl border border-white/10 bg-white/[0.04] px-5 py-2 text-xs font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:bg-[#3B82F6]"
             >
               {signInText}
             </Link>
@@ -154,7 +154,7 @@ export function Hero3({
 
           <button
             onClick={() => setMobileMenuOpen(true)}
-            className="text-white hover:bg-white/10 flex items-center justify-center rounded-xl p-2 transition-colors md:hidden"
+            className="flex items-center justify-center rounded-xl p-2 text-white transition-colors hover:bg-white/10 md:hidden"
             aria-label="Toggle navigation menu"
           >
             <Menu className="h-5 w-5" />
@@ -169,22 +169,22 @@ export function Hero3({
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             exit={{ opacity: 0, y: -8, filter: "blur(6px)" }}
             transition={{ type: "spring", duration: 0.3, bounce: 0 }}
-            className="bg-[#050505]/95 fixed inset-0 z-50 flex flex-col p-6 backdrop-blur-md md:hidden"
+            className="fixed inset-0 z-50 flex flex-col bg-[#050505]/95 p-6 backdrop-blur-md md:hidden"
           >
             <div className="flex items-center justify-between">
               <Link
                 href="/"
-                className="text-white flex items-center gap-2.5 text-lg font-bold tracking-tight"
+                className="flex items-center gap-2.5 text-lg font-bold tracking-tight text-white"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                <span className="text-[#3B82F6] flex items-center justify-center">
+                <span className="flex items-center justify-center text-[#3B82F6]">
                   {logo || <ShieldCheck className="size-7" />}
                 </span>
                 <span>{logoText}</span>
               </Link>
               <button
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-white hover:bg-white/10 flex items-center justify-center rounded-xl p-2 transition-colors"
+                className="flex items-center justify-center rounded-xl p-2 text-white transition-colors hover:bg-white/10"
                 aria-label="Close menu"
               >
                 <X className="h-5 w-5" />
@@ -196,7 +196,7 @@ export function Hero3({
                 <a
                   key={item.label}
                   href={item.href}
-                  className="border-white/10 text-white hover:text-[#3B82F6] flex items-center justify-between border-b pb-3 text-base font-medium transition-colors"
+                  className="flex items-center justify-between border-b border-white/10 pb-3 text-base font-medium text-white transition-colors hover:text-[#3B82F6]"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <span>{item.label}</span>
@@ -211,7 +211,7 @@ export function Hero3({
               <Link
                 href={signInHref}
                 onClick={() => setMobileMenuOpen(false)}
-                className="border-white/10 bg-[#3B82F6] text-white flex w-full items-center justify-center rounded-xl py-3 text-sm font-semibold transition-colors"
+                className="flex w-full items-center justify-center rounded-xl border-white/10 bg-[#3B82F6] py-3 text-sm font-semibold text-white transition-colors"
               >
                 {signInText}
               </Link>
@@ -232,7 +232,7 @@ export function Hero3({
             {tagline && (
               <motion.p
                 variants={item}
-                className="text-xs font-semibold tracking-widest text-[#3B82F6] uppercase mb-4"
+                className="mb-4 text-xs font-semibold tracking-widest text-[#3B82F6] uppercase"
               >
                 {tagline}
               </motion.p>
@@ -240,16 +240,18 @@ export function Hero3({
 
             <motion.h1
               variants={item}
-              className="text-white mb-6 text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl"
+              className="mb-6 text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl"
             >
               {titleLine1 && <span className="block">{titleLine1}</span>}
-              {titleLine2 && <span className="block text-[#3B82F6]">{titleLine2}</span>}
+              {titleLine2 && (
+                <span className="block text-[#3B82F6]">{titleLine2}</span>
+              )}
             </motion.h1>
 
             {description && (
               <motion.p
                 variants={item}
-                className="leading-relaxed mb-6 max-w-2xl text-base text-[#9A9A9A]"
+                className="mb-6 max-w-2xl text-base leading-relaxed text-[#9A9A9A]"
               >
                 {description}
               </motion.p>
@@ -262,7 +264,7 @@ export function Hero3({
               {primaryCtaText && (
                 <Link
                   href={primaryCtaHref}
-                  className="rounded-xl bg-[#3B82F6] px-8 py-3.5 text-sm font-semibold text-white shadow-glow transition-all duration-200 hover:bg-blue-600 sm:text-base"
+                  className="shadow-glow rounded-xl bg-[#3B82F6] px-8 py-3.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-blue-600 sm:text-base"
                 >
                   {primaryCtaText}
                 </Link>
@@ -285,7 +287,7 @@ export function Hero3({
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.6 }}
-          className="border-white/10 mt-12 border-t pt-8 sm:mt-16"
+          className="mt-12 border-t border-white/10 pt-8 sm:mt-16"
         >
           <div className="flex flex-col justify-between gap-8 md:flex-row md:items-center">
             {stats.length > 0 && (
@@ -296,11 +298,11 @@ export function Hero3({
                     key={stat.label}
                     className="flex flex-col gap-1 py-4 first:pt-0 last:pb-0 md:px-6 md:py-0 md:first:pl-0 md:last:pr-0"
                   >
-                    <span className="text-white text-3xl font-bold tracking-tight sm:text-4xl">
+                    <span className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
                       <CountUp value={stat.value} once={false} />
                     </span>
 
-                    <span className="text-xs text-[#9A9A9A] uppercase tracking-wider">
+                    <span className="text-xs tracking-wider text-[#9A9A9A] uppercase">
                       {stat.label}
                     </span>
                   </motion.div>
@@ -312,7 +314,7 @@ export function Hero3({
               <motion.a
                 variants={item}
                 href={scrollHref}
-                className="text-[#9A9A9A] hover:text-white flex items-center gap-2 self-start text-xs font-semibold transition-colors sm:text-sm md:self-auto"
+                className="flex items-center gap-2 self-start text-xs font-semibold text-[#9A9A9A] transition-colors hover:text-white sm:text-sm md:self-auto"
               >
                 <span>{scrollText}</span>
                 <ArrowDown className="h-4 w-4 text-[#3B82F6]" />
